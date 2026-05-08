@@ -1,0 +1,63 @@
+{
+  "timestamp": "2025-12-19T02:43:50.596600",
+  "symbol": "EA",
+  "crash_score": 0.3433310442368189,
+  "alert_level": 1,
+  "early_warning_score": 0.4759636153360208,
+  "early_warning_level": 1,
+  "horizon": "mid_term",
+  "horizon_days": 30,
+  "components": {
+    "macro": 0.14761250734329223,
+    "onchain": 0.5,
+    "sentiment": 0.5,
+    "technical": 0.3333333333333333
+  },
+  "volatility_regime": "NORMAL",
+  "confidence_weight": 1.0,
+  "simulation_results": {
+    "simulations_run": 500,
+    "horizon_days": 30,
+    "tail_probability_10pct": 0.4119972530841827,
+    "tail_probability_25pct": 0.3433310442368189,
+    "expected_return": -0.06866620884736378,
+    "downside_scenarios": 171
+  },
+  "price_projection": {
+    "symbol": "EA",
+    "current_price": 203.89999389648438,
+    "horizon_days": 30,
+    "moderate_drop_pct": 0.10986593415578205,
+    "severe_drop_pct": 0.15986593415578204,
+    "moderate_drop_target": 181.49833059268886,
+    "severe_stress_floor": 171.30333089786467,
+    "note": "Targets are based on Monte Carlo crash scenarios and typical behaviour in leveraged, thin-liquidity sell-offs (fast wicks then stabilization)."
+  },
+  "crash_drivers": [
+    {
+      "type": "NO_CLEAR_DRIVER",
+      "label": "Normal Volatility",
+      "reason": "Risk metrics do not point to a single dominant crash driver. Moves here look more like normal volatility than a structural deleveraging event."
+    }
+  ],
+  "ecosystem_contagion": {},
+  "early_warning": {
+    "score": 0.4759636153360208,
+    "level": 1,
+    "label": "SUBTLE_STRESS",
+    "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+    "signals": []
+  },
+  "recommendation": {
+    "action": "REDUCE_RISK",
+    "specifics": [
+      "REDUCE position sizes by 30%",
+      "FAVOR defensive strategies",
+      "INCREASE cash allocation"
+    ],
+    "urgency": "MODERATE"
+  },
+  "reasoning": [
+    "\ud83d\udcc8 Macro risk low (score: 0.15)"
+  ]
+}

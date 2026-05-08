@@ -1,0 +1,5367 @@
+[
+  {
+    "timestamp": "2025-12-13T02:49:12.577440",
+    "symbol": "BTC-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T02:49:22.102245",
+    "symbol": "ETH-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T02:49:28.962171",
+    "symbol": "SOL-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T02:49:35.896707",
+    "symbol": "XRP-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T02:49:43.072657",
+    "symbol": "DOGE-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T03:12:15.319666",
+    "symbol": "BTC-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T03:12:20.370626",
+    "symbol": "ETH-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T03:12:25.184665",
+    "symbol": "SOL-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T03:12:30.534912",
+    "symbol": "XRP-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T03:12:35.684753",
+    "symbol": "DOGE-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T03:22:04.996468",
+    "symbol": "BTC-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T03:22:09.900864",
+    "symbol": "ETH-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T03:22:14.847264",
+    "symbol": "SOL-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T03:22:20.235005",
+    "symbol": "XRP-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T03:22:25.673256",
+    "symbol": "DOGE-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T04:15:40.343065",
+    "symbol": "BTC-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T04:15:45.012758",
+    "symbol": "ETH-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T04:15:49.949568",
+    "symbol": "SOL-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T04:15:54.678734",
+    "symbol": "XRP-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T04:15:59.446493",
+    "symbol": "DOGE-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T04:24:24.892092",
+    "symbol": "BTC-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T04:24:30.032907",
+    "symbol": "ETH-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T04:24:35.162754",
+    "symbol": "SOL-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T04:24:39.863684",
+    "symbol": "XRP-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T04:24:44.746770",
+    "symbol": "DOGE-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T04:31:44.257636",
+    "symbol": "BTC-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T04:31:49.065267",
+    "symbol": "ETH-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T04:31:54.044662",
+    "symbol": "SOL-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T04:31:58.622598",
+    "symbol": "XRP-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T04:32:03.701905",
+    "symbol": "DOGE-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T04:43:24.612271",
+    "symbol": "BTC-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T04:43:29.442169",
+    "symbol": "ETH-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T04:43:34.212406",
+    "symbol": "SOL-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T04:43:39.163224",
+    "symbol": "XRP-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T04:43:43.740488",
+    "symbol": "DOGE-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T04:52:31.583070",
+    "symbol": "BTC-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T04:52:37.066983",
+    "symbol": "ETH-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T04:52:42.735165",
+    "symbol": "SOL-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T04:52:48.634675",
+    "symbol": "XRP-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T04:52:57.597137",
+    "symbol": "DOGE-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T05:06:52.206574",
+    "symbol": "BTC-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T05:06:57.944146",
+    "symbol": "ETH-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T05:07:04.297083",
+    "symbol": "SOL-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T05:07:09.717664",
+    "symbol": "XRP-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T05:07:14.634836",
+    "symbol": "DOGE-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T05:17:22.743639",
+    "symbol": "BTC-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T05:17:27.849686",
+    "symbol": "ETH-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T05:17:32.865119",
+    "symbol": "SOL-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T05:17:37.766882",
+    "symbol": "XRP-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T05:17:42.834361",
+    "symbol": "DOGE-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T05:31:35.742093",
+    "symbol": "BTC-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T05:31:40.917420",
+    "symbol": "ETH-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T05:31:49.325959",
+    "symbol": "SOL-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T05:31:54.609772",
+    "symbol": "XRP-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T05:32:00.445483",
+    "symbol": "DOGE-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T05:41:45.508241",
+    "symbol": "BTC-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T05:41:53.778610",
+    "symbol": "ETH-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T05:41:58.959075",
+    "symbol": "SOL-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T05:42:04.410027",
+    "symbol": "XRP-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T05:42:09.309306",
+    "symbol": "DOGE-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T05:52:54.887178",
+    "symbol": "BTC-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T05:53:00.716496",
+    "symbol": "ETH-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T05:53:05.574970",
+    "symbol": "SOL-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T05:53:10.228654",
+    "symbol": "XRP-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T05:53:15.464549",
+    "symbol": "DOGE-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T06:02:37.542642",
+    "symbol": "BTC-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T06:02:42.352277",
+    "symbol": "ETH-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T06:02:47.446909",
+    "symbol": "SOL-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T06:02:52.722764",
+    "symbol": "XRP-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T06:02:57.629064",
+    "symbol": "DOGE-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T06:11:27.822591",
+    "symbol": "BTC-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T06:11:33.052704",
+    "symbol": "ETH-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T06:11:38.258913",
+    "symbol": "SOL-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T06:11:42.869003",
+    "symbol": "XRP-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T06:11:48.343702",
+    "symbol": "DOGE-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T06:19:00.535878",
+    "symbol": "BTC-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T06:19:05.865528",
+    "symbol": "ETH-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T06:19:11.087914",
+    "symbol": "SOL-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T06:19:16.100933",
+    "symbol": "XRP-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T06:19:21.032837",
+    "symbol": "DOGE-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T06:29:18.428841",
+    "symbol": "BTC-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T06:29:23.481442",
+    "symbol": "ETH-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T06:29:28.446543",
+    "symbol": "SOL-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T06:29:33.512314",
+    "symbol": "XRP-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T06:29:38.293266",
+    "symbol": "DOGE-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T13:21:17.890453",
+    "symbol": "BTC-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T13:21:22.474062",
+    "symbol": "ETH-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T13:21:27.518073",
+    "symbol": "SOL-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T13:21:32.897364",
+    "symbol": "XRP-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T13:21:37.690957",
+    "symbol": "DOGE-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T13:29:35.327552",
+    "symbol": "BTC-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T13:29:39.959397",
+    "symbol": "ETH-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T13:29:44.728269",
+    "symbol": "SOL-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T13:29:49.459591",
+    "symbol": "XRP-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T13:29:53.977798",
+    "symbol": "DOGE-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T13:37:18.818074",
+    "symbol": "BTC-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T13:37:23.916105",
+    "symbol": "ETH-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T13:37:28.480413",
+    "symbol": "SOL-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T13:37:33.180288",
+    "symbol": "XRP-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T13:37:38.445744",
+    "symbol": "DOGE-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T13:44:52.386843",
+    "symbol": "BTC-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T13:44:56.890341",
+    "symbol": "ETH-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T13:45:01.718289",
+    "symbol": "SOL-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T13:45:06.168161",
+    "symbol": "XRP-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T13:45:10.742411",
+    "symbol": "DOGE-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T14:09:27.343951",
+    "symbol": "BTC-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T14:09:34.196663",
+    "symbol": "ETH-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T14:09:40.831106",
+    "symbol": "SOL-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T14:09:47.354269",
+    "symbol": "XRP-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T14:09:53.376506",
+    "symbol": "DOGE-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T14:18:20.911951",
+    "symbol": "BTC-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T14:18:27.529048",
+    "symbol": "ETH-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T14:18:33.787966",
+    "symbol": "SOL-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T14:18:40.542334",
+    "symbol": "XRP-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T14:18:46.683378",
+    "symbol": "DOGE-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T14:28:22.345589",
+    "symbol": "BTC-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T14:28:29.967598",
+    "symbol": "ETH-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T14:28:37.452726",
+    "symbol": "SOL-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T14:28:43.802408",
+    "symbol": "XRP-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T14:28:49.820831",
+    "symbol": "DOGE-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T14:39:04.467768",
+    "symbol": "BTC-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T14:39:10.640906",
+    "symbol": "ETH-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T14:39:16.498573",
+    "symbol": "SOL-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T14:39:22.872956",
+    "symbol": "XRP-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T14:39:28.834646",
+    "symbol": "DOGE-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T14:49:10.383301",
+    "symbol": "BTC-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T14:49:16.810592",
+    "symbol": "ETH-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T14:49:22.722749",
+    "symbol": "SOL-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T14:49:30.318418",
+    "symbol": "XRP-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T14:49:36.584207",
+    "symbol": "DOGE-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T14:59:09.680630",
+    "symbol": "BTC-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T14:59:16.109541",
+    "symbol": "ETH-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T14:59:21.948416",
+    "symbol": "SOL-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T14:59:28.346016",
+    "symbol": "XRP-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T14:59:34.344198",
+    "symbol": "DOGE-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T15:09:44.030629",
+    "symbol": "BTC-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T15:09:50.411853",
+    "symbol": "ETH-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T15:09:56.443334",
+    "symbol": "SOL-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T15:10:02.804642",
+    "symbol": "XRP-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T15:10:08.846108",
+    "symbol": "DOGE-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T15:21:11.045755",
+    "symbol": "BTC-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T15:21:17.514361",
+    "symbol": "ETH-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T15:21:23.574346",
+    "symbol": "SOL-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T15:21:29.989531",
+    "symbol": "XRP-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T15:21:36.181257",
+    "symbol": "DOGE-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T15:30:03.833926",
+    "symbol": "BTC-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T15:30:09.972665",
+    "symbol": "ETH-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T15:30:16.021887",
+    "symbol": "SOL-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T15:30:22.194390",
+    "symbol": "XRP-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T15:30:28.504144",
+    "symbol": "DOGE-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T15:40:09.933235",
+    "symbol": "BTC-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T15:40:16.307131",
+    "symbol": "ETH-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T15:40:22.280734",
+    "symbol": "SOL-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T15:40:28.422725",
+    "symbol": "XRP-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T15:40:34.557969",
+    "symbol": "DOGE-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T15:42:13.868018",
+    "symbol": "BTC-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T15:42:20.038995",
+    "symbol": "ETH-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T15:42:26.320940",
+    "symbol": "SOL-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T15:42:32.588938",
+    "symbol": "XRP-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T15:42:38.584092",
+    "symbol": "DOGE-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T15:51:00.119191",
+    "symbol": "BTC-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T15:51:06.399852",
+    "symbol": "ETH-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T15:51:12.300186",
+    "symbol": "SOL-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T15:51:18.426873",
+    "symbol": "XRP-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T15:51:24.437981",
+    "symbol": "DOGE-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T16:00:46.022615",
+    "symbol": "BTC-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T16:00:52.354478",
+    "symbol": "ETH-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T16:00:58.359881",
+    "symbol": "SOL-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T16:01:05.107197",
+    "symbol": "XRP-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T16:01:11.075984",
+    "symbol": "DOGE-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T16:08:50.145739",
+    "symbol": "BTC-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T16:08:56.600318",
+    "symbol": "ETH-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T16:09:02.576272",
+    "symbol": "SOL-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T16:09:08.807815",
+    "symbol": "XRP-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T16:09:14.782750",
+    "symbol": "DOGE-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T16:18:10.302589",
+    "symbol": "BTC-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T16:18:16.680991",
+    "symbol": "ETH-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T16:18:22.807334",
+    "symbol": "SOL-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T16:18:29.866161",
+    "symbol": "XRP-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T16:18:35.965302",
+    "symbol": "DOGE-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T16:27:11.754227",
+    "symbol": "BTC-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T16:27:18.204128",
+    "symbol": "ETH-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T16:27:24.108045",
+    "symbol": "SOL-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T16:27:30.359960",
+    "symbol": "XRP-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  },
+  {
+    "timestamp": "2025-12-13T16:27:36.283554",
+    "symbol": "DOGE-USD",
+    "alert_level": 2,
+    "crash_score": 0.40987041596571605,
+    "early_warning_score": 0.36336011650244404,
+    "early_warning_level": 1,
+    "early_warning": {
+      "score": 0.36336011650244404,
+      "level": 1,
+      "label": "SUBTLE_STRESS",
+      "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+      "signals": []
+    },
+    "recommendation": {
+      "action": "CAUTIOUS",
+      "specifics": [
+        "RESTRICT to BUY_PUT only",
+        "REDUCE position sizes by 50%",
+        "TIGHTEN stop losses",
+        "MONITOR macro conditions closely"
+      ],
+      "urgency": "HIGH"
+    },
+    "reasoning": [
+      "\ud83d\udcc8 Macro risk low (score: 0.34)",
+      "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+    ]
+  }
+]

@@ -1,0 +1,37 @@
+{
+  "starting_capital": 10000,
+  "available_capital": 9275.0,
+  "realized_pnl": 25.0,
+  "unrealized_pnl": 605.050048828125,
+  "total_trades": 1,
+  "winning_trades": 1,
+  "losing_trades": 0,
+  "open_positions": {
+    "AAPL": {
+      "quantity": 5,
+      "avg_cost": 150.0,
+      "total_cost": 750.0,
+      "entry_date": "2026-01-03T15:19:46.990648",
+      "signals": [],
+      "first_buy_date": "2026-01-03T15:19:46.990648"
+    }
+  },
+  "last_updated": "2026-01-03T15:19:48.604095",
+  "performance_metrics": {
+    "win_rate": 100.0,
+    "avg_win": 12.5,
+    "avg_loss": 0.0,
+    "largest_win": 25.0,
+    "largest_loss": 0.0,
+    "sharpe_ratio": 0.0,
+    "max_drawdown": 0.0,
+    "current_drawdown": 0.0
+  },
+  "daily_pnl": [
+    {
+      "date": "2026-01-03",
+      "pnl": 25.0
+    }
+  ],
+  "monthly_returns": {}
+}

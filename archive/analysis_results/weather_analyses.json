@@ -1,0 +1,21 @@
+{
+  "analyses": {
+    "KXHIGHCHI-25DEC11-B28.5": {
+      "market_id": "KXHIGHCHI-25DEC11-B28.5",
+      "market_title": "WILL THE HIGH TEMP IN CHICAGO BE 28-29\u00b0 ON DEC 11, 2025?",
+      "location": "CA",
+      "weather_type": "temperature",
+      "season": "summer",
+      "comparison_type": "above",
+      "target_value": 28.0,
+      "time_period": "season",
+      "predicted_probability": 0.79,
+      "ai_adjusted_probability": 0.9019999986680434,
+      "confidence": 0.7500000000000001,
+      "seasonal_edge": 0.1599999980972049,
+      "quick_money_potential": false,
+      "rationale": "Seasonal pattern: CA summer temperature has 90.0% predictability | Historical average: 75.0, targeting 28.0 | Seasonal probability: 95.0%, Kalshi: 79.0% | Trend: warming pattern supports higher outcomes"
+    }
+  },
+  "last_updated": "2025-12-11T02:45:59.396270"
+}

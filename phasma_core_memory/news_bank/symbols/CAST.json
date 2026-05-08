@@ -1,0 +1,50 @@
+[
+  {
+    "title": "China hits growth goal despite Trump tariffs turmoil",
+    "link": "https://www.bbc.com/news/articles/cgk8zd287myo?at_medium=RSS&at_campaign=rss",
+    "published": "Mon, 19 Jan 2026 04:05:38 GMT",
+    "summary": "While official figures show China hit its growth target, some analysts have cast doubt on the data.",
+    "source": "https://feeds.bbci.co.uk/news/business/rss.xml",
+    "category": "BUSINESS_GENERAL",
+    "fetch_time": "2026-01-18T23:27:12.203369",
+    "symbols": [
+      "CHINA",
+      "HITS",
+      "GOAL",
+      "TRUMP",
+      "WHILE",
+      "SHOW",
+      "HIT",
+      "SOME",
+      "CAST",
+      "DOUBT",
+      "ON",
+      "DATA"
+    ],
+    "hash": "f402cab3d477ed7b4386383caa885bd7",
+    "stored_at": "2026-01-18T23:27:17.376823"
+  },
+  {
+    "title": "China hits growth goal after exports defy US tariffs",
+    "link": "https://www.bbc.com/news/articles/cgk8zd287myo?at_medium=RSS&at_campaign=rss",
+    "published": "Mon, 19 Jan 2026 06:40:23 GMT",
+    "summary": "Official figures suggest China's economy hit its target but analysts have cast doubt on the data.",
+    "source": "https://feeds.bbci.co.uk/news/business/rss.xml",
+    "category": "BUSINESS_GENERAL",
+    "fetch_time": "2026-01-19T13:14:40.119217",
+    "symbols": [
+      "CHINA",
+      "HITS",
+      "GOAL",
+      "DEFY",
+      "US",
+      "HIT",
+      "CAST",
+      "DOUBT",
+      "ON",
+      "DATA"
+    ],
+    "hash": "9b0096732c832b466337220e71a69486",
+    "stored_at": "2026-01-19T13:16:27.516022"
+  }
+]

@@ -1,0 +1,205 @@
+{
+  "bankroll": 100,
+  "apis": {
+    "alpha_vantage": {
+      "api_key": "9XGMQRQL9VHDHYN4",
+      "enabled": true,
+      "free_tier": "5 calls/minute"
+    },
+    "financial_modeling_prep": {
+      "api_key": "YOUR_FMP_KEY", 
+      "enabled": false,
+      "free_tier": "250 calls/day"
+    },
+    "polygon_io": {
+      "api_key": "YOUR_POLYGON_KEY",
+      "enabled": false,
+      "free_tier": "5 calls/minute"
+    },
+    "sec_edgar": {
+      "enabled": true,
+      "free_tier": "Unlimited"
+    }
+  },
+  "geopolitical_analysis": {
+    "enabled": true,
+    "news_api_key": "your_newsapi_key_here",
+    "bing_api_key": "your_bing_api_key_here",
+    "event_threshold": 70,
+    "max_signals": 5,
+    "scan_interval_minutes": 60
+  },
+  "unusual_whales": {
+    "enabled": true,
+    "api_key": "YOUR_UNUSUAL_WHALES_API_KEY",
+    "min_volume_multiplier": 3,
+    "min_confidence": 60,
+    "max_signals_per_cycle": 10
+  },
+  "paper_trading": {
+    "enabled": true,
+    "starting_capital": 10000,
+    "track_ai_performance": true,
+    "auto_trade_signals": true,
+    "min_confidence_threshold": 55,
+    "max_position_size": 1000,
+    "max_positions": 10
+  },
+  "trading_mode": "stocks_and_kalshi",
+  "kalshi_enabled": true,
+  "kalshi_weather_only": false,
+  "kalshi_ai_playbook": {
+    "enabled": true,
+    "market_types": ["WEATHER", "ECON", "FED"],
+    "max_positions_per_type": 3,
+    "min_ev_threshold": 0.05,
+    "risk_per_trade": 0.02,
+    "adjusted_mode": {
+      "use_adjusted_thresholds": true,
+      "min_liquidity_score": 1,
+      "min_volume": 50,
+      "price_range": [0.10, 0.90],
+      "entry_window_hours": [168, 12]
+    }
+  },
+  "options_enabled": false,
+  "bankroll_allocation": {
+    "stock_trading": 50,
+    "kalshi_trading": 50,
+    "options_trading": 0
+  },
+  "trading": {
+    "bankroll": 100,
+    "risk_per_trade": 0.02,
+    "min_contracts": 2,
+    "max_contracts": 20,
+    "three_mind_enabled": true,
+    "max_stock_positions": 50
+  },
+  "sports_betting": {
+    "enabled": true,
+    "api_key": "your_odds_api_key_here",
+    "dfs_sites": ["draftkings", "fanduel"],
+    "sports": ["NFL", "NBA", "MLB", "NHL"],
+    "max_positions": 10,
+    "unit_size_percent": 1.0,
+    "standard_units": 2
+  },
+  "stock_trading": {
+    "enabled": true,
+    "bankroll": 50,
+    "max_positions": 5,
+    "position_size": 10
+  },
+  "kalshi_trading": {
+    "enabled": true,
+    "bankroll": 50,
+    "max_positions": 10,
+    "min_edge_threshold": 0.08,
+    "max_bet_size": 5,
+    "weather_only": true
+  },
+  "kalshi_restrictions": {
+    "allowed_markets": ["weather"],
+    "blocked_markets": ["elections", "sports", "politics", "economics", "fed", "volatility"],
+    "note": "Kalshi restricted to weather markets only per user requirement"
+  },
+  "insider_monitor": {
+    "enabled": true,
+    "lookback_days": 7,
+    "min_amount": 1000000
+  },
+  "insider_integrator": {
+    "confluence_threshold": 0.5,
+    "min_price": 0.1,
+    "max_price": 1000.0,
+    "insider_weight": 0.4,
+    "institutional_weight": 0.1,
+    "analyst_weight": 0.15,
+    "options_weight": 0.2,
+    "alt_data_weight": 0.15
+  },
+  "strategies": {
+    "active_strategy": "penny_moonshot",
+    "penny_moonshot": {
+      "strategy_name": "penny_moonshot",
+      "max_price": 50.0,
+      "min_market_cap": 10000000,
+      "max_market_cap": 300000000,
+      "min_ADV_shares": 20000,
+      "min_ADV_dollars": 100000,
+      "max_participation_rate": 0.02,
+      "max_position_pct": 0.015,
+      "required_signals": ["insider_open_market", "options_high_quality"],
+      "optional_signals": ["niche_news", "social_correlated", "job_spike"],
+      "corroboration_window_days": 21,
+      "signal_decay_half_life_days": 7,
+      "dilution_penalty": {
+        "reduce_position_pct_by": 0.5,
+        "if_recent_offering_days": 180
+      }
+    },
+    "smallcap_compounder": {
+      "strategy_name": "smallcap_compounder",
+      "max_price": 200.0,
+      "min_market_cap": 100000000,
+      "max_market_cap": 5000000000,
+      "min_ADV_shares": 100000,
+      "min_ADV_dollars": 500000,
+      "max_participation_rate": 0.05,
+      "max_position_pct": 0.03,
+      "required_signals": ["filing_milestone", "insider_open_market_or_institutional_initiation"],
+      "optional_signals": ["hiring_velocity", "partner_contract", "patent_grant"],
+      "corroboration_window_days": 90,
+      "signal_decay_half_life_days": 30,
+      "dilution_penalty": {
+        "reduce_position_pct_by": 0.25,
+        "if_recent_offering_days": 365
+      }
+    }
+  },
+  "options_filter": {
+    "min_oi_growth_pct": 20,
+    "min_block_contracts": 500,
+    "require_buyer_initiated": true
+  },
+  "insider_thresholds": {
+    "high": 500000,
+    "medium": 250000,
+    "aggregation_window_days": 60
+  },
+  "trading_budget": {
+    "total": 100,
+    "max_per_trade": 10,
+    "max_price_per_share": 50
+  },
+  "underground_discovery": {
+    "enabled": true,
+    "min_market_cap": 10000000,
+    "max_market_cap": 500000000,
+    "min_adv": 50000,
+    "max_signals_per_day": 10,
+    "require_corroboration": true
+  },
+  "global_macro": {
+    "japan_yield_threshold": 1.5
+  },
+  "pump_dump": {
+    "volume_surge_threshold": 3.0
+  },
+  "jury_system": {
+    "enabled": true,
+    "weights": {
+      "evidence": 0.34,
+      "risk": 0.33,
+      "outcome": 0.33
+    },
+    "approve_composite_min": 58.0,
+    "conditional_composite_min": 44.0,
+    "chamber_pass_min": 45.0,
+    "min_chambers_passing_for_approve": 2,
+    "max_chamber_spread": 55.0,
+    "disagreement_penalty": 8.0,
+    "conditional_size_multiplier": 0.55
+  }
+}

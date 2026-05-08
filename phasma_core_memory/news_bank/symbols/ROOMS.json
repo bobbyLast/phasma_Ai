@@ -1,0 +1,22 @@
+[
+  {
+    "title": "Hotel adverts banned over misleadingly cheap rooms",
+    "link": "https://www.bbc.com/news/articles/cvgw7grp5vxo?at_medium=RSS&at_campaign=rss",
+    "published": "Wed, 19 Nov 2025 01:24:01 GMT",
+    "summary": "Ads for Hilton, Travelodge, Booking.com and Accor are banned by the Advertising Standards Authority.",
+    "source": "https://feeds.bbci.co.uk/news/business/rss.xml",
+    "category": "BUSINESS_GENERAL",
+    "fetch_time": "2025-11-19T01:06:05.153755",
+    "symbols": [
+      "HOTEL",
+      "CHEAP",
+      "ROOMS",
+      "ADS",
+      "COM",
+      "ACCOR",
+      "BY"
+    ],
+    "hash": "fbc280954b65c0dfd4320d9448d759a1",
+    "stored_at": "2025-11-19T01:08:47.813908"
+  }
+]

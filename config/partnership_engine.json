@@ -1,0 +1,38 @@
+{
+  "enabled": false,
+  "scan_interval_minutes": 60,
+  "min_impact_score": 7.0,
+  "api_keys": {
+    "sam_gov": {
+      "api_key": "SAM-89369821-caa4-4e0f-a427-b2b842d57177",
+      "base_url": "https://api.sam.gov",
+      "enabled": true
+    },
+    "usaspending": {
+      "base_url": "https://api.usaspending.gov",
+      "enabled": true
+    }
+  },
+  "monitored_tickers": [
+    "AMD",
+    "NVDA",
+    "PLTR",
+    "TSLA",
+    "AAPL",
+    "MSFT",
+    "GOOGL",
+    "AMZN",
+    "META"
+  ],
+  "alerting": {
+    "telegram": {
+      "enabled": true,
+      "bot_token": "${TELEGRAM_BOT_TOKEN}",
+      "chat_id": "${TELEGRAM_CHAT_ID}"
+    },
+    "discord": {
+      "enabled": false,
+      "webhook_url": "${DISCORD_WEBHOOK_URL}"
+    }
+  }
+}

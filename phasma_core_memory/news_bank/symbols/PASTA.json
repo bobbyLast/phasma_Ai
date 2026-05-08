@@ -1,0 +1,81 @@
+[
+  {
+    "title": "US slashes proposed tariffs on Italian pasta imports",
+    "link": "https://www.bbc.com/news/articles/c70lw7w89epo?at_medium=RSS&at_campaign=rss",
+    "published": "Fri, 02 Jan 2026 14:20:35 GMT",
+    "summary": "The plan to impose steep tariffs on 13 producers could have seen major price rises for US consumers.",
+    "source": "https://feeds.bbci.co.uk/news/business/rss.xml",
+    "category": "BUSINESS_GENERAL",
+    "fetch_time": "2026-01-03T14:42:51.540724",
+    "symbols": [
+      "US",
+      "ON",
+      "PASTA",
+      "PLAN",
+      "TO",
+      "STEEP",
+      "SEEN",
+      "MAJOR",
+      "PRICE",
+      "RISES"
+    ],
+    "hash": "451e028b861d55b0bf4ef6b01515681b",
+    "stored_at": "2026-01-03T14:45:34.006922"
+  },
+  {
+    "title": "Italian pasta makers win reprieve from Trump tariffs",
+    "link": "https://www.theguardian.com/us-news/2026/jan/02/italian-pasta-makers-win-reprieve-from-trump-tariffs",
+    "published": "Fri, 02 Jan 2026 10:51:49 GMT",
+    "summary": "US cuts proposed levies to between 2% and 14% despite accusing Italian producers of selling at unfairly low pricesThe US government has slashed proposed tariffs on Italian pasta that would have almostdoubled the cost of many brandsfor shoppers.Donald Trump had threatened toimpose tariffs as high as 92% on Italian pasta companies, after accusing 13 producers including Barilla, La Molisana and Pastificio Lucio Garofalo of selling their products at unfairly low prices.Continue reading...",
+    "source": "https://www.theguardian.com/business/rss",
+    "category": "NEWS_WIRE_SERVICES",
+    "fetch_time": "2026-01-03T14:42:52.970169",
+    "symbols": [
+      "PASTA",
+      "WIN",
+      "TRUMP",
+      "US",
+      "CUTS",
+      "TO",
+      "OF",
+      "AT",
+      "LOW",
+      "ON",
+      "WOULD",
+      "COST",
+      "MANY",
+      "HAD",
+      "AS",
+      "HIGH",
+      "LA",
+      "LUCIO",
+      "THEIR"
+    ],
+    "hash": "dd721ea6312d1e51a5750d42e77f2630",
+    "stored_at": "2026-01-03T14:46:36.510063"
+  },
+  {
+    "title": "I made Gordon Ramsay's Bloody Mary pasta, a dish inspired by one of his favorite drinks",
+    "link": "https://www.businessinsider.com/gordon-ramsay-bloody-mary-pasta-recipe-review",
+    "published": "2026-01-19T15:42:01Z",
+    "summary": "Gordon Ramsay decided to make a pasta dish inspired by one of his favorite drinks, a Bloody Mary. It features tomatoes, Tabasco, and celery salt.",
+    "source": "https://www.businessinsider.com/rss",
+    "category": "BUSINESS_GENERAL",
+    "fetch_time": "2026-01-19T13:14:45.970580",
+    "symbols": [
+      "MADE",
+      "MARY",
+      "PASTA",
+      "DISH",
+      "BY",
+      "ONE",
+      "OF",
+      "HIS",
+      "TO",
+      "IT",
+      "SALT"
+    ],
+    "hash": "f143cea55f81706df01d6e2ac89fb107",
+    "stored_at": "2026-01-19T13:16:46.831963"
+  }
+]

@@ -1,0 +1,84 @@
+{
+  "timestamp": "2025-12-16T17:43:05.409047",
+  "symbol": "DOGE-USD",
+  "crash_score": 0.40880333193143203,
+  "alert_level": 2,
+  "early_warning_score": 0.3641577330048879,
+  "early_warning_level": 1,
+  "horizon": "mid_term",
+  "horizon_days": 30,
+  "components": {
+    "macro": 0.14419999599456787,
+    "onchain": 0.5,
+    "sentiment": 0.5,
+    "technical": 0.6666666666666666
+  },
+  "volatility_regime": "NORMAL",
+  "confidence_weight": 1.0,
+  "simulation_results": {
+    "simulations_run": 500,
+    "horizon_days": 30,
+    "tail_probability_10pct": 0.4905639983177184,
+    "tail_probability_25pct": 0.40880333193143203,
+    "expected_return": -0.08176066638628642,
+    "downside_scenarios": 204
+  },
+  "price_projection": {
+    "symbol": "DOGE-USD",
+    "current_price": 0.13205455243587494,
+    "horizon_days": 30,
+    "moderate_drop_pct": 0.13081706621805828,
+    "severe_drop_pct": 0.1839614993691444,
+    "moderate_drop_target": 0.11477956330547504,
+    "severe_stress_floor": 0.10776159897125008,
+    "note": "Targets are based on Monte Carlo crash scenarios and typical behaviour in leveraged, thin-liquidity sell-offs (fast wicks then stabilization)."
+  },
+  "crash_drivers": [
+    {
+      "type": "LEVERAGE_OVERHANG",
+      "label": "Leverage / Derivatives Overhang",
+      "reason": "Crypto trades are heavily driven by perpetual futures and leverage. Current on-chain/derivatives risk score suggests a crowded long market that can trigger forced liquidations similar to past $10B+ wipeout events."
+    },
+    {
+      "type": "TECHNICAL_BREAKDOWN",
+      "label": "Technical Breakdown",
+      "reason": "Trend and momentum indicators (MACD/RSI/MA) are aligned to the downside, which often accelerates sell-offs as systematic traders and algos exit together."
+    }
+  ],
+  "ecosystem_contagion": {
+    "ecosystem": "GENERIC_CRYPTO",
+    "label": "Crypto microcaps and meme coins",
+    "representative_assets": [],
+    "expected_ecosystem_drawdown_range": [
+      0.25,
+      0.55
+    ],
+    "penny_coin_tail_risk_range": [
+      0.4,
+      0.8
+    ],
+    "narrative": "A sharp move in a major chain typically forces risk-off across its ecosystem. DeFi, infrastructure and meme/penny coins on the same chain often see amplified intraday drawdowns as liquidity thins, leverage unwinds and market makers widen spreads."
+  },
+  "early_warning": {
+    "score": 0.3641577330048879,
+    "level": 1,
+    "label": "SUBTLE_STRESS",
+    "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+    "signals": []
+  },
+  "recommendation": {
+    "action": "CAUTIOUS",
+    "specifics": [
+      "RESTRICT to BUY_PUT only",
+      "REDUCE position sizes by 50%",
+      "TIGHTEN stop losses",
+      "MONITOR macro conditions closely"
+    ],
+    "urgency": "HIGH"
+  },
+  "reasoning": [
+    "\ud83d\udcc8 Macro risk low (score: 0.14)",
+    "\ud83d\udcca Technical signals bearish (score: 0.67)",
+    "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+  ]
+}

@@ -1,0 +1,88 @@
+{
+  "ticker": "NVDA",
+  "timestamp": "2025-11-30T15:02:38.308691",
+  "volatility_edge": {
+    "analysis": {
+      "ticker": "NVDA",
+      "implied_volatility": 0.35,
+      "realized_volatility": 0.25,
+      "iv_rv_ratio": 1.4,
+      "iv_rv_percentile": 0.0,
+      "volatility_regime": "low_iv_discount",
+      "historical_data_points": 1,
+      "last_updated": "2025-11-30T15:02:38.309996",
+      "avg_historical_iv": 0.35,
+      "avg_historical_rv": 0.25,
+      "iv_volatility": 0,
+      "rv_volatility": 0,
+      "edge_signals_count": 0
+    },
+    "signals": [],
+    "regime": {
+      "regime": "neutral_volatility",
+      "description": "Market IV near historical average (27.5%)",
+      "average_iv_percentile": 0.5,
+      "average_iv": 0.275,
+      "tickers_analyzed": 2
+    }
+  },
+  "optimal_positioning": {
+    "ticker": "NVDA",
+    "option_type": "call",
+    "strike_price": 850.0,
+    "expiry_date": "2025-12-05",
+    "days_to_expiry": 5,
+    "delta": 0.5,
+    "premium": 34.81974129084884,
+    "bid_ask_spread_pct": 0.05,
+    "liquidity_score": 0.95,
+    "edge_score": 0.9497848441762682,
+    "rationale": "ITM/ATM call for conservative positioning (0.0% from spot). Very short-term expiry (5 DTE) to capture immediate catalyst. Excellent edge alignment across catalyst, timing, and execution factors",
+    "risk_reward_ratio": Infinity,
+    "breakeven_price": 884.8197412908488,
+    "max_loss": 696.3948258169768,
+    "max_profit": 999999
+  },
+  "risk_assessment": {
+    "timestamp": "2025-11-30T15:02:38.313954",
+    "overall_risk_level": "critical",
+    "recommended_action": "emergency",
+    "risk_metrics": {
+      "total_portfolio_value": 1800,
+      "total_unrealized_pnl": -200,
+      "portfolio_drawdown": 0.1111111111111111,
+      "concentration_single_asset": 1.0,
+      "correlation_group_exposure": 1.0,
+      "liquidity_risk": 0.0,
+      "risk_factor_concentration": 1.0
+    },
+    "violations": [
+      "portfolio_drawdown: 11.1% (elevated)",
+      "concentration_single_asset: 100.0% (critical)",
+      "correlation_group_exposure: 100.0% (critical)"
+    ],
+    "recommendations": [
+      "\ud83d\udea8 EMERGENCY: Immediately close all positions and halt trading",
+      "\ud83d\udcde Contact risk management immediately",
+      "\ud83d\udd0d Conduct full portfolio review",
+      "\ud83c\udfaf Reduce single asset concentration below 25%",
+      "\ud83d\udd17 Diversify across correlation groups"
+    ]
+  },
+  "integrated_recommendation": {
+    "ticker": "NVDA",
+    "strategy": "CALL $850.00",
+    "confidence": 0.27999999999999997,
+    "position_size": 1899,
+    "expected_return": Infinity,
+    "risk_level": "critical",
+    "action_required": "Execute CALL $850.00 position for $1,899 notional",
+    "rationale": [],
+    "warnings": [
+      "High risk environment - reduced position size and confidence"
+    ]
+  },
+  "narrative": {
+    "error": "'MockOpp' object has no attribute 'opportunity_type'"
+  }
+}

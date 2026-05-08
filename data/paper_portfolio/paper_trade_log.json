@@ -1,0 +1,44 @@
+[
+  {
+    "id": 1,
+    "timestamp": "2026-01-03T15:19:46.990648",
+    "action": "BUY",
+    "symbol": "AAPL",
+    "quantity": 10,
+    "price": 150.0,
+    "total_cost": 1500.0,
+    "signal_data": {
+      "symbol": "AAPL",
+      "action": "BUY",
+      "confidence": 85,
+      "entry_price": 150.0,
+      "source": "test_signal"
+    },
+    "confidence": 85,
+    "position_after": {
+      "quantity": 10,
+      "avg_cost": 150.0,
+      "total_cost": 1500.0
+    },
+    "paper_trade": true
+  },
+  {
+    "id": 2,
+    "timestamp": "2026-01-03T15:19:47.002891",
+    "action": "SELL",
+    "symbol": "AAPL",
+    "quantity": 5,
+    "price": 155.0,
+    "total_proceeds": 775.0,
+    "cost_basis": 750.0,
+    "realized_pnl": 25.0,
+    "realized_pct": 3.3333333333333335,
+    "reason": "Take profit",
+    "signal_data": {},
+    "position_before": {
+      "quantity": 10,
+      "avg_cost": 150.0
+    },
+    "paper_trade": true
+  }
+]

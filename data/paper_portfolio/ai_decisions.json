@@ -1,0 +1,28 @@
+[
+  {
+    "timestamp": "2026-01-03T15:19:46.998014",
+    "symbol": "AAPL",
+    "action": "BUY",
+    "quantity": 10,
+    "price": 150.0,
+    "signal_data": {
+      "symbol": "AAPL",
+      "action": "BUY",
+      "confidence": 85,
+      "entry_price": 150.0,
+      "source": "test_signal"
+    },
+    "confidence": 85,
+    "pnl": null
+  },
+  {
+    "timestamp": "2026-01-03T15:19:48.616342",
+    "symbol": "AAPL",
+    "action": "SELL",
+    "quantity": 5,
+    "price": 155.0,
+    "signal_data": null,
+    "confidence": null,
+    "pnl": 25.0
+  }
+]

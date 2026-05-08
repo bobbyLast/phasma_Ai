@@ -1,0 +1,48 @@
+{
+  "positions": {
+    "test_NVDA_options": {
+      "position_id": "test_NVDA_options",
+      "asset": "NVDA",
+      "position_type": "option",
+      "notional_value": 2000,
+      "market_value": 1800,
+      "unrealized_pnl": -200,
+      "risk_factors": [
+        "volatility",
+        "tech",
+        "ai"
+      ],
+      "correlation_group": "tech_stocks"
+    }
+  },
+  "kill_switch_activated": true,
+  "emergency_mode": true,
+  "last_assessment": "2025-11-30T15:02:38.313954",
+  "latest_assessment": {
+    "timestamp": "2025-11-30T15:02:38.313954",
+    "overall_risk_level": "critical",
+    "recommended_action": "emergency",
+    "risk_metrics": {
+      "total_portfolio_value": 1800,
+      "total_unrealized_pnl": -200,
+      "portfolio_drawdown": 0.1111111111111111,
+      "concentration_single_asset": 1.0,
+      "correlation_group_exposure": 1.0,
+      "liquidity_risk": 0.0,
+      "risk_factor_concentration": 1.0
+    },
+    "violations": [
+      "portfolio_drawdown: 11.1% (elevated)",
+      "concentration_single_asset: 100.0% (critical)",
+      "correlation_group_exposure: 100.0% (critical)"
+    ],
+    "recommendations": [
+      "\ud83d\udea8 EMERGENCY: Immediately close all positions and halt trading",
+      "\ud83d\udcde Contact risk management immediately",
+      "\ud83d\udd0d Conduct full portfolio review",
+      "\ud83c\udfaf Reduce single asset concentration below 25%",
+      "\ud83d\udd17 Diversify across correlation groups"
+    ]
+  },
+  "last_updated": "2025-11-30T15:02:38.316997"
+}

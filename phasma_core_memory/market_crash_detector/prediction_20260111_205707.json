@@ -1,0 +1,71 @@
+{
+  "timestamp": "2026-01-11T20:57:07.196753",
+  "symbol": "SPY",
+  "crash_score": 0.27474932461596213,
+  "alert_level": 1,
+  "alert_level_name": "MINOR_DIP",
+  "early_warning_layer": {
+    "score": 0.4463712741979342,
+    "level": 1,
+    "label": "SUBTLE_STRESS",
+    "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+    "signals": []
+  },
+  "early_warning_score": 0.4463712741979342,
+  "early_warning_level": 1,
+  "horizon": "short_term",
+  "horizon_days": 7,
+  "components": {
+    "macro": 0.14214092747417745,
+    "onchain": 0.5,
+    "sentiment": 0.5,
+    "technical": 0.0
+  },
+  "volatility_regime": "LOW",
+  "confidence_weight": 1.0,
+  "simulation_results": {
+    "simulations_run": 500,
+    "horizon_days": 7,
+    "tail_probability_10pct": 0.32969918953915456,
+    "tail_probability_25pct": 0.27474932461596213,
+    "expected_return": -0.054949864923192426,
+    "downside_scenarios": 137
+  },
+  "price_projection": {
+    "symbol": "SPY",
+    "current_price": 694.0700073242188,
+    "horizon_days": 7,
+    "moderate_drop_pct": 0.08791978387710789,
+    "severe_drop_pct": 0.1379197838771079,
+    "moderate_drop_target": 633.0475222846908,
+    "severe_stress_floor": 598.3440219184798,
+    "note": "Targets are based on Monte Carlo crash scenarios and typical behaviour in leveraged, thin-liquidity sell-offs (fast wicks then stabilization)."
+  },
+  "crash_drivers": [
+    {
+      "type": "NO_CLEAR_DRIVER",
+      "label": "Normal Volatility",
+      "reason": "Risk metrics do not point to a single dominant crash driver. Moves here look more like normal volatility than a structural deleveraging event."
+    }
+  ],
+  "ecosystem_contagion": {},
+  "early_warning": {
+    "score": 0.4463712741979342,
+    "level": 1,
+    "label": "SUBTLE_STRESS",
+    "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+    "signals": []
+  },
+  "recommendation": {
+    "action": "REDUCE_RISK",
+    "specifics": [
+      "REDUCE position sizes by 30%",
+      "FAVOR defensive strategies",
+      "INCREASE cash allocation"
+    ],
+    "urgency": "MODERATE"
+  },
+  "reasoning": [
+    "\ud83d\udcc8 Macro risk low (score: 0.14)"
+  ]
+}

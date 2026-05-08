@@ -1,0 +1,7 @@
+{
+  "timestamp": "2025-11-30T15:02:38.313954",
+  "reason": "Emergency risk thresholds breached",
+  "active_positions": 1,
+  "total_exposure": 1800,
+  "action": "KILL_SWITCH_ACTIVATED"
+}

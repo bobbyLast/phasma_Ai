@@ -1,0 +1,19 @@
+{
+  "analyses": {
+    "KALSHI_none": {
+      "market_name": "KALSHI",
+      "market_type": "prediction_market",
+      "anomaly_type": "none",
+      "anomaly_strength": 0.0,
+      "reversion_probability": 0.4583333333333333,
+      "reversion_speed_minutes": 21.250000000000004,
+      "time_since_anomaly": 5,
+      "current_volume": 217,
+      "recent_avg_volume": 800,
+      "easy_trade_confidence": 0.5,
+      "rationale": "Market: KALSHI (prediction_market) | Avg Daily Volume: 500,000 | Market Depth: 30.0% | Short-term Reversion: 65.0% | Overreaction Tendency: 95.0% | Institutional Impact: 20.0% | No anomalies detected | Reversion Probability: 45.8% within 21 minutes | No microstructure anomalies detected | Thin market - anomalies more likely to persist | Market prone to overreactions and quick reversions",
+      "recommended_action": "MONITOR"
+    }
+  },
+  "last_updated": "2025-12-22T16:31:33.252349"
+}

@@ -1,0 +1,40 @@
+[
+  {
+    "title": "Review & Preview: Risky Business",
+    "link": "https://finance.yahoo.com/m/d2a25466-86b6-3a3f-9a94-0cdbc017bb96/review-%26-preview%3A-risky.html?.tsrc=rss",
+    "published": "Wed, 19 Nov 2025 00:55:00 +0000",
+    "summary": "The Dow Jones Industrial Average fell 499 points, or 1.1%, while the Nasdaq Composite closed down 1.2%.  \u201cStocks are suffering losses for the fourth consecutive day as Wall Street adopts a risk-off posture, considering valuation worries, household spending anxiety, employment angst, and elevated inflation that is keeping the Fed at bay and increasingly preventing it from intervening,\u201d writes Jos\u00e9 Torres, senior economist at Interactive Brokers.  Torres notes that investors spent the day bailing out of the market ahead of tomorrow\u2019s earnings report from Nvidia, as the AI skepticism theme gains traction.",
+    "source": "https://feeds.finance.yahoo.com/rss/2.0/headline?s=^GSPC",
+    "category": "FINANCIAL_HIGH_PRIORITY",
+    "fetch_time": "2025-11-19T01:06:04.157453",
+    "symbols": [
+      "RISKY",
+      "DOW",
+      "JONES",
+      "FELL",
+      "OR",
+      "WHILE",
+      "DOWN",
+      "AS",
+      "WALL",
+      "RISK",
+      "OFF",
+      "ANGST",
+      "IS",
+      "FED",
+      "AT",
+      "BAY",
+      "IT",
+      "NOTES",
+      "SPENT",
+      "OUT",
+      "OF",
+      "AHEAD",
+      "AI",
+      "THEME",
+      "GAINS"
+    ],
+    "hash": "34582e964fdacd6cfa73ff9b6e942271",
+    "stored_at": "2025-11-19T01:06:54.836089"
+  }
+]

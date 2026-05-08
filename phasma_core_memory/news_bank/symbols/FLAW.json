@@ -1,0 +1,76 @@
+[
+  {
+    "title": "A Simple WhatsApp Security Flaw Exposed 3.5 Billion Phone Numbers",
+    "link": "https://www.wired.com/story/a-simple-whatsapp-security-flaw-exposed-billions-phone-numbers/",
+    "published": "Tue, 18 Nov 2025 14:00:00 +0000",
+    "summary": "By plugging tens of billions of phone numbers into WhatsApp\u2019s contact discovery tool, researchers found \u201cthe most extensive exposure of phone numbers\u201d ever\u2014along with profile photos and more.",
+    "source": "https://www.wired.com/feed/rss",
+    "category": "TECH_AI_SECTOR",
+    "fetch_time": "2025-11-19T01:06:04.993777",
+    "symbols": [
+      "FLAW",
+      "PHONE",
+      "BY",
+      "TENS",
+      "OF",
+      "INTO",
+      "TOOL",
+      "FOUND",
+      "EVER",
+      "ALONG"
+    ],
+    "hash": "aa8b649b0ced25811f37e1570c5fd9da",
+    "stored_at": "2025-11-19T01:08:17.578875"
+  },
+  {
+    "title": "I found a near-perfect Android phone, but the premium display has a surprising flaw",
+    "link": "https://www.zdnet.com/article/i-found-a-near-perfect-android-phone-but-the-premium-display-has-a-surprising-flaw/",
+    "published": "Wed, 19 Nov 2025 01:43:00 GMT",
+    "summary": "It has nothing to do with the OnePlus 15's lack of features or general availability; instead, it comes down to form and fit.",
+    "source": "https://www.zdnet.com/news/rss.xml",
+    "category": "TECH_AI_SECTOR",
+    "fetch_time": "2025-11-19T01:06:05.279686",
+    "symbols": [
+      "FOUND",
+      "NEAR",
+      "PHONE",
+      "FLAW",
+      "IT",
+      "TO",
+      "DO",
+      "LACK",
+      "OF",
+      "OR",
+      "COMES",
+      "DOWN",
+      "FORM",
+      "FIT"
+    ],
+    "hash": "70cfef728e5a98b7f209363e81d39435",
+    "stored_at": "2025-11-19T01:08:24.814042"
+  },
+  {
+    "title": "A new earbud security flaw may expose you to remote eavesdropping - here's how to fix it",
+    "link": "https://www.zdnet.com/article/whisperpair-google-fast-pair-bluetooth-headphones-attack/",
+    "published": "Sat, 17 Jan 2026 01:15:45 GMT",
+    "summary": "Google Fast Pair makes pairing easy, but a flawed implementation has created a serious security risk.",
+    "source": "https://www.zdnet.com/news/rss.xml",
+    "category": "TECH_AI_SECTOR",
+    "fetch_time": "2026-01-17T15:56:51.354279",
+    "symbols": [
+      "FLAW",
+      "MAY",
+      "TO",
+      "HERE",
+      "FIX",
+      "IT",
+      "FAST",
+      "PAIR",
+      "MAKES",
+      "EASY",
+      "RISK"
+    ],
+    "hash": "e44a911521ab68b0181e683f836350e9",
+    "stored_at": "2026-01-17T15:58:50.796851"
+  }
+]

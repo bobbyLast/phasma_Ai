@@ -1,0 +1,670 @@
+{
+  "opportunities": {
+    "kalshi_fed_cut": {
+      "id": "kalshi_fed_cut",
+      "type": "kalshi_market",
+      "title": "Fed Rate Cut 0.25% in March 2025",
+      "description": "Federal Reserve expected to cut rates by 0.25% in March",
+      "primary_asset": "FED_RATE_CUT",
+      "secondary_assets": [],
+      "score": {
+        "edge_size": 0.6840836616503649,
+        "confidence": 0.8,
+        "liquidity": 0.7,
+        "time_decay": 0.9999997484606481,
+        "diversification": 0.0,
+        "market_regime": 0.0,
+        "total_score": 0.6786334395062108
+      },
+      "expected_return": 0.15,
+      "risk_level": "medium",
+      "time_horizon": "medium",
+      "confidence_level": 0.0,
+      "recommended_position_size": 0.0,
+      "rationale": "Strong probability edge in liquid market with upcoming FOMC meeting",
+      "action_required": "Buy YES position on Kalshi",
+      "tags": [
+        "high_probability",
+        "macro",
+        "central_bank"
+      ],
+      "last_updated": "2025-11-30T14:55:02.284870",
+      "metadata": {}
+    },
+    "kalshi_btc_200k": {
+      "id": "kalshi_btc_200k",
+      "type": "kalshi_market",
+      "title": "Bitcoin Hits $200K by End of 2025",
+      "description": "Prediction market for Bitcoin reaching $200K target",
+      "primary_asset": "BTC-USD",
+      "secondary_assets": [],
+      "score": {
+        "edge_size": 0.29095427052645817,
+        "confidence": 0.7,
+        "liquidity": 0.8,
+        "time_decay": 0.9999997484606481,
+        "diversification": 0.0,
+        "market_regime": 0.0,
+        "total_score": 0.5113816830566481
+      },
+      "expected_return": 0.08,
+      "risk_level": "high",
+      "time_horizon": "long",
+      "confidence_level": 0.0,
+      "recommended_position_size": 0.0,
+      "rationale": "BTC price prediction with significant upside potential",
+      "action_required": "Buy YES on Kalshi BTC200K market",
+      "tags": [
+        "price_target",
+        "long_term",
+        "crypto"
+      ],
+      "last_updated": "2025-11-30T14:55:02.284870",
+      "metadata": {}
+    },
+    "arbitrage_btc_kalshi_options": {
+      "id": "arbitrage_btc_kalshi_options",
+      "type": "cross_market_arbitrage",
+      "title": "BTC Price Target: Kalshi vs Options Mispricing",
+      "description": "Kalshi shows 25% probability, options imply 40% - buy Kalshi sell options",
+      "primary_asset": "BTC-USD",
+      "secondary_assets": [
+        "BTC options"
+      ],
+      "score": {
+        "edge_size": 0.1647915128264293,
+        "confidence": 0.75,
+        "liquidity": 0.6,
+        "time_decay": 0.9999997484606481,
+        "diversification": 0.0,
+        "market_regime": 0.0,
+        "total_score": 0.4434165799766365
+      },
+      "expected_return": 0.12,
+      "risk_level": "medium",
+      "time_horizon": "medium",
+      "confidence_level": 0.0,
+      "recommended_position_size": 0.0,
+      "rationale": "Multi-venue probability disagreement creates arbitrage opportunity",
+      "action_required": "Buy Kalshi YES, sell equivalent options position",
+      "tags": [
+        "arbitrage",
+        "multi_venue",
+        "quantitative"
+      ],
+      "last_updated": "2025-11-30T14:55:02.284870",
+      "metadata": {}
+    },
+    "scenario_soft_landing": {
+      "id": "scenario_soft_landing",
+      "type": "scenario_tree",
+      "title": "Soft Landing Scenario: Fed Cuts + Growth Continues",
+      "description": "Complete scenario: Fed rate cut + low inflation + SPY/QQQ up + BTC risk-on",
+      "primary_asset": "SPY",
+      "secondary_assets": [
+        "QQQ",
+        "BTC-USD"
+      ],
+      "score": {
+        "edge_size": 0.5731196107938614,
+        "confidence": 0.6,
+        "liquidity": 0.9,
+        "time_decay": 0.9999997484606481,
+        "diversification": 0.0,
+        "market_regime": 0.0,
+        "total_score": 0.6142478191636094
+      },
+      "expected_return": 0.18,
+      "risk_level": "medium",
+      "time_horizon": "medium",
+      "confidence_level": 0.0,
+      "recommended_position_size": 0.0,
+      "rationale": "Coordinated scenario with multiple reinforcing signals",
+      "action_required": "Buy SPY calls, QQQ calls, BTC positions",
+      "tags": [
+        "macro",
+        "scenario",
+        "multi_asset"
+      ],
+      "last_updated": "2025-11-30T14:55:02.284870",
+      "metadata": {}
+    },
+    "ceo_apple_tim_cook": {
+      "id": "ceo_apple_tim_cook",
+      "type": "traditional_signal",
+      "title": "Tim Cook Apple CEO Reappointment Cross-Market",
+      "description": "High probability Tim Cook remains Apple CEO - stock impact opportunity",
+      "primary_asset": "AAPL",
+      "secondary_assets": [],
+      "score": {
+        "edge_size": 0.7048495128846274,
+        "confidence": 0.8,
+        "liquidity": 0.9,
+        "time_decay": 0.9999997484606481,
+        "diversification": 0.0,
+        "market_regime": 0.0,
+        "total_score": 0.7169397799999159
+      },
+      "expected_return": 0.25,
+      "risk_level": "low",
+      "time_horizon": "long",
+      "confidence_level": 0.0,
+      "recommended_position_size": 0.0,
+      "rationale": "CEO track record analysis shows positive Apple stock impact",
+      "action_required": "Buy AAPL calls with 6-12 month expiry",
+      "tags": [
+        "ceo",
+        "apple",
+        "fundamental"
+      ],
+      "last_updated": "2025-11-30T14:55:02.284870",
+      "metadata": {}
+    },
+    "ai_breakthrough_2025": {
+      "id": "ai_breakthrough_2025",
+      "type": "kalshi_market",
+      "title": "Major AI Breakthrough in 2025",
+      "description": "Prediction market for significant AI advancement this year",
+      "primary_asset": "NVDA",
+      "secondary_assets": [
+        "MSFT",
+        "GOOGL",
+        "META"
+      ],
+      "score": {
+        "edge_size": 0.40041571580604735,
+        "confidence": 0.5,
+        "liquidity": 0.7,
+        "time_decay": 0.9999997484606481,
+        "diversification": 0.0,
+        "market_regime": 0.0,
+        "total_score": 0.4901662611684837
+      },
+      "expected_return": 0.22,
+      "risk_level": "high",
+      "time_horizon": "medium",
+      "confidence_level": 0.0,
+      "recommended_position_size": 0.0,
+      "rationale": "AI sector catalyst with broad market implications",
+      "action_required": "Buy NVDA calls, consider AI sector ETF",
+      "tags": [
+        "ai",
+        "breakthrough",
+        "sector_catalyst"
+      ],
+      "last_updated": "2025-11-30T14:55:02.284870",
+      "metadata": {}
+    },
+    "oil_crisis_scenario": {
+      "id": "oil_crisis_scenario",
+      "type": "scenario_tree",
+      "title": "Oil Crisis Scenario: $150+ Oil in 2025",
+      "description": "Geopolitical oil disruption scenario with energy stock impacts",
+      "primary_asset": "XOM",
+      "secondary_assets": [
+        "CVX",
+        "BTC-USD"
+      ],
+      "score": {
+        "edge_size": 0.3644289128902948,
+        "confidence": 0.6,
+        "liquidity": 0.8,
+        "time_decay": 0.9999997484606481,
+        "diversification": 0.0,
+        "market_regime": 0.0,
+        "total_score": 0.5157715400021827
+      },
+      "expected_return": 0.16,
+      "risk_level": "high",
+      "time_horizon": "medium",
+      "confidence_level": 0.0,
+      "recommended_position_size": 0.0,
+      "rationale": "Oil supply disruption scenario with risk-off crypto implications",
+      "action_required": "Buy XOM/CVX calls, consider BTC puts as hedge",
+      "tags": [
+        "commodity",
+        "energy",
+        "geopolitical"
+      ],
+      "last_updated": "2025-11-30T14:55:02.284870",
+      "metadata": {}
+    },
+    "fda_ai_drug_approval": {
+      "id": "fda_ai_drug_approval",
+      "type": "cross_market_arbitrage",
+      "title": "FDA AI Drug Approval - Biotech Impact",
+      "description": "FDA approves AI-assisted drug treatment with biotech stock implications",
+      "primary_asset": "Biotech ETF",
+      "secondary_assets": [
+        "NVDA",
+        "MSFT"
+      ],
+      "score": {
+        "edge_size": 0.9470100382247522,
+        "confidence": 0.8,
+        "liquidity": 0.5,
+        "time_decay": 0.9999997484606481,
+        "diversification": 0.0,
+        "market_regime": 0.0,
+        "total_score": 0.7538039901359657
+      },
+      "expected_return": 0.35,
+      "risk_level": "high",
+      "time_horizon": "medium",
+      "confidence_level": 0.0,
+      "recommended_position_size": 0.0,
+      "rationale": "High-impact FDA approval with AI/healthcare crossover potential",
+      "action_required": "Buy biotech ETF, consider AI healthcare positions",
+      "tags": [
+        "biotech",
+        "ai_healthcare",
+        "fda"
+      ],
+      "last_updated": "2025-11-30T14:55:02.284870",
+      "metadata": {}
+    },
+    "inflation_shock_scenario": {
+      "id": "inflation_shock_scenario",
+      "type": "scenario_tree",
+      "title": "Inflation Shock: CPI Exceeds 3% in 2025",
+      "description": "Inflationary scenario with broad market implications",
+      "primary_asset": "SPY",
+      "secondary_assets": [
+        "BTC-USD",
+        "GLD"
+      ],
+      "score": {
+        "edge_size": 0.43768587642258383,
+        "confidence": 0.55,
+        "liquidity": 0.9,
+        "time_decay": 0.9999997484606481,
+        "diversification": 0.0,
+        "market_regime": 0.0,
+        "total_score": 0.5475743254150984
+      },
+      "expected_return": 0.14,
+      "risk_level": "medium",
+      "time_horizon": "short",
+      "confidence_level": 0.0,
+      "recommended_position_size": 0.0,
+      "rationale": "Inflation scenario analysis shows defensive positioning needed",
+      "action_required": "Buy TIPS/gold, reduce growth exposure",
+      "tags": [
+        "macro",
+        "inflation",
+        "defensive"
+      ],
+      "last_updated": "2025-11-30T14:55:02.284870",
+      "metadata": {}
+    },
+    "election_dem_win_2024": {
+      "id": "election_dem_win_2024",
+      "type": "kalshi_market",
+      "title": "Democrat Wins 2024 US Election",
+      "description": "Election outcome prediction with market implications",
+      "primary_asset": "SPY",
+      "secondary_assets": [
+        "NVDA",
+        "XOM"
+      ],
+      "score": {
+        "edge_size": 0.5253156051507697,
+        "confidence": 0.6,
+        "liquidity": 0.9,
+        "time_decay": 0.9999997484606481,
+        "diversification": 0.0,
+        "market_regime": 0.0,
+        "total_score": 0.5951262169063727
+      },
+      "expected_return": 0.2,
+      "risk_level": "medium",
+      "time_horizon": "short",
+      "confidence_level": 0.0,
+      "recommended_position_size": 0.0,
+      "rationale": "Election outcome drives sector rotation and market sentiment",
+      "action_required": "Position for Democratic policy preferences",
+      "tags": [
+        "election",
+        "sector_rotation",
+        "political"
+      ],
+      "last_updated": "2025-11-30T14:55:02.284870",
+      "metadata": {}
+    }
+  },
+  "top_10_cache": [
+    {
+      "id": "fda_ai_drug_approval",
+      "type": "cross_market_arbitrage",
+      "title": "FDA AI Drug Approval - Biotech Impact",
+      "description": "FDA approves AI-assisted drug treatment with biotech stock implications",
+      "primary_asset": "Biotech ETF",
+      "secondary_assets": [
+        "NVDA",
+        "MSFT"
+      ],
+      "score": {
+        "edge_size": 0.9470100382247522,
+        "confidence": 0.8,
+        "liquidity": 0.5,
+        "time_decay": 0.9999997484606481,
+        "diversification": 0.0,
+        "market_regime": 0.0,
+        "total_score": 0.7538039901359657
+      },
+      "expected_return": 0.35,
+      "risk_level": "high",
+      "time_horizon": "medium",
+      "confidence_level": 0.0,
+      "recommended_position_size": 0.0,
+      "rationale": "High-impact FDA approval with AI/healthcare crossover potential",
+      "action_required": "Buy biotech ETF, consider AI healthcare positions",
+      "tags": [
+        "biotech",
+        "ai_healthcare",
+        "fda"
+      ],
+      "last_updated": "2025-11-30T14:55:02.284870",
+      "metadata": {}
+    },
+    {
+      "id": "ceo_apple_tim_cook",
+      "type": "traditional_signal",
+      "title": "Tim Cook Apple CEO Reappointment Cross-Market",
+      "description": "High probability Tim Cook remains Apple CEO - stock impact opportunity",
+      "primary_asset": "AAPL",
+      "secondary_assets": [],
+      "score": {
+        "edge_size": 0.7048495128846274,
+        "confidence": 0.8,
+        "liquidity": 0.9,
+        "time_decay": 0.9999997484606481,
+        "diversification": 0.0,
+        "market_regime": 0.0,
+        "total_score": 0.7169397799999159
+      },
+      "expected_return": 0.25,
+      "risk_level": "low",
+      "time_horizon": "long",
+      "confidence_level": 0.0,
+      "recommended_position_size": 0.0,
+      "rationale": "CEO track record analysis shows positive Apple stock impact",
+      "action_required": "Buy AAPL calls with 6-12 month expiry",
+      "tags": [
+        "ceo",
+        "apple",
+        "fundamental"
+      ],
+      "last_updated": "2025-11-30T14:55:02.284870",
+      "metadata": {}
+    },
+    {
+      "id": "kalshi_fed_cut",
+      "type": "kalshi_market",
+      "title": "Fed Rate Cut 0.25% in March 2025",
+      "description": "Federal Reserve expected to cut rates by 0.25% in March",
+      "primary_asset": "FED_RATE_CUT",
+      "secondary_assets": [],
+      "score": {
+        "edge_size": 0.6840836616503649,
+        "confidence": 0.8,
+        "liquidity": 0.7,
+        "time_decay": 0.9999997484606481,
+        "diversification": 0.0,
+        "market_regime": 0.0,
+        "total_score": 0.6786334395062108
+      },
+      "expected_return": 0.15,
+      "risk_level": "medium",
+      "time_horizon": "medium",
+      "confidence_level": 0.0,
+      "recommended_position_size": 0.0,
+      "rationale": "Strong probability edge in liquid market with upcoming FOMC meeting",
+      "action_required": "Buy YES position on Kalshi",
+      "tags": [
+        "high_probability",
+        "macro",
+        "central_bank"
+      ],
+      "last_updated": "2025-11-30T14:55:02.284870",
+      "metadata": {}
+    },
+    {
+      "id": "scenario_soft_landing",
+      "type": "scenario_tree",
+      "title": "Soft Landing Scenario: Fed Cuts + Growth Continues",
+      "description": "Complete scenario: Fed rate cut + low inflation + SPY/QQQ up + BTC risk-on",
+      "primary_asset": "SPY",
+      "secondary_assets": [
+        "QQQ",
+        "BTC-USD"
+      ],
+      "score": {
+        "edge_size": 0.5731196107938614,
+        "confidence": 0.6,
+        "liquidity": 0.9,
+        "time_decay": 0.9999997484606481,
+        "diversification": 0.0,
+        "market_regime": 0.0,
+        "total_score": 0.6142478191636094
+      },
+      "expected_return": 0.18,
+      "risk_level": "medium",
+      "time_horizon": "medium",
+      "confidence_level": 0.0,
+      "recommended_position_size": 0.0,
+      "rationale": "Coordinated scenario with multiple reinforcing signals",
+      "action_required": "Buy SPY calls, QQQ calls, BTC positions",
+      "tags": [
+        "macro",
+        "scenario",
+        "multi_asset"
+      ],
+      "last_updated": "2025-11-30T14:55:02.284870",
+      "metadata": {}
+    },
+    {
+      "id": "election_dem_win_2024",
+      "type": "kalshi_market",
+      "title": "Democrat Wins 2024 US Election",
+      "description": "Election outcome prediction with market implications",
+      "primary_asset": "SPY",
+      "secondary_assets": [
+        "NVDA",
+        "XOM"
+      ],
+      "score": {
+        "edge_size": 0.5253156051507697,
+        "confidence": 0.6,
+        "liquidity": 0.9,
+        "time_decay": 0.9999997484606481,
+        "diversification": 0.0,
+        "market_regime": 0.0,
+        "total_score": 0.5951262169063727
+      },
+      "expected_return": 0.2,
+      "risk_level": "medium",
+      "time_horizon": "short",
+      "confidence_level": 0.0,
+      "recommended_position_size": 0.0,
+      "rationale": "Election outcome drives sector rotation and market sentiment",
+      "action_required": "Position for Democratic policy preferences",
+      "tags": [
+        "election",
+        "sector_rotation",
+        "political"
+      ],
+      "last_updated": "2025-11-30T14:55:02.284870",
+      "metadata": {}
+    },
+    {
+      "id": "inflation_shock_scenario",
+      "type": "scenario_tree",
+      "title": "Inflation Shock: CPI Exceeds 3% in 2025",
+      "description": "Inflationary scenario with broad market implications",
+      "primary_asset": "SPY",
+      "secondary_assets": [
+        "BTC-USD",
+        "GLD"
+      ],
+      "score": {
+        "edge_size": 0.43768587642258383,
+        "confidence": 0.55,
+        "liquidity": 0.9,
+        "time_decay": 0.9999997484606481,
+        "diversification": 0.0,
+        "market_regime": 0.0,
+        "total_score": 0.5475743254150984
+      },
+      "expected_return": 0.14,
+      "risk_level": "medium",
+      "time_horizon": "short",
+      "confidence_level": 0.0,
+      "recommended_position_size": 0.0,
+      "rationale": "Inflation scenario analysis shows defensive positioning needed",
+      "action_required": "Buy TIPS/gold, reduce growth exposure",
+      "tags": [
+        "macro",
+        "inflation",
+        "defensive"
+      ],
+      "last_updated": "2025-11-30T14:55:02.284870",
+      "metadata": {}
+    },
+    {
+      "id": "oil_crisis_scenario",
+      "type": "scenario_tree",
+      "title": "Oil Crisis Scenario: $150+ Oil in 2025",
+      "description": "Geopolitical oil disruption scenario with energy stock impacts",
+      "primary_asset": "XOM",
+      "secondary_assets": [
+        "CVX",
+        "BTC-USD"
+      ],
+      "score": {
+        "edge_size": 0.3644289128902948,
+        "confidence": 0.6,
+        "liquidity": 0.8,
+        "time_decay": 0.9999997484606481,
+        "diversification": 0.0,
+        "market_regime": 0.0,
+        "total_score": 0.5157715400021827
+      },
+      "expected_return": 0.16,
+      "risk_level": "high",
+      "time_horizon": "medium",
+      "confidence_level": 0.0,
+      "recommended_position_size": 0.0,
+      "rationale": "Oil supply disruption scenario with risk-off crypto implications",
+      "action_required": "Buy XOM/CVX calls, consider BTC puts as hedge",
+      "tags": [
+        "commodity",
+        "energy",
+        "geopolitical"
+      ],
+      "last_updated": "2025-11-30T14:55:02.284870",
+      "metadata": {}
+    },
+    {
+      "id": "kalshi_btc_200k",
+      "type": "kalshi_market",
+      "title": "Bitcoin Hits $200K by End of 2025",
+      "description": "Prediction market for Bitcoin reaching $200K target",
+      "primary_asset": "BTC-USD",
+      "secondary_assets": [],
+      "score": {
+        "edge_size": 0.29095427052645817,
+        "confidence": 0.7,
+        "liquidity": 0.8,
+        "time_decay": 0.9999997484606481,
+        "diversification": 0.0,
+        "market_regime": 0.0,
+        "total_score": 0.5113816830566481
+      },
+      "expected_return": 0.08,
+      "risk_level": "high",
+      "time_horizon": "long",
+      "confidence_level": 0.0,
+      "recommended_position_size": 0.0,
+      "rationale": "BTC price prediction with significant upside potential",
+      "action_required": "Buy YES on Kalshi BTC200K market",
+      "tags": [
+        "price_target",
+        "long_term",
+        "crypto"
+      ],
+      "last_updated": "2025-11-30T14:55:02.284870",
+      "metadata": {}
+    },
+    {
+      "id": "ai_breakthrough_2025",
+      "type": "kalshi_market",
+      "title": "Major AI Breakthrough in 2025",
+      "description": "Prediction market for significant AI advancement this year",
+      "primary_asset": "NVDA",
+      "secondary_assets": [
+        "MSFT",
+        "GOOGL",
+        "META"
+      ],
+      "score": {
+        "edge_size": 0.40041571580604735,
+        "confidence": 0.5,
+        "liquidity": 0.7,
+        "time_decay": 0.9999997484606481,
+        "diversification": 0.0,
+        "market_regime": 0.0,
+        "total_score": 0.4901662611684837
+      },
+      "expected_return": 0.22,
+      "risk_level": "high",
+      "time_horizon": "medium",
+      "confidence_level": 0.0,
+      "recommended_position_size": 0.0,
+      "rationale": "AI sector catalyst with broad market implications",
+      "action_required": "Buy NVDA calls, consider AI sector ETF",
+      "tags": [
+        "ai",
+        "breakthrough",
+        "sector_catalyst"
+      ],
+      "last_updated": "2025-11-30T14:55:02.284870",
+      "metadata": {}
+    },
+    {
+      "id": "arbitrage_btc_kalshi_options",
+      "type": "cross_market_arbitrage",
+      "title": "BTC Price Target: Kalshi vs Options Mispricing",
+      "description": "Kalshi shows 25% probability, options imply 40% - buy Kalshi sell options",
+      "primary_asset": "BTC-USD",
+      "secondary_assets": [
+        "BTC options"
+      ],
+      "score": {
+        "edge_size": 0.1647915128264293,
+        "confidence": 0.75,
+        "liquidity": 0.6,
+        "time_decay": 0.9999997484606481,
+        "diversification": 0.0,
+        "market_regime": 0.0,
+        "total_score": 0.4434165799766365
+      },
+      "expected_return": 0.12,
+      "risk_level": "medium",
+      "time_horizon": "medium",
+      "confidence_level": 0.0,
+      "recommended_position_size": 0.0,
+      "rationale": "Multi-venue probability disagreement creates arbitrage opportunity",
+      "action_required": "Buy Kalshi YES, sell equivalent options position",
+      "tags": [
+        "arbitrage",
+        "multi_venue",
+        "quantitative"
+      ],
+      "last_updated": "2025-11-30T14:55:02.284870",
+      "metadata": {}
+    }
+  ],
+  "last_refresh": "2025-11-30T14:55:02.284346",
+  "timestamp": "2025-11-30T14:55:02.284870"
+}

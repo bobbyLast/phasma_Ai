@@ -1,0 +1,195 @@
+{
+  "documentation_date": "2025-12-25T22:50:15.548912",
+  "initial_bankroll": 100,
+  "bankroll_allocation": {
+    "stock_trading": 50,
+    "kalshi_trading": 50
+  },
+  "trades_found": [
+    {
+      "source": "phasma_trading.log",
+      "trade_number": "32",
+      "timestamp": "2025-12-12 02:30:07,300",
+      "status": "executed",
+      "details": "2025-12-12 02:30:07,300 - root - INFO - [OK] Trade 32 executed and logged"
+    },
+    {
+      "source": "phasma_trading.log",
+      "trade_number": "33",
+      "timestamp": "2025-12-12 02:33:19,650",
+      "status": "executed",
+      "details": "2025-12-12 02:33:19,650 - root - INFO - [OK] Trade 33 executed and logged"
+    },
+    {
+      "source": "phasma_trading.log",
+      "trade_number": "34",
+      "timestamp": "2025-12-12 02:36:49,019",
+      "status": "executed",
+      "details": "2025-12-12 02:36:49,019 - root - INFO - [OK] Trade 34 executed and logged"
+    },
+    {
+      "source": "phasma_trading.log",
+      "trade_number": "35",
+      "timestamp": "2025-12-12 02:39:58,663",
+      "status": "executed",
+      "details": "2025-12-12 02:39:58,663 - root - INFO - [OK] Trade 35 executed and logged"
+    },
+    {
+      "source": "phasma_trading.log",
+      "trade_number": "36",
+      "timestamp": "2025-12-12 02:43:19,756",
+      "status": "executed",
+      "details": "2025-12-12 02:43:19,756 - root - INFO - [OK] Trade 36 executed and logged"
+    },
+    {
+      "source": "phasma_trading.log",
+      "trade_number": "37",
+      "timestamp": "2025-12-12 02:46:54,413",
+      "status": "executed",
+      "details": "2025-12-12 02:46:54,413 - root - INFO - [OK] Trade 37 executed and logged"
+    },
+    {
+      "source": "phasma_trading.log",
+      "trade_number": "38",
+      "timestamp": "2025-12-12 02:52:28,781",
+      "status": "executed",
+      "details": "2025-12-12 02:52:28,781 - root - INFO - [OK] Trade 38 executed and logged"
+    },
+    {
+      "source": "phasma_trading.log",
+      "trade_number": "39",
+      "timestamp": "2025-12-12 02:55:55,174",
+      "status": "executed",
+      "details": "2025-12-12 02:55:55,174 - root - INFO - [OK] Trade 39 executed and logged"
+    },
+    {
+      "source": "phasma_trading.log",
+      "trade_number": "40",
+      "timestamp": "2025-12-12 02:59:38,507",
+      "status": "executed",
+      "details": "2025-12-12 02:59:38,507 - root - INFO - [OK] Trade 40 executed and logged"
+    },
+    {
+      "source": "phasma_trading.log",
+      "trade_number": "41",
+      "timestamp": "2025-12-12 03:03:10,467",
+      "status": "executed",
+      "details": "2025-12-12 03:03:10,467 - root - INFO - [OK] Trade 41 executed and logged"
+    },
+    {
+      "source": "phasma_trading.log",
+      "trade_number": "42",
+      "timestamp": "2025-12-12 03:07:00,850",
+      "status": "executed",
+      "details": "2025-12-12 03:07:00,850 - root - INFO - [OK] Trade 42 executed and logged"
+    }
+  ],
+  "open_positions": [
+    {
+      "symbol": "NVDA",
+      "trade_type": "REGULAR",
+      "action": "BUY_CALL",
+      "entry_price": 0,
+      "target_price": 0,
+      "entry_time": "2025-12-25T20:44:12.718183",
+      "quantity": 0,
+      "status": "open"
+    },
+    {
+      "symbol": "LCID",
+      "trade_type": "REGULAR",
+      "action": "BUY_CALL",
+      "entry_price": 0,
+      "target_price": 0,
+      "entry_time": "2025-12-25T20:44:12.718183",
+      "quantity": 0,
+      "status": "open"
+    },
+    {
+      "symbol": "WELL",
+      "trade_type": "REGULAR",
+      "action": "BUY_CALL",
+      "entry_price": 0,
+      "target_price": 0,
+      "entry_time": "2025-12-25T20:44:12.718183",
+      "quantity": 0,
+      "status": "open"
+    },
+    {
+      "symbol": "SPOT",
+      "trade_type": "REGULAR",
+      "action": "BUY_CALL",
+      "entry_price": 0,
+      "target_price": 0,
+      "entry_time": "2025-12-25T20:44:12.718183",
+      "quantity": 0,
+      "status": "open"
+    },
+    {
+      "symbol": "BTC",
+      "trade_type": "REGULAR",
+      "action": "BUY_CALL",
+      "entry_price": 0,
+      "target_price": 0,
+      "entry_time": "2025-12-25T20:44:12.718183",
+      "quantity": 0,
+      "status": "open"
+    },
+    {
+      "symbol": "LINK",
+      "trade_type": "REGULAR",
+      "action": "BUY_CALL",
+      "entry_price": 0,
+      "target_price": 0,
+      "entry_time": "2025-12-25T20:44:12.718183",
+      "quantity": 0,
+      "status": "open"
+    },
+    {
+      "symbol": "COST",
+      "trade_type": "REGULAR",
+      "action": "BUY_CALL",
+      "entry_price": 0,
+      "target_price": 0,
+      "entry_time": "2025-12-25T20:44:12.718183",
+      "quantity": 0,
+      "status": "open"
+    },
+    {
+      "symbol": "GOOGL",
+      "trade_type": "STOCK",
+      "action": "SELL",
+      "entry_price": 0,
+      "target_price": 0,
+      "entry_time": "2025-12-25T20:44:12.718183",
+      "quantity": 0,
+      "status": "open"
+    },
+    {
+      "symbol": "GOLD",
+      "trade_type": "STOCK",
+      "action": "BUY",
+      "entry_price": 0,
+      "target_price": 0,
+      "entry_time": "2025-12-25T20:44:12.718183",
+      "quantity": 0,
+      "status": "open"
+    }
+  ],
+  "summary": {
+    "total_trades_executed": 11,
+    "total_open_positions": 9,
+    "bankroll_used": 0,
+    "current_portfolio_value": 0
+  },
+  "portfolio_status": {
+    "available_capital": 0,
+    "total_portfolio_value": 0,
+    "total_return": 0,
+    "total_trades": 0
+  },
+  "databases_checked": [
+    "unified_main.db",
+    "profit_maximization_exits.db"
+  ]
+}

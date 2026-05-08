@@ -1,0 +1,185 @@
+{
+  "relationships": {
+    "FED_RATE_DECISION_SPY": {
+      "cause": "FED_RATE_DECISION",
+      "effect": "SPY",
+      "type": "direct",
+      "strength": -0.6,
+      "confidence": 0.8,
+      "time_lag": 1,
+      "conditions": {
+        "rate_direction": "cut"
+      },
+      "evidence": [
+        "Historical Fed cut impacts",
+        "Market reaction data"
+      ]
+    },
+    "FED_RATE_DECISION_QQQ": {
+      "cause": "FED_RATE_DECISION",
+      "effect": "QQQ",
+      "type": "direct",
+      "strength": -0.7,
+      "confidence": 0.8,
+      "time_lag": 1,
+      "conditions": {
+        "rate_direction": "cut"
+      },
+      "evidence": [
+        "Tech sector rate sensitivity studies"
+      ]
+    },
+    "FED_RATE_DECISION_BTC-USD": {
+      "cause": "FED_RATE_DECISION",
+      "effect": "BTC-USD",
+      "type": "direct",
+      "strength": -0.5,
+      "confidence": 0.6,
+      "time_lag": 1,
+      "conditions": {
+        "rate_direction": "cut"
+      },
+      "evidence": [
+        "Crypto rate correlation analysis"
+      ]
+    },
+    "CPI_INFLATION_FED_RATE_DECISION": {
+      "cause": "CPI_INFLATION",
+      "effect": "FED_RATE_DECISION",
+      "type": "direct",
+      "strength": 0.8,
+      "confidence": 0.9,
+      "time_lag": 30,
+      "conditions": {},
+      "evidence": [
+        "Fed reaction function studies"
+      ]
+    },
+    "CPI_INFLATION_SPY": {
+      "cause": "CPI_INFLATION",
+      "effect": "SPY",
+      "type": "mediated",
+      "strength": -0.4,
+      "confidence": 0.7,
+      "time_lag": 45,
+      "conditions": {},
+      "evidence": [
+        "Inflation-stock correlation data"
+      ]
+    },
+    "ELECTION_OUTCOME_NVDA": {
+      "cause": "ELECTION_OUTCOME",
+      "effect": "NVDA",
+      "type": "direct",
+      "strength": 0.5,
+      "confidence": 0.6,
+      "time_lag": 30,
+      "conditions": {
+        "outcome": "democrat"
+      },
+      "evidence": [
+        "Sector rotation by administration"
+      ]
+    },
+    "ELECTION_OUTCOME_XOM": {
+      "cause": "ELECTION_OUTCOME",
+      "effect": "XOM",
+      "type": "direct",
+      "strength": -0.3,
+      "confidence": 0.5,
+      "time_lag": 30,
+      "conditions": {
+        "outcome": "democrat"
+      },
+      "evidence": [
+        "Energy policy historical data"
+      ]
+    },
+    "AI_BREAKTHROUGH_NVDA": {
+      "cause": "AI_BREAKTHROUGH",
+      "effect": "NVDA",
+      "type": "direct",
+      "strength": 0.8,
+      "confidence": 0.8,
+      "time_lag": 7,
+      "conditions": {},
+      "evidence": [
+        "AI hype cycles",
+        "Chip demand data"
+      ]
+    },
+    "AI_BREAKTHROUGH_MSFT": {
+      "cause": "AI_BREAKTHROUGH",
+      "effect": "MSFT",
+      "type": "direct",
+      "strength": 0.7,
+      "confidence": 0.8,
+      "time_lag": 7,
+      "conditions": {},
+      "evidence": [
+        "AI adoption metrics"
+      ]
+    },
+    "OIL_PRICE_SHOCK_XOM": {
+      "cause": "OIL_PRICE_SHOCK",
+      "effect": "XOM",
+      "type": "direct",
+      "strength": 0.7,
+      "confidence": 0.8,
+      "time_lag": 1,
+      "conditions": {},
+      "evidence": [
+        "Oil company earnings sensitivity"
+      ]
+    },
+    "OIL_PRICE_SHOCK_BTC-USD": {
+      "cause": "OIL_PRICE_SHOCK",
+      "effect": "BTC-USD",
+      "type": "direct",
+      "strength": -0.4,
+      "confidence": 0.6,
+      "time_lag": 1,
+      "conditions": {},
+      "evidence": [
+        "Crypto-oil correlation studies"
+      ]
+    },
+    "BTC_PRICE_TARGET_BTC-USD": {
+      "cause": "BTC_PRICE_TARGET",
+      "effect": "BTC-USD",
+      "type": "direct",
+      "strength": 0.9,
+      "confidence": 0.9,
+      "time_lag": 0,
+      "conditions": {},
+      "evidence": [
+        "Self-evident - direct price target"
+      ]
+    },
+    "BTC_PRICE_TARGET_SPY": {
+      "cause": "BTC_PRICE_TARGET",
+      "effect": "SPY",
+      "type": "correlation",
+      "strength": 0.3,
+      "confidence": 0.4,
+      "time_lag": 30,
+      "conditions": {},
+      "evidence": [
+        "Risk asset correlation data"
+      ]
+    },
+    "FDA_AI_DRUG_APPROVAL_NVDA": {
+      "cause": "FDA_AI_DRUG_APPROVAL",
+      "effect": "NVDA",
+      "type": "direct",
+      "strength": 0.6,
+      "confidence": 0.7,
+      "time_lag": 30,
+      "conditions": {},
+      "evidence": [
+        "Sector spillover effects"
+      ]
+    }
+  },
+  "last_updated": "2025-11-30T14:55:02.288821"
+}

@@ -1,0 +1,16 @@
+{
+  "analyses": {
+    "PRESIDENTIAL_ELECTION": {
+      "contract_id": "PRESIDENTIAL_ELECTION",
+      "contract_title": "WHO WILL WIN THE NEXT TURKISH PRESIDENTIAL ELECTION?",
+      "payoff_asymmetry": 0.0,
+      "resolution_lag_opportunity": false,
+      "impossible_outcomes_count": 1,
+      "structural_edge": 0.05,
+      "easy_trade_confidence": 0.95,
+      "rationale": "Contract: Will [Candidate] win the 2024 Presidential Election? | Settlement: Congress (30 day lag) | Payoff Asymmetry: 0.0% - Balanced risk/reward structure | Resolution Lag Opportunity: NO - No real-time data available | Impossible Outcomes: 1 identified | Structural Edge: 5.0% | Impossible outcome priced in: Write-in candidate wins without major party nomination",
+      "recommended_action": "BUY NO - IMPOSSIBLE OUTCOME"
+    }
+  },
+  "last_updated": "2025-12-04T11:52:16.337883"
+}

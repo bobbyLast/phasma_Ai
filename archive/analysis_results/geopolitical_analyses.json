@@ -1,0 +1,31 @@
+{
+  "analyses": {
+    "RUS_UKR_TREATY": {
+      "market_id": "RUS_UKR_TREATY",
+      "market_title": "WILL RUSSIA AND UKRAINE SIGN COMPREHENSIVE PEACE TREATY IN 2025?",
+      "countries_involved": [
+        "RUS",
+        "UKR"
+      ],
+      "event_type": "peace_treaty",
+      "predicted_probability": 0.3,
+      "ai_adjusted_probability": 0.19999999999999998,
+      "confidence": 0.95,
+      "key_factors": [
+        "Russia: Trust Score 30.2%, Conflict Probability 100.0%",
+        "Ukraine: Trust Score 70.2%, Conflict Probability 40.0%",
+        "Relationship between RUS and UKR: Hostile, Tension 95.0%",
+        "Historical conflicts: 3 incidents",
+        "Peace agreements: 1 (broken: 1)"
+      ],
+      "historical_precedents": [
+        "Crimea annexation",
+        "Donbas invasion",
+        "Full invasion 2022",
+        "Budapest Memorandum (broken)"
+      ],
+      "rationale": "Analysis based on historical patterns: Good treaty compliance: UKR has honored most agreements"
+    }
+  },
+  "last_updated": "2025-11-30T15:10:40.365600"
+}

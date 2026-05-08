@@ -1,0 +1,35 @@
+[
+  {
+    "title": "Stock Futures Fall as Trump\u2019s Europe Tariffs Weigh on Sentiment",
+    "link": "https://finance.yahoo.com/news/trump-tariff-threat-weigh-risk-172919631.html?.tsrc=rss",
+    "published": "Mon, 19 Jan 2026 00:34:24 +0000",
+    "summary": "Futures on the Euro Stoxx 50 slumped 1.2% in early trading, while those on the S&P 500 dropped 0.8%.  Trump on Saturday announced a 10% tariff as of Feb. 1 on goods from European countries that have rallied to support Greenland in the face of US threats to seize the semi-autonomous Danish territory.",
+    "source": "https://feeds.finance.yahoo.com/rss/2.0/headline?s=^GSPC",
+    "category": "FINANCIAL_HIGH_PRIORITY",
+    "fetch_time": "2026-01-18T22:25:07.033173",
+    "symbols": [
+      "STOCK",
+      "FALL",
+      "AS",
+      "TRUMP",
+      "WEIGH",
+      "ON",
+      "EURO",
+      "STOXX",
+      "IN",
+      "EARLY",
+      "WHILE",
+      "THOSE",
+      "OF",
+      "FEB",
+      "GOODS",
+      "TO",
+      "FACE",
+      "US",
+      "SEIZE",
+      "SEMI"
+    ],
+    "hash": "9f96b82ebd85dd0309730395e779993b",
+    "stored_at": "2026-01-18T22:25:42.316742"
+  }
+]

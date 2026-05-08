@@ -1,0 +1,165 @@
+{
+  "volatility_data": [
+    {
+      "ticker": "SPY",
+      "implied_volatility": 0.25,
+      "realized_volatility": 0.15,
+      "iv_rv_ratio": 1.6666666666666667,
+      "iv_rv_percentile": 0.5,
+      "volatility_regime": "neutral_iv",
+      "historical_data_points": 0,
+      "last_updated": "2025-11-30T15:00:02.159012"
+    },
+    {
+      "ticker": "AAPL",
+      "implied_volatility": 0.18,
+      "realized_volatility": 0.25,
+      "iv_rv_ratio": 0.72,
+      "iv_rv_percentile": 0.5,
+      "volatility_regime": "neutral_iv",
+      "historical_data_points": 0,
+      "last_updated": "2025-11-30T15:00:02.450135"
+    },
+    {
+      "ticker": "AMD",
+      "implied_volatility": 0.0,
+      "realized_volatility": 0.0,
+      "iv_rv_ratio": 1.0,
+      "iv_rv_percentile": 0.5,
+      "volatility_regime": "neutral_iv",
+      "historical_data_points": 0,
+      "last_updated": "2025-11-30T15:00:02.068392"
+    },
+    {
+      "ticker": "MSFT",
+      "implied_volatility": 0.15,
+      "realized_volatility": 0.22,
+      "iv_rv_ratio": 0.6818181818181818,
+      "iv_rv_percentile": 0.5,
+      "volatility_regime": "neutral_iv",
+      "historical_data_points": 0,
+      "last_updated": "2025-11-30T15:00:02.556756"
+    },
+    {
+      "ticker": "TSM",
+      "implied_volatility": 0.0,
+      "realized_volatility": 0.0,
+      "iv_rv_ratio": 1.0,
+      "iv_rv_percentile": 0.5,
+      "volatility_regime": "neutral_iv",
+      "historical_data_points": 0,
+      "last_updated": "2025-11-30T15:00:02.068392"
+    },
+    {
+      "ticker": "BA",
+      "implied_volatility": 0.0,
+      "realized_volatility": 0.0,
+      "iv_rv_ratio": 1.0,
+      "iv_rv_percentile": 0.5,
+      "volatility_regime": "neutral_iv",
+      "historical_data_points": 0,
+      "last_updated": "2025-11-30T15:00:02.068392"
+    },
+    {
+      "ticker": "GOOGL",
+      "implied_volatility": 0.0,
+      "realized_volatility": 0.0,
+      "iv_rv_ratio": 1.0,
+      "iv_rv_percentile": 0.5,
+      "volatility_regime": "neutral_iv",
+      "historical_data_points": 0,
+      "last_updated": "2025-11-30T15:00:02.068392"
+    },
+    {
+      "ticker": "INTC",
+      "implied_volatility": 0.0,
+      "realized_volatility": 0.0,
+      "iv_rv_ratio": 1.0,
+      "iv_rv_percentile": 0.5,
+      "volatility_regime": "neutral_iv",
+      "historical_data_points": 0,
+      "last_updated": "2025-11-30T15:00:02.068392"
+    },
+    {
+      "ticker": "META",
+      "implied_volatility": 0.0,
+      "realized_volatility": 0.0,
+      "iv_rv_ratio": 1.0,
+      "iv_rv_percentile": 0.5,
+      "volatility_regime": "neutral_iv",
+      "historical_data_points": 0,
+      "last_updated": "2025-11-30T15:00:02.068392"
+    },
+    {
+      "ticker": "XOM",
+      "implied_volatility": 0.0,
+      "realized_volatility": 0.0,
+      "iv_rv_ratio": 1.0,
+      "iv_rv_percentile": 0.5,
+      "volatility_regime": "neutral_iv",
+      "historical_data_points": 0,
+      "last_updated": "2025-11-30T15:00:02.068392"
+    },
+    {
+      "ticker": "QQQ",
+      "implied_volatility": 0.3,
+      "realized_volatility": 0.18,
+      "iv_rv_ratio": 1.6666666666666667,
+      "iv_rv_percentile": 0.5,
+      "volatility_regime": "neutral_iv",
+      "historical_data_points": 0,
+      "last_updated": "2025-11-30T15:00:02.238286"
+    },
+    {
+      "ticker": "JPM",
+      "implied_volatility": 0.0,
+      "realized_volatility": 0.0,
+      "iv_rv_ratio": 1.0,
+      "iv_rv_percentile": 0.5,
+      "volatility_regime": "neutral_iv",
+      "historical_data_points": 0,
+      "last_updated": "2025-11-30T15:00:02.068392"
+    },
+    {
+      "ticker": "NVDA",
+      "implied_volatility": 0.35,
+      "realized_volatility": 0.25,
+      "iv_rv_ratio": 1.4,
+      "iv_rv_percentile": 0.0,
+      "volatility_regime": "low_iv_discount",
+      "historical_data_points": 1,
+      "last_updated": "2025-11-30T15:02:38.309996"
+    },
+    {
+      "ticker": "TSLA",
+      "implied_volatility": 0.8,
+      "realized_volatility": 0.45,
+      "iv_rv_ratio": 1.777777777777778,
+      "iv_rv_percentile": 0.5,
+      "volatility_regime": "neutral_iv",
+      "historical_data_points": 0,
+      "last_updated": "2025-11-30T15:00:02.339931"
+    },
+    {
+      "ticker": "NFLX",
+      "implied_volatility": 0.0,
+      "realized_volatility": 0.0,
+      "iv_rv_ratio": 1.0,
+      "iv_rv_percentile": 0.5,
+      "volatility_regime": "neutral_iv",
+      "historical_data_points": 0,
+      "last_updated": "2025-11-30T15:00:02.068392"
+    },
+    {
+      "ticker": "AMZN",
+      "implied_volatility": 0.0,
+      "realized_volatility": 0.0,
+      "iv_rv_ratio": 1.0,
+      "iv_rv_percentile": 0.5,
+      "volatility_regime": "neutral_iv",
+      "historical_data_points": 0,
+      "last_updated": "2025-11-30T15:00:02.068392"
+    }
+  ],
+  "last_updated": "2025-11-30T15:02:38.309996"
+}

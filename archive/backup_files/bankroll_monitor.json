@@ -1,0 +1,24 @@
+{
+  "created": "2025-12-25T23:00:51.308711",
+  "total_bankroll": 100,
+  "allocations": {
+    "stock_trading": {
+      "allocated": 50,
+      "available": 50,
+      "used": 0,
+      "trades_count": 0
+    },
+    "kalshi_trading": {
+      "allocated": 50,
+      "available": 50,
+      "used": 0,
+      "trades_count": 0
+    }
+  },
+  "rules": {
+    "max_stock_position": 10,
+    "max_kalshi_bet": 5,
+    "stock_max_positions": 5,
+    "kalshi_max_positions": 10
+  }
+}

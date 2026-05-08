@@ -1,0 +1,83 @@
+{
+  "timestamp": "2025-12-31T23:21:14.330671",
+  "signals": [
+    {
+      "ticker": "TCS",
+      "type": "news_sentiment",
+      "strength": 0.8,
+      "evidence": "News Signal: TCS, HCLTech, Infosys, Coforge To Announce Quarterly Earnings On These Dates \u2014 IT Q3 Results Calenda",
+      "sources": [
+        "world_news"
+      ]
+    },
+    {
+      "ticker": "SEBI",
+      "type": "news_sentiment",
+      "strength": 0.8,
+      "evidence": "News Signal: SEBI Clears Pranav Adani, Two Others In Insider Trading Case",
+      "sources": [
+        "mediastack"
+      ]
+    },
+    {
+      "ticker": "BJP",
+      "type": "news_sentiment",
+      "strength": 0.8,
+      "evidence": "News Signal: BJP Accuses Telangana of Rs. 6.29 L Cr Land Scam",
+      "sources": [
+        "mediastack"
+      ]
+    },
+    {
+      "ticker": "COO",
+      "type": "news_sentiment",
+      "strength": 0.8,
+      "evidence": "News Signal: Former President and COO of Eagle-based company pleads guilty to insider trading",
+      "sources": [
+        "mediastack"
+      ]
+    },
+    {
+      "ticker": "MOCK1",
+      "type": "sec_filing",
+      "strength": 0.8,
+      "evidence": "VP purchased 10,000 shares at $5.50",
+      "sources": [
+        "SEC EDGAR"
+      ]
+    },
+    {
+      "ticker": "VP",
+      "type": "news_sentiment",
+      "strength": 0.74,
+      "evidence": "News Signal: Cogent Communications VP Sells 4,800 Shares After Tumultuous Year",
+      "sources": [
+        "world_news"
+      ]
+    },
+    {
+      "ticker": "MOCK2",
+      "type": "sec_filing",
+      "strength": 0.7,
+      "evidence": "Director bought 5,000 shares",
+      "sources": [
+        "SEC EDGAR"
+      ]
+    },
+    {
+      "ticker": "MOCK3",
+      "type": "sec_filing",
+      "strength": 0.6,
+      "evidence": "Officer acquired 2,500 shares",
+      "sources": [
+        "SEC EDGAR"
+      ]
+    }
+  ],
+  "stats": {
+    "total_signals": 8,
+    "news_signals": 6,
+    "sec_signals": 3,
+    "api_articles": 66
+  }
+}

@@ -1,0 +1,84 @@
+{
+  "signals": [
+    "UndergroundSignal(ticker='TCS', signal_type='news_sentiment', strength=0.8, evidence='News Signal: TCS, HCLTech, Infosys, Coforge To Announce Quarterly Earnings On These Dates \u2014 IT Q3 Results Calenda', timestamp=datetime.datetime(2025, 12, 31, 23, 21, 14, 326383), sources=['world_news'], liquidity_score=0.7, dilution_risk='LOW')",
+    "UndergroundSignal(ticker='SEBI', signal_type='news_sentiment', strength=0.8, evidence='News Signal: SEBI Clears Pranav Adani, Two Others In Insider Trading Case', timestamp=datetime.datetime(2025, 12, 31, 23, 21, 14, 326383), sources=['mediastack'], liquidity_score=0.7, dilution_risk='LOW')",
+    "UndergroundSignal(ticker='BJP', signal_type='news_sentiment', strength=0.8, evidence='News Signal: BJP Accuses Telangana of Rs. 6.29 L Cr Land Scam', timestamp=datetime.datetime(2025, 12, 31, 23, 21, 14, 326383), sources=['mediastack'], liquidity_score=0.7, dilution_risk='LOW')",
+    "UndergroundSignal(ticker='COO', signal_type='news_sentiment', strength=0.8, evidence='News Signal: Former President and COO of Eagle-based company pleads guilty to insider trading', timestamp=datetime.datetime(2025, 12, 31, 23, 21, 14, 326383), sources=['mediastack'], liquidity_score=0.7, dilution_risk='LOW')",
+    "UndergroundSignal(ticker='MOCK1', signal_type='sec_filing', strength=0.8, evidence='VP purchased 10,000 shares at $5.50', timestamp=datetime.datetime(2025, 12, 31, 23, 21, 14, 330671), sources=['SEC EDGAR'], liquidity_score=0.8, dilution_risk='LOW')",
+    "UndergroundSignal(ticker='VP', signal_type='news_sentiment', strength=0.74, evidence='News Signal: Cogent Communications VP Sells 4,800 Shares After Tumultuous Year', timestamp=datetime.datetime(2025, 12, 31, 23, 21, 14, 326383), sources=['world_news'], liquidity_score=0.7, dilution_risk='LOW')",
+    "UndergroundSignal(ticker='MOCK2', signal_type='sec_filing', strength=0.7, evidence='Director bought 5,000 shares', timestamp=datetime.datetime(2025, 12, 31, 23, 21, 14, 330671), sources=['SEC EDGAR'], liquidity_score=0.7, dilution_risk='MEDIUM')",
+    "UndergroundSignal(ticker='MOCK3', signal_type='sec_filing', strength=0.6, evidence='Officer acquired 2,500 shares', timestamp=datetime.datetime(2025, 12, 31, 23, 21, 14, 330671), sources=['SEC EDGAR'], liquidity_score=0.6, dilution_risk='LOW')"
+  ],
+  "approved": [
+    "UndergroundSignal(ticker='TCS', signal_type='news_sentiment', strength=0.8, evidence='News Signal: TCS, HCLTech, Infosys, Coforge To Announce Quarterly Earnings On These Dates \u2014 IT Q3 Results Calenda', timestamp=datetime.datetime(2025, 12, 31, 23, 21, 14, 326383), sources=['world_news'], liquidity_score=0.7, dilution_risk='LOW')",
+    "UndergroundSignal(ticker='SEBI', signal_type='news_sentiment', strength=0.8, evidence='News Signal: SEBI Clears Pranav Adani, Two Others In Insider Trading Case', timestamp=datetime.datetime(2025, 12, 31, 23, 21, 14, 326383), sources=['mediastack'], liquidity_score=0.7, dilution_risk='LOW')",
+    "UndergroundSignal(ticker='BJP', signal_type='news_sentiment', strength=0.8, evidence='News Signal: BJP Accuses Telangana of Rs. 6.29 L Cr Land Scam', timestamp=datetime.datetime(2025, 12, 31, 23, 21, 14, 326383), sources=['mediastack'], liquidity_score=0.7, dilution_risk='LOW')",
+    "UndergroundSignal(ticker='COO', signal_type='news_sentiment', strength=0.8, evidence='News Signal: Former President and COO of Eagle-based company pleads guilty to insider trading', timestamp=datetime.datetime(2025, 12, 31, 23, 21, 14, 326383), sources=['mediastack'], liquidity_score=0.7, dilution_risk='LOW')",
+    "UndergroundSignal(ticker='MOCK1', signal_type='sec_filing', strength=0.8, evidence='VP purchased 10,000 shares at $5.50', timestamp=datetime.datetime(2025, 12, 31, 23, 21, 14, 330671), sources=['SEC EDGAR'], liquidity_score=0.8, dilution_risk='LOW')",
+    "UndergroundSignal(ticker='MOCK2', signal_type='sec_filing', strength=0.7, evidence='Director bought 5,000 shares', timestamp=datetime.datetime(2025, 12, 31, 23, 21, 14, 330671), sources=['SEC EDGAR'], liquidity_score=0.7, dilution_risk='MEDIUM')",
+    "UndergroundSignal(ticker='MOCK3', signal_type='sec_filing', strength=0.6, evidence='Officer acquired 2,500 shares', timestamp=datetime.datetime(2025, 12, 31, 23, 21, 14, 330671), sources=['SEC EDGAR'], liquidity_score=0.6, dilution_risk='LOW')"
+  ],
+  "executed": [
+    {
+      "ticker": "TCS",
+      "shares": 1000,
+      "price": 10.0,
+      "status": "FILLED",
+      "slippage": 0.001,
+      "commission": 5.0
+    },
+    {
+      "ticker": "SEBI",
+      "shares": 1000,
+      "price": 10.0,
+      "status": "FILLED",
+      "slippage": 0.001,
+      "commission": 5.0
+    },
+    {
+      "ticker": "BJP",
+      "shares": 1000,
+      "price": 10.0,
+      "status": "FILLED",
+      "slippage": 0.001,
+      "commission": 5.0
+    },
+    {
+      "ticker": "COO",
+      "shares": 1000,
+      "price": 10.0,
+      "status": "FILLED",
+      "slippage": 0.001,
+      "commission": 5.0
+    },
+    {
+      "ticker": "MOCK1",
+      "shares": 1000,
+      "price": 10.0,
+      "status": "FILLED",
+      "slippage": 0.001,
+      "commission": 5.0
+    },
+    {
+      "ticker": "MOCK2",
+      "shares": 1000,
+      "price": 10.0,
+      "status": "FILLED",
+      "slippage": 0.001,
+      "commission": 5.0
+    },
+    {
+      "ticker": "MOCK3",
+      "shares": 1000,
+      "price": 10.0,
+      "status": "FILLED",
+      "slippage": 0.001,
+      "commission": 5.0
+    }
+  ],
+  "metrics": {
+    "total_signals": 8,
+    "approval_rate": 0.875,
+    "execution_rate": 0.875
+  }
+}

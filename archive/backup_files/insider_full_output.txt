@@ -1,0 +1,7 @@
+
+
+=== STDERR ===
+  File "<string>", line 19
+    print(f"
+          ^
+SyntaxError: unterminated string literal (detected at line 19)

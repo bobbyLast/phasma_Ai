@@ -1,0 +1,73 @@
+ARCHIVED ENGINES ANALYSIS
+========================
+
+POTENTIALLY VALUABLE TRADING FEATURES:
+- calendar_seasonality_engine.py - Tracks seasonal patterns in stocks
+- corporate_actions_engine.py - Monitors splits, mergers, dividends
+- correlation_tracker.py - Tracks correlation between assets
+- cross_venue_radar.py - Monitors multiple exchanges
+- earnings_drift_engine.py - Post-earnings price movements
+- macro_calendar_engine.py - Economic calendar events
+- market_regime.py - Detects bull/bear markets
+- range_barrier_engine.py - Support/resistance levels
+- scenario_graph_engine.py - Market scenario modeling
+- spread_builder.py - Options spread strategies
+- strike_expiry_selector.py - Options optimization
+
+CLEAR DUPLICATES:
+- (Already removed crash_detector.py - old version)
+
+EXPERIMENTAL/RESEARCH:
+- causal_counterfactual_engine.py - "What if" analysis
+- narrative_generator.py - News narrative analysis
+- self_calibrating_probability_engine.py - Adaptive probabilities
+- smart_monte_carlo.py - Advanced Monte Carlo
+
+UTILITY/HELPERS:
+- backtest_engine.py - Strategy testing
+- auto_exit_manager.py - Exit automation
+- exit_optimizer.py - Exit optimization
+
+UNCLEAR PURPOSE:
+- event_structure_engine.py - Event analysis
+- geopolitical_engine.py - Geopolitical risk
+- iv_crush_predictor.py - Implied volatility crush
+- market_scanner_24_7.py - Continuous scanning
+- microstructure_engine.py - Market microstructure
+- moonshot_keywords.py - Keyword detection
+- pricing_sources.py - Price data sources
+- risk_engine.py - Risk management (might be needed)
+- risk_guardian_meta_agent.py - AI risk agent
+- sports_analysis_engine.py - Sports betting?
+- thematic_analysis_engine.py - (Already active)
+- top_10_dashboard.py - Dashboard
+- trade_analyzer/ - Trade analysis tools
+- volatility_edge_engine.py - Volatility trading
+- weather_engine.py - Weather impact
+- weather_validation_engine.py - Weather validation
+- long_tier/ - Unknown features
+- social_engine/ - Social media analysis
+
+RECOMMENDATIONS:
+1. RESTORE these valuable engines:
+   - calendar_seasonality_engine.py
+   - corporate_actions_engine.py
+   - correlation_tracker.py
+   - earnings_drift_engine.py
+   - macro_calendar_engine.py
+   - market_regime.py
+   - scenario_graph_engine.py
+   - spread_builder.py
+   - strike_expiry_selector.py
+
+2. KEEP for future:
+   - All experimental engines
+   - Utility helpers
+
+3. DELETE:
+   - Only clear duplicates (already done)
+
+4. INVESTIGATE:
+   - social_engine/ (might be useful for sentiment)
+   - weather_engine.py (could affect markets)
+   - thematic_analysis_engine.py (check if duplicate)

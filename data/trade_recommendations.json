@@ -1,0 +1,20 @@
+{
+  "TEST": [
+    {
+      "date": "2026-01-11T21:53:06.180608",
+      "verdict": "BUY",
+      "bullets": [
+        "Test recommendation for learning"
+      ],
+      "confidence": 0.75
+    },
+    {
+      "date": "2026-01-11T22:06:06.603117",
+      "verdict": "BUY",
+      "bullets": [
+        "Test recommendation for learning"
+      ],
+      "confidence": 0.75
+    }
+  ]
+}

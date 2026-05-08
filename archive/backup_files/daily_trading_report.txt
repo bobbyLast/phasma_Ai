@@ -1,0 +1,51 @@
+
+================================================================================
+DAILY TRADING INTELLIGENCE REPORT
+================================================================================
+Generated: 2025-12-18 03:32:52
+
+
+THESIS OPPORTUNITIES (Long-Term)
+--------------------------------------------------
+THESIS OPPORTUNITY: DUK
+   Classification: Infrastructure / Cash-flow
+   Ecosystem Role: Shovel Seller
+   Reasoning: Passes macro force test as Shovel Seller with survival score 5/10
+
+   RECOMMENDATION: Add to watchlist
+
+
+THESIS OPPORTUNITY: PLUG
+   Classification: Speculation / Trade
+   Ecosystem Role: Shovel Seller
+   Reasoning: Survival risk too high: 1/10
+
+   RECOMMENDATION: Avoid
+
+
+THESIS OPPORTUNITY: TSLA
+   Classification: Growth / Execution
+   Ecosystem Role: Toll Booth
+   Reasoning: Fails macro force test: Unclear macro necessity for Consumer Cyclical - Auto Manufacturers
+
+   RECOMMENDATION: Avoid
+
+
+THESIS OPPORTUNITY: NVDA
+   Classification: Growth / Execution
+   Ecosystem Role: Shovel Seller
+   Reasoning: Passes macro force test as Shovel Seller with survival score 7/10
+
+   RECOMMENDATION: Establish thesis position
+   Max Size: 4.5%
+   Review: Every 18 months
+
+
+
+ACTIVE THESIS PORTFOLIO
+--------------------------------------------------
+NVDA: Growth / Execution - Confidence 70/100 (CONVICTION)
+
+================================================================================
+END REPORT
+================================================================================

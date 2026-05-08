@@ -1,0 +1,62 @@
+{
+  "tech_trader": {
+    "trader_id": "tech_trader",
+    "total_calls": 3,
+    "profitable_calls": 2,
+    "win_rate": 66.66666666666666,
+    "avg_gain_pct": 14.976927402111762,
+    "avg_loss_pct": -79.54976218087333,
+    "max_gain_pct": 16.073849921411025,
+    "max_loss_pct": -79.54976218087333,
+    "trust_score": 70.04937844248046,
+    "avg_days_to_profit": 7,
+    "avg_days_to_loss": 7,
+    "chasing_score": 33.33333333333333,
+    "last_updated": "2025-12-11T02:31:02.984419+00:00"
+  },
+  "penny_king": {
+    "trader_id": "penny_king",
+    "total_calls": 3,
+    "profitable_calls": 3,
+    "win_rate": 100.0,
+    "avg_gain_pct": 18.136572408266275,
+    "avg_loss_pct": 0,
+    "max_gain_pct": 23.725487204159005,
+    "max_loss_pct": 2.967241736544462,
+    "trust_score": 100,
+    "avg_days_to_profit": 7,
+    "avg_days_to_loss": null,
+    "chasing_score": 0.0,
+    "last_updated": "2025-12-11T02:31:05.017460+00:00"
+  },
+  "value_investor": {
+    "trader_id": "value_investor",
+    "total_calls": 3,
+    "profitable_calls": 2,
+    "win_rate": 66.66666666666666,
+    "avg_gain_pct": 13.180787349357285,
+    "avg_loss_pct": -2.2414905029168506,
+    "max_gain_pct": 22.621402625579528,
+    "max_loss_pct": -4.431947455658176,
+    "trust_score": 88.16666666666666,
+    "avg_days_to_profit": 7,
+    "avg_days_to_loss": 7,
+    "chasing_score": 0.0,
+    "last_updated": "2025-12-11T02:31:07.324100+00:00"
+  },
+  "stock_guru_123": {
+    "trader_id": "stock_guru_123",
+    "total_calls": 3,
+    "profitable_calls": 3,
+    "win_rate": 100.0,
+    "avg_gain_pct": 14.166654701162805,
+    "avg_loss_pct": -1.631173352702215,
+    "max_gain_pct": 30.927850095298286,
+    "max_loss_pct": -3.126034921107329,
+    "trust_score": 100,
+    "avg_days_to_profit": 7,
+    "avg_days_to_loss": null,
+    "chasing_score": 0.0,
+    "last_updated": "2025-12-11T02:31:09.500349+00:00"
+  }
+}

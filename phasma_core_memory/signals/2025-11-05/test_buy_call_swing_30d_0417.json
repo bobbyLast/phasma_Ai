@@ -1,0 +1,25 @@
+{
+  "timestamp": "2025-11-05T04:17:05.629204+00:00",
+  "class": "SWING_30D",
+  "symbol": "TEST",
+  "asset_type": "stock",
+  "trade_type": "BUY_CALL",
+  "entry": 100.0,
+  "target": 120.0,
+  "stop": 95.0,
+  "confidence": 0.75,
+  "simulations_run": 1000,
+  "success_rate": 0.72,
+  "min_hold_days": 5,
+  "max_hold_days": 30,
+  "review_cadence_hours": 24,
+  "risk_reward_ratio": 2.5,
+  "reason": "Integration test trade",
+  "modules": [
+    "simulation_engine",
+    "market_analyzer"
+  ],
+  "metadata": {
+    "test": true
+  }
+}

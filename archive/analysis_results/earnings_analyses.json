@@ -1,0 +1,18 @@
+{
+  "analyses": {
+    "AAPL": {
+      "company_ticker": "AAPL",
+      "sector": "Technology",
+      "eps_forecast": 0.0,
+      "revenue_forecast": 0.0,
+      "guidance_expectation": "maintain",
+      "market_price": 100.0,
+      "predicted_drift": -0.027,
+      "drift_confidence": 0.25,
+      "easy_trade_confidence": 0.5,
+      "rationale": "Company: AAPL (Technology sector) | EPS Forecast: 0.00 | Revenue Forecast: 0.00 | Guidance Expectation: maintain | Historical EPS Surprise Avg: 5.8% | Surprise Consistency: 75.0% | Guidance Reliability: 85.0% | Predicted 3-Day Drift: -2.7% (confidence: 25.0%) | No clear earnings drift pattern | Historical beat drift: +3.5% | Historical miss drift: -4.5%",
+      "recommended_action": "MONITOR"
+    }
+  },
+  "last_updated": "2025-12-11T02:46:48.783578"
+}

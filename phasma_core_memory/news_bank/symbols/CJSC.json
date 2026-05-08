@@ -1,0 +1,21 @@
+[
+  {
+    "title": "Federal Reserve Board announces approval of application by ID Bank CJSC",
+    "link": "https://www.federalreserve.gov/newsevents/pressreleases/orders20251112a.htm",
+    "published": "Wed, 12 Nov 2025 22:00:00 GMT",
+    "summary": "Federal Reserve Board announces approval of application by ID Bank CJSC",
+    "source": "https://www.federalreserve.gov/feeds/press_all.xml",
+    "category": "ECONOMIC_DATA",
+    "fetch_time": "2025-11-19T01:06:13.330464",
+    "symbols": [
+      "BOARD",
+      "OF",
+      "BY",
+      "ID",
+      "BANK",
+      "CJSC"
+    ],
+    "hash": "66d10bc9af84052ff15c72fd34205ef6",
+    "stored_at": "2025-11-19T01:16:29.131004"
+  }
+]

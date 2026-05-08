@@ -1,0 +1,41 @@
+ticker,company_name,sector
+AAPL,Apple Inc.,Technology
+MSFT,Microsoft Corporation,Technology
+GOOGL,Alphabet Inc.,Technology
+AMZN,Amazon.com Inc.,Consumer
+NVDA,NVIDIA Corporation,Technology
+TSLA,Tesla Inc.,Automotive
+META,Meta Platforms Inc.,Technology
+BRK.B,Berkshire Hathaway Inc.,Finance
+V,Visa Inc.,Finance
+JNJ,Johnson & Johnson,Healthcare
+WMT,Walmart Inc.,Consumer
+JPM,JPMorgan Chase & Co.,Finance
+MA,Mastercard Inc.,Finance
+PG,Procter & Gamble Co.,Consumer
+UNH,UnitedHealth Group Inc.,Healthcare
+HD,Home Depot Inc.,Consumer
+BAC,Bank of America Corp.,Finance
+XOM,Exxon Mobil Corporation,Energy
+COST,Costco Wholesale Corporation,Consumer
+ABBV,AbbVie Inc.,Healthcare
+PFE,Pfizer Inc.,Healthcare
+KO,Coca-Cola Company,Consumer
+PEP,PepsiCo Inc.,Consumer
+AVGO,Broadcom Inc.,Technology
+TMO,Thermo Fisher Scientific Inc.,Healthcare
+CVX,Chevron Corporation,Energy
+MRK,Merck & Co. Inc.,Healthcare
+AMD,Advanced Micro Devices Inc.,Technology
+ADBE,Adobe Inc.,Technology
+NFLX,Netflix Inc.,Technology
+CRM,Salesforce Inc.,Technology
+NKE,Nike Inc.,Consumer
+INTC,Intel Corporation,Technology
+CSCO,Cisco Systems Inc.,Technology
+ORCL,Oracle Corporation,Technology
+F,Ford Motor Company,Automotive
+GM,General Motors Company,Automotive
+LOW,Lowe's Companies Inc.,Consumer
+GS,Goldman Sachs Group Inc.,Finance
+COP,ConocoPhillips,Energy

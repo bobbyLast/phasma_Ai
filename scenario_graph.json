@@ -1,0 +1,413 @@
+{
+  "nodes": [
+    {
+      "id": "FED_RATE_CUT",
+      "type": "event",
+      "name": "Fed Rate Cut",
+      "description": "Federal Reserve cuts interest rates by 0.25%",
+      "probability": 0.5,
+      "impact_strength": 0.0,
+      "connected_nodes": [
+        "BTC-USD",
+        "QQQ",
+        "SPY"
+      ],
+      "metadata": {
+        "category": "macro",
+        "source": "kalshi"
+      }
+    },
+    {
+      "id": "CPI_HIGH",
+      "type": "event",
+      "name": "Cpi High",
+      "description": "CPI inflation exceeds 3%",
+      "probability": 0.5,
+      "impact_strength": 0.0,
+      "connected_nodes": [
+        "BTC-USD",
+        "QQQ",
+        "SPY"
+      ],
+      "metadata": {
+        "category": "macro",
+        "source": "kalshi"
+      }
+    },
+    {
+      "id": "SPX_CRASH",
+      "type": "event",
+      "name": "Spx Crash",
+      "description": "S&P 500 drops 10%+ in Q1 2025",
+      "probability": 0.5,
+      "impact_strength": 0.0,
+      "connected_nodes": [
+        "QQQ",
+        "BTC-USD"
+      ],
+      "metadata": {
+        "category": "equity",
+        "source": "kalshi"
+      }
+    },
+    {
+      "id": "BTC_200K",
+      "type": "event",
+      "name": "Btc 200K",
+      "description": "Bitcoin reaches $200K by end of 2025",
+      "probability": 0.5,
+      "impact_strength": 0.0,
+      "connected_nodes": [
+        "BTC-USD"
+      ],
+      "metadata": {
+        "category": "crypto",
+        "source": "kalshi"
+      }
+    },
+    {
+      "id": "OIL_150",
+      "type": "event",
+      "name": "Oil 150",
+      "description": "Oil exceeds $150/barrel in 2025",
+      "probability": 0.5,
+      "impact_strength": 0.0,
+      "connected_nodes": [
+        "XOM",
+        "BTC-USD"
+      ],
+      "metadata": {
+        "category": "commodity",
+        "source": "kalshi"
+      }
+    },
+    {
+      "id": "AI_BREAKTHROUGH",
+      "type": "event",
+      "name": "Ai Breakthrough",
+      "description": "Major AI breakthrough announced in 2025",
+      "probability": 0.5,
+      "impact_strength": 0.0,
+      "connected_nodes": [
+        "NVDA",
+        "META",
+        "MSFT"
+      ],
+      "metadata": {
+        "category": "tech",
+        "source": "kalshi"
+      }
+    },
+    {
+      "id": "ELECTION_DEM",
+      "type": "event",
+      "name": "Election Dem",
+      "description": "Democrat wins 2024 US election",
+      "probability": 0.5,
+      "impact_strength": 0.0,
+      "connected_nodes": [
+        "XOM",
+        "NVDA",
+        "SPY"
+      ],
+      "metadata": {
+        "category": "political",
+        "source": "kalshi"
+      }
+    },
+    {
+      "id": "FDA_AI_DRUG",
+      "type": "event",
+      "name": "Fda Ai Drug",
+      "description": "FDA approves AI-assisted drug",
+      "probability": 0.5,
+      "impact_strength": 0.0,
+      "connected_nodes": [
+        "NVDA",
+        "MSFT"
+      ],
+      "metadata": {
+        "category": "healthcare",
+        "source": "kalshi"
+      }
+    },
+    {
+      "id": "SPY",
+      "type": "asset",
+      "name": "SPY",
+      "description": "SPDR S&P 500 ETF Trust",
+      "probability": 0.5,
+      "impact_strength": 0.0,
+      "connected_nodes": [
+        "FED_RATE_CUT",
+        "CPI_HIGH",
+        "ELECTION_DEM"
+      ],
+      "metadata": {
+        "asset_type": "equity"
+      }
+    },
+    {
+      "id": "QQQ",
+      "type": "asset",
+      "name": "QQQ",
+      "description": "Invesco QQQ Trust",
+      "probability": 0.5,
+      "impact_strength": 0.0,
+      "connected_nodes": [
+        "FED_RATE_CUT",
+        "CPI_HIGH",
+        "SPX_CRASH"
+      ],
+      "metadata": {
+        "asset_type": "equity"
+      }
+    },
+    {
+      "id": "BTC-USD",
+      "type": "asset",
+      "name": "BTC-USD",
+      "description": "Bitcoin",
+      "probability": 0.5,
+      "impact_strength": 0.0,
+      "connected_nodes": [
+        "FED_RATE_CUT",
+        "OIL_150",
+        "BTC_200K",
+        "CPI_HIGH",
+        "SPX_CRASH"
+      ],
+      "metadata": {
+        "asset_type": "crypto"
+      }
+    },
+    {
+      "id": "NVDA",
+      "type": "asset",
+      "name": "NVDA",
+      "description": "NVIDIA Corporation",
+      "probability": 0.5,
+      "impact_strength": 0.0,
+      "connected_nodes": [
+        "FDA_AI_DRUG",
+        "AI_BREAKTHROUGH",
+        "ELECTION_DEM"
+      ],
+      "metadata": {
+        "asset_type": "equity"
+      }
+    },
+    {
+      "id": "XOM",
+      "type": "asset",
+      "name": "XOM",
+      "description": "Exxon Mobil Corporation",
+      "probability": 0.5,
+      "impact_strength": 0.0,
+      "connected_nodes": [
+        "OIL_150",
+        "ELECTION_DEM"
+      ],
+      "metadata": {
+        "asset_type": "equity"
+      }
+    },
+    {
+      "id": "MSFT",
+      "type": "asset",
+      "name": "MSFT",
+      "description": "Microsoft Corporation",
+      "probability": 0.5,
+      "impact_strength": 0.0,
+      "connected_nodes": [
+        "FDA_AI_DRUG",
+        "AI_BREAKTHROUGH"
+      ],
+      "metadata": {
+        "asset_type": "equity"
+      }
+    },
+    {
+      "id": "TSLA",
+      "type": "asset",
+      "name": "TSLA",
+      "description": "Tesla, Inc.",
+      "probability": 0.5,
+      "impact_strength": 0.0,
+      "connected_nodes": [],
+      "metadata": {
+        "asset_type": "equity"
+      }
+    },
+    {
+      "id": "META",
+      "type": "asset",
+      "name": "META",
+      "description": "Meta Platforms, Inc.",
+      "probability": 0.5,
+      "impact_strength": 0.0,
+      "connected_nodes": [
+        "AI_BREAKTHROUGH"
+      ],
+      "metadata": {
+        "asset_type": "equity"
+      }
+    }
+  ],
+  "edges": [
+    {
+      "from": "FED_RATE_CUT",
+      "to": "SPY",
+      "type": "causes",
+      "strength": 0.8,
+      "confidence": 0.7,
+      "description": "Rate cuts typically boost equities"
+    },
+    {
+      "from": "FED_RATE_CUT",
+      "to": "QQQ",
+      "type": "causes",
+      "strength": 0.8,
+      "confidence": 0.7,
+      "description": "Tech benefits from lower rates"
+    },
+    {
+      "from": "FED_RATE_CUT",
+      "to": "BTC-USD",
+      "type": "causes",
+      "strength": 0.6,
+      "confidence": 0.7,
+      "description": "Crypto often rallies on rate cuts"
+    },
+    {
+      "from": "CPI_HIGH",
+      "to": "SPY",
+      "type": "causes",
+      "strength": -0.7,
+      "confidence": 0.7,
+      "description": "High inflation pressures stocks"
+    },
+    {
+      "from": "CPI_HIGH",
+      "to": "QQQ",
+      "type": "causes",
+      "strength": -0.6,
+      "confidence": 0.7,
+      "description": "Tech sensitive to inflation"
+    },
+    {
+      "from": "CPI_HIGH",
+      "to": "BTC-USD",
+      "type": "causes",
+      "strength": -0.5,
+      "confidence": 0.7,
+      "description": "BTC can be inflation hedge but volatile"
+    },
+    {
+      "from": "SPX_CRASH",
+      "to": "QQQ",
+      "type": "correlates_with",
+      "strength": 0.9,
+      "confidence": 0.7,
+      "description": "Tech follows broad market"
+    },
+    {
+      "from": "SPX_CRASH",
+      "to": "BTC-USD",
+      "type": "correlates_with",
+      "strength": -0.3,
+      "confidence": 0.7,
+      "description": "BTC can decouple in crashes"
+    },
+    {
+      "from": "BTC_200K",
+      "to": "BTC-USD",
+      "type": "predicts",
+      "strength": 0.9,
+      "confidence": 0.7,
+      "description": "Direct price target prediction"
+    },
+    {
+      "from": "OIL_150",
+      "to": "XOM",
+      "type": "causes",
+      "strength": 0.8,
+      "confidence": 0.7,
+      "description": "Oil companies benefit from high prices"
+    },
+    {
+      "from": "OIL_150",
+      "to": "BTC-USD",
+      "type": "causes",
+      "strength": -0.5,
+      "confidence": 0.7,
+      "description": "Risk-off reduces crypto demand"
+    },
+    {
+      "from": "AI_BREAKTHROUGH",
+      "to": "NVDA",
+      "type": "causes",
+      "strength": 0.9,
+      "confidence": 0.7,
+      "description": "NVIDIA leads AI hardware"
+    },
+    {
+      "from": "AI_BREAKTHROUGH",
+      "to": "MSFT",
+      "type": "causes",
+      "strength": 0.8,
+      "confidence": 0.7,
+      "description": "Microsoft major AI player"
+    },
+    {
+      "from": "AI_BREAKTHROUGH",
+      "to": "META",
+      "type": "causes",
+      "strength": 0.7,
+      "confidence": 0.7,
+      "description": "Meta invested heavily in AI"
+    },
+    {
+      "from": "ELECTION_DEM",
+      "to": "SPY",
+      "type": "causes",
+      "strength": 0.4,
+      "confidence": 0.7,
+      "description": "Democratic policies can favor certain sectors"
+    },
+    {
+      "from": "ELECTION_DEM",
+      "to": "NVDA",
+      "type": "causes",
+      "strength": 0.5,
+      "confidence": 0.7,
+      "description": "Dem focus on tech/AI"
+    },
+    {
+      "from": "ELECTION_DEM",
+      "to": "XOM",
+      "type": "causes",
+      "strength": -0.3,
+      "confidence": 0.7,
+      "description": "Dem energy policies less favorable"
+    },
+    {
+      "from": "FDA_AI_DRUG",
+      "to": "NVDA",
+      "type": "causes",
+      "strength": 0.7,
+      "confidence": 0.7,
+      "description": "AI drug approval boosts AI sector"
+    },
+    {
+      "from": "FDA_AI_DRUG",
+      "to": "MSFT",
+      "type": "causes",
+      "strength": 0.6,
+      "confidence": 0.7,
+      "description": "Healthcare AI applications"
+    }
+  ],
+  "scenarios": [],
+  "last_updated": "2025-12-30T21:24:47.908470"
+}

@@ -1,0 +1,63 @@
+{
+  "timestamp": "2025-12-04T11:38:53.518604",
+  "symbol": "SPY",
+  "crash_score": 0.2747962507009506,
+  "alert_level": 1,
+  "early_warning_score": 0.45458318770527834,
+  "early_warning_level": 1,
+  "horizon": "mid_term",
+  "horizon_days": 30,
+  "components": {
+    "macro": 0.14227500200271606,
+    "onchain": 0.5,
+    "sentiment": 0.5,
+    "technical": 0.0
+  },
+  "volatility_regime": "NORMAL",
+  "confidence_weight": 1.0,
+  "simulation_results": {
+    "simulations_run": 500,
+    "horizon_days": 30,
+    "tail_probability_10pct": 0.3297555008411407,
+    "tail_probability_25pct": 0.2747962507009506,
+    "expected_return": -0.054959250140190125,
+    "downside_scenarios": 137
+  },
+  "price_projection": {
+    "symbol": "SPY",
+    "current_price": 683.1199951171875,
+    "horizon_days": 30,
+    "moderate_drop_pct": 0.0879348002243042,
+    "severe_drop_pct": 0.1379348002243042,
+    "moderate_drop_target": 623.0499748173299,
+    "severe_stress_floor": 588.8939750614707,
+    "note": "Targets are based on Monte Carlo crash scenarios and typical behaviour in leveraged, thin-liquidity sell-offs (fast wicks then stabilization)."
+  },
+  "crash_drivers": [
+    {
+      "type": "NO_CLEAR_DRIVER",
+      "label": "Normal Volatility",
+      "reason": "Risk metrics do not point to a single dominant crash driver. Moves here look more like normal volatility than a structural deleveraging event."
+    }
+  ],
+  "ecosystem_contagion": {},
+  "early_warning": {
+    "score": 0.45458318770527834,
+    "level": 1,
+    "label": "SUBTLE_STRESS",
+    "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+    "signals": []
+  },
+  "recommendation": {
+    "action": "REDUCE_RISK",
+    "specifics": [
+      "REDUCE position sizes by 30%",
+      "FAVOR defensive strategies",
+      "INCREASE cash allocation"
+    ],
+    "urgency": "MODERATE"
+  },
+  "reasoning": [
+    "\ud83d\udcc8 Macro risk low (score: 0.14)"
+  ]
+}

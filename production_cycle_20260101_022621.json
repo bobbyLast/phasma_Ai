@@ -1,0 +1,133 @@
+{
+  "timestamp": "2026-01-01T02:26:21.643477",
+  "cycle_time": 10.222052574157715,
+  "metrics": {
+    "start_time": "2026-01-01 02:26:05.151884",
+    "cycles_run": 1,
+    "signals_detected": 64,
+    "last_update": "2026-01-01 02:26:21.639294",
+    "status": "degraded"
+  },
+  "results": {
+    "timestamp": "2026-01-01T02:26:21.624133",
+    "total_sources": 18,
+    "max_possible": 19,
+    "success_rate": 94.73684210526315,
+    "status": "100% COMPLETE",
+    "articles_per_fetch": 120,
+    "market_tickers": 5,
+    "sec_filings": 10,
+    "monthly_cost": 0,
+    "breakdown": {
+      "news_apis": 4,
+      "rss_feeds": 10,
+      "sec_data": 1,
+      "market_data": 1,
+      "sentiment_data": 1,
+      "social_frameworks": 2
+    }
+  },
+  "signals": [
+    {
+      "type": "insider_activity",
+      "keyword": "insider trading",
+      "source": "World News API",
+      "title": "Sample article 1 from World News API",
+      "url": "http://example.com/World News API/1",
+      "tickers": [],
+      "confidence": "medium",
+      "timestamp": "2026-01-01T02:26:21.637663"
+    },
+    {
+      "type": "insider_activity",
+      "keyword": "insider trading",
+      "source": "World News API",
+      "title": "Sample article 2 from World News API",
+      "url": "http://example.com/World News API/2",
+      "tickers": [],
+      "confidence": "medium",
+      "timestamp": "2026-01-01T02:26:21.637663"
+    },
+    {
+      "type": "insider_activity",
+      "keyword": "insider trading",
+      "source": "World News API",
+      "title": "Sample article 3 from World News API",
+      "url": "http://example.com/World News API/3",
+      "tickers": [],
+      "confidence": "medium",
+      "timestamp": "2026-01-01T02:26:21.637663"
+    },
+    {
+      "type": "insider_activity",
+      "keyword": "insider trading",
+      "source": "World News API",
+      "title": "Sample article 4 from World News API",
+      "url": "http://example.com/World News API/4",
+      "tickers": [],
+      "confidence": "medium",
+      "timestamp": "2026-01-01T02:26:21.637663"
+    },
+    {
+      "type": "insider_activity",
+      "keyword": "insider trading",
+      "source": "World News API",
+      "title": "Sample article 5 from World News API",
+      "url": "http://example.com/World News API/5",
+      "tickers": [],
+      "confidence": "medium",
+      "timestamp": "2026-01-01T02:26:21.637663"
+    },
+    {
+      "type": "insider_activity",
+      "keyword": "insider trading",
+      "source": "World News API",
+      "title": "Sample article 6 from World News API",
+      "url": "http://example.com/World News API/6",
+      "tickers": [],
+      "confidence": "medium",
+      "timestamp": "2026-01-01T02:26:21.637663"
+    },
+    {
+      "type": "insider_activity",
+      "keyword": "insider trading",
+      "source": "World News API",
+      "title": "Sample article 7 from World News API",
+      "url": "http://example.com/World News API/7",
+      "tickers": [],
+      "confidence": "medium",
+      "timestamp": "2026-01-01T02:26:21.637663"
+    },
+    {
+      "type": "insider_activity",
+      "keyword": "insider trading",
+      "source": "World News API",
+      "title": "Sample article 8 from World News API",
+      "url": "http://example.com/World News API/8",
+      "tickers": [],
+      "confidence": "medium",
+      "timestamp": "2026-01-01T02:26:21.637663"
+    },
+    {
+      "type": "insider_activity",
+      "keyword": "insider trading",
+      "source": "World News API",
+      "title": "Sample article 9 from World News API",
+      "url": "http://example.com/World News API/9",
+      "tickers": [],
+      "confidence": "medium",
+      "timestamp": "2026-01-01T02:26:21.637663"
+    },
+    {
+      "type": "insider_activity",
+      "keyword": "insider trading",
+      "source": "World News API",
+      "title": "Sample article 10 from World News API",
+      "url": "http://example.com/World News API/10",
+      "tickers": [],
+      "confidence": "medium",
+      "timestamp": "2026-01-01T02:26:21.637663"
+    }
+  ],
+  "signal_count": 64
+}

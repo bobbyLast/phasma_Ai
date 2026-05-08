@@ -1,0 +1,367 @@
+{
+  "initial_event": "USA attacks Venezuela and seizes oil facilities",
+  "day_by_day_analysis": {
+    "Day 0": {
+      "theme": "Initial shock and reaction",
+      "impacts": {
+        "oil": {
+          "impact": "Supply disruption from Venezuela",
+          "magnitude": "High",
+          "stocks_affected": [
+            "XOM",
+            "CVX",
+            "COP",
+            "SLB",
+            "HAL"
+          ],
+          "expected_move": "+5-10%"
+        },
+        "military": {
+          "impact": "Defense contracts increase",
+          "magnitude": "Medium",
+          "stocks_affected": [
+            "LMT",
+            "NOC",
+            "GD",
+            "RTX"
+          ],
+          "expected_move": "+3-7%"
+        },
+        "geopolitical": {
+          "impact": "Risk aversion increases",
+          "magnitude": "High",
+          "assets_affected": [
+            "Gold",
+            "USD",
+            "Bonds"
+          ],
+          "expected_move": "Flight to safety"
+        }
+      },
+      "market_sentiment": "Risk-off",
+      "volatility": "Spiking (VIX +30%)"
+    },
+    "Day 1": {
+      "theme": "Allied reactions and condemnations",
+      "developments": [
+        "NATO allies issue statements",
+        "UN emergency session called",
+        "Russia and China condemn US action",
+        "Oil prices spike 15%"
+      ],
+      "market_impact": {
+        "energy_stocks": "Continue rising",
+        "airlines": "Sell off on fuel costs",
+        "defense_stocks": "Momentum builds"
+      }
+    },
+    "Day 2": {
+      "theme": "Supply chain disruptions begin",
+      "developments": [
+        "Shipping routes rerouted",
+        "Insurance costs surge",
+        "Global supply chains strained",
+        "Inflation fears grow"
+      ],
+      "market_impact": {
+        "logistics_stocks": "Volatile",
+        "inflation_hedges": "In demand",
+        "consumer_stocks": "Pressure"
+      }
+    },
+    "Day 3": {
+      "theme": "Oil price shock propagates",
+      "developments": [
+        "Strategic petroleum reserve considered",
+        "OPEC emergency meeting",
+        "Gas prices hit consumers",
+        "Fed intervention considered"
+      ],
+      "market_impact": {
+        "refiners": "Benefit from margins",
+        "renewables": "Interest increases",
+        "financial_stocks": "Rate concerns"
+      }
+    },
+    "Day 4": {
+      "theme": "Economic ripple effects",
+      "developments": [
+        "Emerging markets stress",
+        "Currency volatility spikes",
+        "Debt sustainability concerns",
+        "Social unrest in oil-importing nations"
+      ],
+      "market_impact": {
+        "emerging_markets": "Capital outflows",
+        "usd": "Safe haven bid",
+        "commodities": "Broad rally"
+      }
+    },
+    "Day 5": {
+      "theme": "Political realignment",
+      "developments": [
+        "New alliances forming",
+        "Trade negotiations begin",
+        "Sanctions regime debated",
+        "Diplomatic solutions sought"
+      ],
+      "market_impact": {
+        "trade_stocks": "Uncertainty",
+        "agriculture": "Supply concerns",
+        "tech_stocks": "Geopolitical risk"
+      }
+    },
+    "Day 6": {
+      "theme": "Market adaptation",
+      "developments": [
+        "Alternative suppliers sought",
+        "Strategic stockpiles released",
+        "Conservation measures begin",
+        "Long-term contracts renegotiated"
+      ],
+      "market_impact": {
+        "alternative_energy": "Investment surge",
+        "efficiency_tech": "Demand rises",
+        "infrastructure": "Government spending"
+      }
+    },
+    "Day 7": {
+      "theme": "New equilibrium",
+      "developments": [
+        "Price levels stabilize",
+        "Supply chains adapt",
+        "Political solutions emerge",
+        "Market finds new normal"
+      ],
+      "market_impact": {
+        "volatility": "Subsides",
+        "winners_losers": "Clearer picture",
+        "long_term_trends": "Established"
+      }
+    }
+  },
+  "platform_impacts": {
+    "stock_market": {
+      "sectors_bullish": [
+        "Energy",
+        "Defense",
+        "Materials"
+      ],
+      "sectors_bearish": [
+        "Airlines",
+        "Consumer",
+        "Retail"
+      ],
+      "key_etfs": [
+        "XLE",
+        "XLF",
+        "XLI",
+        "ITA"
+      ],
+      "volatility": "Elevated (VIX 25-35)"
+    },
+    "options_market": {
+      "strategies": [
+        "Long calls on energy",
+        "Protective puts",
+        "Volatility selling"
+      ],
+      "skew": "Steep (OTM puts expensive)",
+      "term_structure": "Contango in near-term",
+      "volume": "Surging across all strikes"
+    },
+    "commodities": {
+      "bullish": [
+        "Crude Oil",
+        "Natural Gas",
+        "Gold",
+        "Silver"
+      ],
+      "bearish": [
+        "Industrial metals (short-term)"
+      ],
+      "futures_curves": "Backwardation in energy",
+      "roll_yield": "Positive for longs"
+    },
+    "forex": {
+      "strong": [
+        "USD",
+        "CHF",
+        "JPY"
+      ],
+      "weak": [
+        "Emerging market currencies",
+        "Commodity currencies"
+      ],
+      "carry_trades": "Unwinding",
+      "intervention": "Possible from central banks"
+    },
+    "crypto": {
+      "trend": "Mixed (inflation hedge vs risk-off)",
+      "leaders": [
+        "BTC",
+        "ETH"
+      ],
+      "stablecoins": "Increased demand",
+      "regulation": "Risk of crackdown"
+    },
+    "bonds": {
+      "yields": "Rising (inflation concern)",
+      "curve": "Flattening",
+      "credit_spreads": "Widening",
+      "inflation_protected": "Outperforming"
+    }
+  },
+  "second_order_effects": [
+    {
+      "effect": "Inflation expectations become unanchored",
+      "impact": "Fed may need aggressive rate hikes",
+      "timeline": "2-4 weeks",
+      "probability": "60%"
+    },
+    {
+      "effect": "Global recession risk increases",
+      "impact": "Corporate earnings downgrades",
+      "timeline": "1-2 months",
+      "probability": "45%"
+    },
+    {
+      "effect": "Energy independence accelerates",
+      "impact": "Renewable and nuclear investment surge",
+      "timeline": "3-6 months",
+      "probability": "75%"
+    },
+    {
+      "effect": "Supply chain diversification",
+      "impact": "Mexico, Brazil benefit from near-shoring",
+      "timeline": "6-12 months",
+      "probability": "80%"
+    }
+  ],
+  "third_order_effects": [
+    {
+      "effect": "US dollar dominance challenged",
+      "impact": "Alternative payment systems emerge",
+      "timeline": "1-2 years",
+      "probability": "40%"
+    },
+    {
+      "effect": "Multipolar world accelerates",
+      "impact": "BRICS currency agreements",
+      "timeline": "2-3 years",
+      "probability": "55%"
+    },
+    {
+      "effect": "Technology decoupling intensifies",
+      "impact": "Separate tech ecosystems form",
+      "timeline": "3-5 years",
+      "probability": "65%"
+    }
+  ],
+  "black_swan_risks": [
+    {
+      "risk": "Russia-China military alliance forms",
+      "trigger": "US action in Venezuela",
+      "impact": "Cold War 2.0",
+      "probability": "20%",
+      "market_impact": "Catastrophic"
+    },
+    {
+      "risk": "Oil weaponization escalates",
+      "trigger": "Extended conflict",
+      "impact": "Global depression",
+      "probability": "15%",
+      "market_impact": "Severe"
+    },
+    {
+      "risk": "Nuclear escalation",
+      "trigger": "Miscalculation",
+      "impact": "Markets cease to function",
+      "probability": "5%",
+      "market_impact": "Existential"
+    },
+    {
+      "risk": "US dollar collapse",
+      "trigger": "Global sanctions on US",
+      "impact": "Hyperinflation in US",
+      "probability": "10%",
+      "market_impact": "Catastrophic"
+    }
+  ],
+  "opportunities": [
+    {
+      "opportunity": "Long oil services",
+      "symbols": [
+        "SLB",
+        "HAL",
+        "BKR"
+      ],
+      "thesis": "Higher oil prices drive drilling activity",
+      "timeframe": "1-3 months",
+      "risk_level": "Medium",
+      "potential_return": "20-40%"
+    },
+    {
+      "opportunity": "Long defense contractors",
+      "symbols": [
+        "LMT",
+        "NOC",
+        "GD",
+        "RTX"
+      ],
+      "thesis": "Increased defense spending globally",
+      "timeframe": "6-12 months",
+      "risk_level": "Low",
+      "potential_return": "15-25%"
+    },
+    {
+      "opportunity": "Long inflation hedges",
+      "symbols": [
+        "GLD",
+        "TLT",
+        "TIP"
+      ],
+      "thesis": "Inflation expectations rise",
+      "timeframe": "3-6 months",
+      "risk_level": "Low",
+      "potential_return": "10-20%"
+    },
+    {
+      "opportunity": "Long near-shoring beneficiaries",
+      "symbols": [
+        "MEX",
+        "BBA",
+        "ITUB"
+      ],
+      "thesis": "Supply chains move closer to US",
+      "timeframe": "6-18 months",
+      "risk_level": "Medium",
+      "potential_return": "30-50%"
+    },
+    {
+      "opportunity": "Long renewable energy",
+      "symbols": [
+        "ICLN",
+        "ENPH",
+        "SEDG",
+        "TSLA"
+      ],
+      "thesis": "Energy independence push accelerates",
+      "timeframe": "1-3 years",
+      "risk_level": "High",
+      "potential_return": "50-100%"
+    },
+    {
+      "opportunity": "Short emerging markets",
+      "symbols": [
+        "EEM",
+        "EWZ",
+        "RSX"
+      ],
+      "thesis": "Capital flight to safety",
+      "timeframe": "3-6 months",
+      "risk_level": "High",
+      "potential_return": "20-30%"
+    }
+  ]
+}

@@ -1,0 +1,137 @@
+{
+  "events": [
+    {
+      "symbol": "MS",
+      "catalyst_type": "Unknown",
+      "event_date": "2025-12-03T23:51:38.994596",
+      "days_remaining": 21,
+      "status": "active",
+      "pop_at_entry": 0,
+      "expected_move": 0,
+      "created_at": "2025-11-12T23:51:38.994596",
+      "notes": "Kim Kardashian's shapewear brand Skims hits $5bn valuation"
+    },
+    {
+      "symbol": "KO",
+      "catalyst_type": "Unknown",
+      "event_date": "2025-12-25T10:48:34.261260",
+      "days_remaining": 21,
+      "status": "active",
+      "pop_at_entry": 0,
+      "expected_move": 0,
+      "created_at": "2025-12-04T10:48:34.261260",
+      "notes": "Trump's South Korea tariff cuts are major boost for Hyundai and GM"
+    },
+    {
+      "symbol": "NVDA",
+      "catalyst_type": "Unknown",
+      "event_date": "2026-01-03T10:48:36.197063",
+      "days_remaining": 30,
+      "status": "active",
+      "pop_at_entry": 0,
+      "expected_move": 0,
+      "created_at": "2025-12-04T10:48:36.197063",
+      "notes": "Put 5k back in the meme account last week to gamble, daddy Zuck provides."
+    },
+    {
+      "symbol": "F",
+      "catalyst_type": "Unknown",
+      "event_date": "2025-12-25T11:43:48.526447",
+      "days_remaining": 21,
+      "status": "active",
+      "pop_at_entry": 0,
+      "expected_move": 0,
+      "created_at": "2025-12-04T11:43:48.526447",
+      "notes": "Why Microsoft\u2019s controversial OpenAI partnership is actually a safety net for the stock"
+    },
+    {
+      "symbol": "HD",
+      "catalyst_type": "Unknown",
+      "event_date": "2025-12-25T14:50:26.576608",
+      "days_remaining": 21,
+      "status": "active",
+      "pop_at_entry": 0,
+      "expected_move": 0,
+      "created_at": "2025-12-04T14:50:26.578128",
+      "notes": "Congressional watchdog probes Trump FHFA chief Bill Pulte"
+    },
+    {
+      "symbol": "DIS",
+      "catalyst_type": "Unknown",
+      "event_date": "2025-12-25T14:50:28.666234",
+      "days_remaining": 21,
+      "status": "active",
+      "pop_at_entry": 0,
+      "expected_move": 0,
+      "created_at": "2025-12-04T14:50:28.666234",
+      "notes": "Six-month unfair dismissal right to begin from 2027"
+    },
+    {
+      "symbol": "GOOGL",
+      "catalyst_type": "Unknown",
+      "event_date": "2026-01-04T13:39:45.699552",
+      "days_remaining": 30,
+      "status": "active",
+      "pop_at_entry": 0,
+      "expected_move": 0,
+      "created_at": "2025-12-05T13:39:45.699552",
+      "notes": "How Google could follow Nvidia to become the next $5 trillion company"
+    },
+    {
+      "symbol": "NKE",
+      "catalyst_type": "Unknown",
+      "event_date": "2025-12-26T13:39:47.892998",
+      "days_remaining": 21,
+      "status": "active",
+      "pop_at_entry": 0,
+      "expected_move": 0,
+      "created_at": "2025-12-05T13:39:47.892998",
+      "notes": "\u2018Misbehaving\u2019 U.S. long bonds have this strategist looking for yield elsewhere"
+    },
+    {
+      "symbol": "MSTR",
+      "catalyst_type": "Unknown",
+      "event_date": "2026-01-04T13:39:49.997132",
+      "days_remaining": 30,
+      "status": "active",
+      "pop_at_entry": 0,
+      "expected_move": 0,
+      "created_at": "2025-12-05T13:39:49.997132",
+      "notes": "My husband would still be alive if he'd got Post Office compensation"
+    },
+    {
+      "symbol": "PG",
+      "catalyst_type": "Unknown",
+      "event_date": "2025-12-27T02:48:31.634026",
+      "days_remaining": 21,
+      "status": "active",
+      "pop_at_entry": 0,
+      "expected_move": 0,
+      "created_at": "2025-12-06T02:48:31.634026",
+      "notes": "The last holdout on MP Materials\u2019 stock has turned bullish"
+    },
+    {
+      "symbol": "V",
+      "catalyst_type": "Unknown",
+      "event_date": "2025-12-27T02:48:32.459348",
+      "days_remaining": 21,
+      "status": "active",
+      "pop_at_entry": 0,
+      "expected_move": 0,
+      "created_at": "2025-12-06T02:48:32.459348",
+      "notes": "CVNA added to S&P \ud83e\udd21\ud83e\udd21\ud83e\udd21[previous post deleted]"
+    },
+    {
+      "symbol": "KXPERSONPRESFUENTES-45",
+      "catalyst_type": "Unknown",
+      "event_date": "2045-01-08T02:29:56.931587",
+      "days_remaining": 6967,
+      "status": "active",
+      "pop_at_entry": 0,
+      "expected_move": 0,
+      "created_at": "2025-12-12T02:29:56.931587",
+      "notes": "Kalshi: Will  become President of the United States before 2045? - BUY_NO"
+    }
+  ],
+  "last_updated": "2025-12-12T02:29:56.931587"
+}

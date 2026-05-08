@@ -1,0 +1,64 @@
+[
+  {
+    "title": "Trump admin secretly working with Russia to draft Ukraine ceasefire- Axios",
+    "link": "https://www.investing.com/news/economy/trump-admin-secretly-working-with-russia-to-draft-ukraine-ceasefire-axios-4366649",
+    "published": "2025-11-19 01:37:04",
+    "summary": "",
+    "source": "https://www.investing.com/rss/news_14.rss",
+    "category": "FINANCIAL_SECTOR_SPECIFIC",
+    "fetch_time": "2025-11-19T01:06:03.405848",
+    "symbols": [
+      "TRUMP",
+      "ADMIN",
+      "TO",
+      "DRAFT",
+      "AXIOS"
+    ],
+    "hash": "9b099f1c26481e8dfeceb20b1f00df5c",
+    "stored_at": "2025-11-19T01:07:19.179737"
+  },
+  {
+    "title": "Mandiant releases rainbow table that cracks weak admin password in 12 hours",
+    "link": "https://arstechnica.com/security/2026/01/mandiant-releases-rainbow-table-that-cracks-weak-admin-password-in-12-hours/",
+    "published": "Fri, 16 Jan 2026 21:05:37 +0000",
+    "summary": "Windows laggards still using the vulnerable hashing function: Your days are numbered.",
+    "source": "https://feeds.arstechnica.com/arstechnica/index",
+    "category": "TECH_AI_SECTOR",
+    "fetch_time": "2026-01-17T15:56:50.445887",
+    "symbols": [
+      "TABLE",
+      "WEAK",
+      "ADMIN",
+      "IN",
+      "HOURS",
+      "STILL",
+      "USING",
+      "YOUR",
+      "DAYS"
+    ],
+    "hash": "cc8da0efd56b995ade5ae1d6950e8d37",
+    "stored_at": "2026-01-17T15:58:24.469870"
+  },
+  {
+    "title": "Mandiant releases rainbow table that cracks weak admin password in 12 hours",
+    "link": "https://arstechnica.com/security/2026/01/mandiant-releases-rainbow-table-that-cracks-weak-admin-password-in-12-hours/",
+    "published": "Fri, 16 Jan 2026 21:05:37 +0000",
+    "summary": "Windows laggards still using the vulnerable hashing function: Your days are numbered.",
+    "source": "https://feeds.arstechnica.com/arstechnica/index",
+    "category": "TECH_AI_SECTOR",
+    "fetch_time": "2026-01-18T22:25:06.829055",
+    "symbols": [
+      "TABLE",
+      "WEAK",
+      "ADMIN",
+      "IN",
+      "HOURS",
+      "STILL",
+      "USING",
+      "YOUR",
+      "DAYS"
+    ],
+    "hash": "cc8da0efd56b995ade5ae1d6950e8d37",
+    "stored_at": "2026-01-18T22:26:30.885486"
+  }
+]

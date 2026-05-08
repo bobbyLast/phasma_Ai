@@ -1,0 +1,35 @@
+[
+  {
+    "title": "Cardano Falls 10% In Rout",
+    "link": "https://www.investing.com/news/cryptocurrency-news/cardano-falls-10-in-rout-4332614",
+    "published": "2025-11-05 01:23:55",
+    "summary": "",
+    "source": "https://www.investing.com/rss/news_301.rss",
+    "category": "FINANCIAL_SECTOR_SPECIFIC",
+    "fetch_time": "2025-11-05T22:39:09.110836",
+    "symbols": [
+      "FALLS",
+      "IN",
+      "ROUT"
+    ],
+    "hash": "bf461a1899fa59858664f57b4c8bdfe1",
+    "stored_at": "2025-11-05T22:39:32.300137"
+  },
+  {
+    "title": "EOS Falls 10% In Rout",
+    "link": "https://www.investing.com/news/cryptocurrency-news/eos-falls-10-in-rout-4364059",
+    "published": "2025-11-18 02:05:02",
+    "summary": "",
+    "source": "https://www.investing.com/rss/news_301.rss",
+    "category": "FINANCIAL_SECTOR_SPECIFIC",
+    "fetch_time": "2025-11-19T01:06:02.834375",
+    "symbols": [
+      "EOS",
+      "FALLS",
+      "IN",
+      "ROUT"
+    ],
+    "hash": "9b620d972877436f11a7312883034d03",
+    "stored_at": "2025-11-19T01:07:22.363078"
+  }
+]

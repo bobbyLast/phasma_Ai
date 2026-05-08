@@ -1,0 +1,7 @@
+{
+  "timestamp": "2025-11-30T14:54:01.085390",
+  "reason": "High risk conditions detected",
+  "active_positions": 5,
+  "total_exposure": 18600,
+  "action": "KILL_SWITCH_ACTIVATED"
+}

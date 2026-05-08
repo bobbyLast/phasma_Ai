@@ -1,0 +1,1009 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+<title>Latest Filings - Thu, 18 Dec 2025 00:13:23 EST</title>
+<link rel="alternate" href="/cgi-bin/browse-edgar?action=getcurrent"/>
+<link rel="self" href="/cgi-bin/browse-edgar?action=getcurrent"/>
+<id>https://www.sec.gov/cgi-bin/browse-edgar?action=getcurrent</id>
+<author><name>Webmaster</name><email>webmaster@sec.gov</email></author>
+<updated>2025-12-18T00:13:23-05:00</updated>
+<entry>
+<title>4 - Hyten John E. (0002040511) (Reporting)</title>
+<link rel="alternate" type="text/html" href="https://www.sec.gov/Archives/edgar/data/2040511/000204051125000006/0002040511-25-000006-index.htm"/>
+<summary type="html">
+ &lt;b&gt;Filed:&lt;/b&gt; 2025-12-17 &lt;b&gt;AccNo:&lt;/b&gt; 0002040511-25-000006 &lt;b&gt;Size:&lt;/b&gt; 5 KB
+</summary>
+<updated>2025-12-17T21:53:43-05:00</updated>
+<category scheme="https://www.sec.gov/" label="form type" term="4"/>
+<id>urn:tag:sec.gov,2008:accession-number=0002040511-25-000006</id>
+</entry>
+<entry>
+<title>4 - C3.ai, Inc. (0001577526) (Issuer)</title>
+<link rel="alternate" type="text/html" href="https://www.sec.gov/Archives/edgar/data/1577526/000204051125000006/0002040511-25-000006-index.htm"/>
+<summary type="html">
+ &lt;b&gt;Filed:&lt;/b&gt; 2025-12-17 &lt;b&gt;AccNo:&lt;/b&gt; 0002040511-25-000006 &lt;b&gt;Size:&lt;/b&gt; 5 KB
+</summary>
+<updated>2025-12-17T21:53:43-05:00</updated>
+<category scheme="https://www.sec.gov/" label="form type" term="4"/>
+<id>urn:tag:sec.gov,2008:accession-number=0002040511-25-000006</id>
+</entry>
+<entry>
+<title>4 - Schindler Philipp (0001837573) (Reporting)</title>
+<link rel="alternate" type="text/html" href="https://www.sec.gov/Archives/edgar/data/1837573/000119312525323453/0001193125-25-323453-index.htm"/>
+<summary type="html">
+ &lt;b&gt;Filed:&lt;/b&gt; 2025-12-17 &lt;b&gt;AccNo:&lt;/b&gt; 0001193125-25-323453 &lt;b&gt;Size:&lt;/b&gt; 10 KB
+</summary>
+<updated>2025-12-17T21:51:44-05:00</updated>
+<category scheme="https://www.sec.gov/" label="form type" term="4"/>
+<id>urn:tag:sec.gov,2008:accession-number=0001193125-25-323453</id>
+</entry>
+<entry>
+<title>4 - Alphabet Inc. (0001652044) (Issuer)</title>
+<link rel="alternate" type="text/html" href="https://www.sec.gov/Archives/edgar/data/1652044/000119312525323453/0001193125-25-323453-index.htm"/>
+<summary type="html">
+ &lt;b&gt;Filed:&lt;/b&gt; 2025-12-17 &lt;b&gt;AccNo:&lt;/b&gt; 0001193125-25-323453 &lt;b&gt;Size:&lt;/b&gt; 10 KB
+</summary>
+<updated>2025-12-17T21:51:44-05:00</updated>
+<category scheme="https://www.sec.gov/" label="form type" term="4"/>
+<id>urn:tag:sec.gov,2008:accession-number=0001193125-25-323453</id>
+</entry>
+<entry>
+<title>4 - Couling John D (0001894052) (Reporting)</title>
+<link rel="alternate" type="text/html" href="https://www.sec.gov/Archives/edgar/data/1894052/000119312525323446/0001193125-25-323446-index.htm"/>
+<summary type="html">
+ &lt;b&gt;Filed:&lt;/b&gt; 2025-12-17 &lt;b&gt;AccNo:&lt;/b&gt; 0001193125-25-323446 &lt;b&gt;Size:&lt;/b&gt; 18 KB
+</summary>
+<updated>2025-12-17T21:48:47-05:00</updated>
+<category scheme="https://www.sec.gov/" label="form type" term="4"/>
+<id>urn:tag:sec.gov,2008:accession-number=0001193125-25-323446</id>
+</entry>
+<entry>
+<title>4 - Dolby Laboratories, Inc. (0001308547) (Issuer)</title>
+<link rel="alternate" type="text/html" href="https://www.sec.gov/Archives/edgar/data/1308547/000119312525323446/0001193125-25-323446-index.htm"/>
+<summary type="html">
+ &lt;b&gt;Filed:&lt;/b&gt; 2025-12-17 &lt;b&gt;AccNo:&lt;/b&gt; 0001193125-25-323446 &lt;b&gt;Size:&lt;/b&gt; 18 KB
+</summary>
+<updated>2025-12-17T21:48:47-05:00</updated>
+<category scheme="https://www.sec.gov/" label="form type" term="4"/>
+<id>urn:tag:sec.gov,2008:accession-number=0001193125-25-323446</id>
+</entry>
+<entry>
+<title>4 - Nicholson Ryan (0001767009) (Reporting)</title>
+<link rel="alternate" type="text/html" href="https://www.sec.gov/Archives/edgar/data/1767009/000119312525323440/0001193125-25-323440-index.htm"/>
+<summary type="html">
+ &lt;b&gt;Filed:&lt;/b&gt; 2025-12-17 &lt;b&gt;AccNo:&lt;/b&gt; 0001193125-25-323440 &lt;b&gt;Size:&lt;/b&gt; 9 KB
+</summary>
+<updated>2025-12-17T21:46:19-05:00</updated>
+<category scheme="https://www.sec.gov/" label="form type" term="4"/>
+<id>urn:tag:sec.gov,2008:accession-number=0001193125-25-323440</id>
+</entry>
+<entry>
+<title>4 - Dolby Laboratories, Inc. (0001308547) (Issuer)</title>
+<link rel="alternate" type="text/html" href="https://www.sec.gov/Archives/edgar/data/1308547/000119312525323440/0001193125-25-323440-index.htm"/>
+<summary type="html">
+ &lt;b&gt;Filed:&lt;/b&gt; 2025-12-17 &lt;b&gt;AccNo:&lt;/b&gt; 0001193125-25-323440 &lt;b&gt;Size:&lt;/b&gt; 9 KB
+</summary>
+<updated>2025-12-17T21:46:19-05:00</updated>
+<category scheme="https://www.sec.gov/" label="form type" term="4"/>
+<id>urn:tag:sec.gov,2008:accession-number=0001193125-25-323440</id>
+</entry>
+<entry>
+<title>4 - Pendleton Todd (0001746636) (Reporting)</title>
+<link rel="alternate" type="text/html" href="https://www.sec.gov/Archives/edgar/data/1746636/000119312525323435/0001193125-25-323435-index.htm"/>
+<summary type="html">
+ &lt;b&gt;Filed:&lt;/b&gt; 2025-12-17 &lt;b&gt;AccNo:&lt;/b&gt; 0001193125-25-323435 &lt;b&gt;Size:&lt;/b&gt; 18 KB
+</summary>
+<updated>2025-12-17T21:44:30-05:00</updated>
+<category scheme="https://www.sec.gov/" label="form type" term="4"/>
+<id>urn:tag:sec.gov,2008:accession-number=0001193125-25-323435</id>
+</entry>
+<entry>
+<title>4 - Dolby Laboratories, Inc. (0001308547) (Issuer)</title>
+<link rel="alternate" type="text/html" href="https://www.sec.gov/Archives/edgar/data/1308547/000119312525323435/0001193125-25-323435-index.htm"/>
+<summary type="html">
+ &lt;b&gt;Filed:&lt;/b&gt; 2025-12-17 &lt;b&gt;AccNo:&lt;/b&gt; 0001193125-25-323435 &lt;b&gt;Size:&lt;/b&gt; 18 KB
+</summary>
+<updated>2025-12-17T21:44:30-05:00</updated>
+<category scheme="https://www.sec.gov/" label="form type" term="4"/>
+<id>urn:tag:sec.gov,2008:accession-number=0001193125-25-323435</id>
+</entry>
+<entry>
+<title>4 - Dolby Laboratories, Inc. (0001308547) (Issuer)</title>
+<link rel="alternate" type="text/html" href="https://www.sec.gov/Archives/edgar/data/1308547/000119312525323431/0001193125-25-323431-index.htm"/>
+<summary type="html">
+ &lt;b&gt;Filed:&lt;/b&gt; 2025-12-17 &lt;b&gt;AccNo:&lt;/b&gt; 0001193125-25-323431 &lt;b&gt;Size:&lt;/b&gt; 28 KB
+</summary>
+<updated>2025-12-17T21:43:02-05:00</updated>
+<category scheme="https://www.sec.gov/" label="form type" term="4"/>
+<id>urn:tag:sec.gov,2008:accession-number=0001193125-25-323431</id>
+</entry>
+<entry>
+<title>4 - YEAMAN KEVIN J (0001200469) (Reporting)</title>
+<link rel="alternate" type="text/html" href="https://www.sec.gov/Archives/edgar/data/1200469/000119312525323431/0001193125-25-323431-index.htm"/>
+<summary type="html">
+ &lt;b&gt;Filed:&lt;/b&gt; 2025-12-17 &lt;b&gt;AccNo:&lt;/b&gt; 0001193125-25-323431 &lt;b&gt;Size:&lt;/b&gt; 28 KB
+</summary>
+<updated>2025-12-17T21:43:02-05:00</updated>
+<category scheme="https://www.sec.gov/" label="form type" term="4"/>
+<id>urn:tag:sec.gov,2008:accession-number=0001193125-25-323431</id>
+</entry>
+<entry>
+<title>4 - Revankar Shriram (0001928994) (Reporting)</title>
+<link rel="alternate" type="text/html" href="https://www.sec.gov/Archives/edgar/data/1928994/000119312525323427/0001193125-25-323427-index.htm"/>
+<summary type="html">
+ &lt;b&gt;Filed:&lt;/b&gt; 2025-12-17 &lt;b&gt;AccNo:&lt;/b&gt; 0001193125-25-323427 &lt;b&gt;Size:&lt;/b&gt; 18 KB
+</summary>
+<updated>2025-12-17T21:41:31-05:00</updated>
+<category scheme="https://www.sec.gov/" label="form type" term="4"/>
+<id>urn:tag:sec.gov,2008:accession-number=0001193125-25-323427</id>
+</entry>
+<entry>
+<title>4 - Dolby Laboratories, Inc. (0001308547) (Issuer)</title>
+<link rel="alternate" type="text/html" href="https://www.sec.gov/Archives/edgar/data/1308547/000119312525323427/0001193125-25-323427-index.htm"/>
+<summary type="html">
+ &lt;b&gt;Filed:&lt;/b&gt; 2025-12-17 &lt;b&gt;AccNo:&lt;/b&gt; 0001193125-25-323427 &lt;b&gt;Size:&lt;/b&gt; 18 KB
+</summary>
+<updated>2025-12-17T21:41:31-05:00</updated>
+<category scheme="https://www.sec.gov/" label="form type" term="4"/>
+<id>urn:tag:sec.gov,2008:accession-number=0001193125-25-323427</id>
+</entry>
+<entry>
+<title>4 - Dolby Laboratories, Inc. (0001308547) (Issuer)</title>
+<link rel="alternate" type="text/html" href="https://www.sec.gov/Archives/edgar/data/1308547/000119312525323425/0001193125-25-323425-index.htm"/>
+<summary type="html">
+ &lt;b&gt;Filed:&lt;/b&gt; 2025-12-17 &lt;b&gt;AccNo:&lt;/b&gt; 0001193125-25-323425 &lt;b&gt;Size:&lt;/b&gt; 24 KB
+</summary>
+<updated>2025-12-17T21:39:52-05:00</updated>
+<category scheme="https://www.sec.gov/" label="form type" term="4"/>
+<id>urn:tag:sec.gov,2008:accession-number=0001193125-25-323425</id>
+</entry>
+<entry>
+<title>4 - SHERMAN MARK ANDREW (0001256708) (Reporting)</title>
+<link rel="alternate" type="text/html" href="https://www.sec.gov/Archives/edgar/data/1256708/000119312525323425/0001193125-25-323425-index.htm"/>
+<summary type="html">
+ &lt;b&gt;Filed:&lt;/b&gt; 2025-12-17 &lt;b&gt;AccNo:&lt;/b&gt; 0001193125-25-323425 &lt;b&gt;Size:&lt;/b&gt; 24 KB
+</summary>
+<updated>2025-12-17T21:39:52-05:00</updated>
+<category scheme="https://www.sec.gov/" label="form type" term="4"/>
+<id>urn:tag:sec.gov,2008:accession-number=0001193125-25-323425</id>
+</entry>
+<entry>
+<title>4 - Alphabet Inc. (0001652044) (Issuer)</title>
+<link rel="alternate" type="text/html" href="https://www.sec.gov/Archives/edgar/data/1652044/000119312525323423/0001193125-25-323423-index.htm"/>
+<summary type="html">
+ &lt;b&gt;Filed:&lt;/b&gt; 2025-12-17 &lt;b&gt;AccNo:&lt;/b&gt; 0001193125-25-323423 &lt;b&gt;Size:&lt;/b&gt; 10 KB
+</summary>
+<updated>2025-12-17T21:38:47-05:00</updated>
+<category scheme="https://www.sec.gov/" label="form type" term="4"/>
+<id>urn:tag:sec.gov,2008:accession-number=0001193125-25-323423</id>
+</entry>
+<entry>
+<title>4 - WALKER JOHN KENT (0001238734) (Reporting)</title>
+<link rel="alternate" type="text/html" href="https://www.sec.gov/Archives/edgar/data/1238734/000119312525323423/0001193125-25-323423-index.htm"/>
+<summary type="html">
+ &lt;b&gt;Filed:&lt;/b&gt; 2025-12-17 &lt;b&gt;AccNo:&lt;/b&gt; 0001193125-25-323423 &lt;b&gt;Size:&lt;/b&gt; 10 KB
+</summary>
+<updated>2025-12-17T21:38:47-05:00</updated>
+<category scheme="https://www.sec.gov/" label="form type" term="4"/>
+<id>urn:tag:sec.gov,2008:accession-number=0001193125-25-323423</id>
+</entry>
+<entry>
+<title>4 - Park Robert J (0001887569) (Reporting)</title>
+<link rel="alternate" type="text/html" href="https://www.sec.gov/Archives/edgar/data/1887569/000119312525323422/0001193125-25-323422-index.htm"/>
+<summary type="html">
+ &lt;b&gt;Filed:&lt;/b&gt; 2025-12-17 &lt;b&gt;AccNo:&lt;/b&gt; 0001193125-25-323422 &lt;b&gt;Size:&lt;/b&gt; 18 KB
+</summary>
+<updated>2025-12-17T21:38:25-05:00</updated>
+<category scheme="https://www.sec.gov/" label="form type" term="4"/>
+<id>urn:tag:sec.gov,2008:accession-number=0001193125-25-323422</id>
+</entry>
+<entry>
+<title>4 - Dolby Laboratories, Inc. (0001308547) (Issuer)</title>
+<link rel="alternate" type="text/html" href="https://www.sec.gov/Archives/edgar/data/1308547/000119312525323422/0001193125-25-323422-index.htm"/>
+<summary type="html">
+ &lt;b&gt;Filed:&lt;/b&gt; 2025-12-17 &lt;b&gt;AccNo:&lt;/b&gt; 0001193125-25-323422 &lt;b&gt;Size:&lt;/b&gt; 18 KB
+</summary>
+<updated>2025-12-17T21:38:25-05:00</updated>
+<category scheme="https://www.sec.gov/" label="form type" term="4"/>
+<id>urn:tag:sec.gov,2008:accession-number=0001193125-25-323422</id>
+</entry>
+<entry>
+<title>4 - Nagy McBane Clara (0002027696) (Reporting)</title>
+<link rel="alternate" type="text/html" href="https://www.sec.gov/Archives/edgar/data/2027696/000121390025123026/0001213900-25-123026-index.htm"/>
+<summary type="html">
+ &lt;b&gt;Filed:&lt;/b&gt; 2025-12-17 &lt;b&gt;AccNo:&lt;/b&gt; 0001213900-25-123026 &lt;b&gt;Size:&lt;/b&gt; 7 KB
+</summary>
+<updated>2025-12-17T21:30:25-05:00</updated>
+<category scheme="https://www.sec.gov/" label="form type" term="4"/>
+<id>urn:tag:sec.gov,2008:accession-number=0001213900-25-123026</id>
+</entry>
+<entry>
+<title>4 - SPRUCE POWER HOLDING CORP (0001772720) (Issuer)</title>
+<link rel="alternate" type="text/html" href="https://www.sec.gov/Archives/edgar/data/1772720/000121390025123026/0001213900-25-123026-index.htm"/>
+<summary type="html">
+ &lt;b&gt;Filed:&lt;/b&gt; 2025-12-17 &lt;b&gt;AccNo:&lt;/b&gt; 0001213900-25-123026 &lt;b&gt;Size:&lt;/b&gt; 7 KB
+</summary>
+<updated>2025-12-17T21:30:25-05:00</updated>
+<category scheme="https://www.sec.gov/" label="form type" term="4"/>
+<id>urn:tag:sec.gov,2008:accession-number=0001213900-25-123026</id>
+</entry>
+<entry>
+<title>4 - Gartman Dennis H. (0001938733) (Reporting)</title>
+<link rel="alternate" type="text/html" href="https://www.sec.gov/Archives/edgar/data/1938733/000156918725000186/0001569187-25-000186-index.htm"/>
+<summary type="html">
+ &lt;b&gt;Filed:&lt;/b&gt; 2025-12-17 &lt;b&gt;AccNo:&lt;/b&gt; 0001569187-25-000186 &lt;b&gt;Size:&lt;/b&gt; 4 KB
+</summary>
+<updated>2025-12-17T21:27:55-05:00</updated>
+<category scheme="https://www.sec.gov/" label="form type" term="4"/>
+<id>urn:tag:sec.gov,2008:accession-number=0001569187-25-000186</id>
+</entry>
+<entry>
+<title>4 - Armada Hoffler Properties, Inc. (0001569187) (Issuer)</title>
+<link rel="alternate" type="text/html" href="https://www.sec.gov/Archives/edgar/data/1569187/000156918725000186/0001569187-25-000186-index.htm"/>
+<summary type="html">
+ &lt;b&gt;Filed:&lt;/b&gt; 2025-12-17 &lt;b&gt;AccNo:&lt;/b&gt; 0001569187-25-000186 &lt;b&gt;Size:&lt;/b&gt; 4 KB
+</summary>
+<updated>2025-12-17T21:27:55-05:00</updated>
+<category scheme="https://www.sec.gov/" label="form type" term="4"/>
+<id>urn:tag:sec.gov,2008:accession-number=0001569187-25-000186</id>
+</entry>
+<entry>
+<title>4 - Wimbush Frederick Blair (0001745407) (Reporting)</title>
+<link rel="alternate" type="text/html" href="https://www.sec.gov/Archives/edgar/data/1745407/000156918725000185/0001569187-25-000185-index.htm"/>
+<summary type="html">
+ &lt;b&gt;Filed:&lt;/b&gt; 2025-12-17 &lt;b&gt;AccNo:&lt;/b&gt; 0001569187-25-000185 &lt;b&gt;Size:&lt;/b&gt; 7 KB
+</summary>
+<updated>2025-12-17T21:27:49-05:00</updated>
+<category scheme="https://www.sec.gov/" label="form type" term="4"/>
+<id>urn:tag:sec.gov,2008:accession-number=0001569187-25-000185</id>
+</entry>
+<entry>
+<title>4 - Armada Hoffler Properties, Inc. (0001569187) (Issuer)</title>
+<link rel="alternate" type="text/html" href="https://www.sec.gov/Archives/edgar/data/1569187/000156918725000185/0001569187-25-000185-index.htm"/>
+<summary type="html">
+ &lt;b&gt;Filed:&lt;/b&gt; 2025-12-17 &lt;b&gt;AccNo:&lt;/b&gt; 0001569187-25-000185 &lt;b&gt;Size:&lt;/b&gt; 7 KB
+</summary>
+<updated>2025-12-17T21:27:49-05:00</updated>
+<category scheme="https://www.sec.gov/" label="form type" term="4"/>
+<id>urn:tag:sec.gov,2008:accession-number=0001569187-25-000185</id>
+</entry>
+<entry>
+<title>4 - Carroll James A (0001575997) (Reporting)</title>
+<link rel="alternate" type="text/html" href="https://www.sec.gov/Archives/edgar/data/1575997/000156918725000184/0001569187-25-000184-index.htm"/>
+<summary type="html">
+ &lt;b&gt;Filed:&lt;/b&gt; 2025-12-17 &lt;b&gt;AccNo:&lt;/b&gt; 0001569187-25-000184 &lt;b&gt;Size:&lt;/b&gt; 8 KB
+</summary>
+<updated>2025-12-17T21:27:43-05:00</updated>
+<category scheme="https://www.sec.gov/" label="form type" term="4"/>
+<id>urn:tag:sec.gov,2008:accession-number=0001569187-25-000184</id>
+</entry>
+<entry>
+<title>4 - Armada Hoffler Properties, Inc. (0001569187) (Issuer)</title>
+<link rel="alternate" type="text/html" href="https://www.sec.gov/Archives/edgar/data/1569187/000156918725000184/0001569187-25-000184-index.htm"/>
+<summary type="html">
+ &lt;b&gt;Filed:&lt;/b&gt; 2025-12-17 &lt;b&gt;AccNo:&lt;/b&gt; 0001569187-25-000184 &lt;b&gt;Size:&lt;/b&gt; 8 KB
+</summary>
+<updated>2025-12-17T21:27:43-05:00</updated>
+<category scheme="https://www.sec.gov/" label="form type" term="4"/>
+<id>urn:tag:sec.gov,2008:accession-number=0001569187-25-000184</id>
+</entry>
+<entry>
+<title>4 - Ashkenazi Anat (0001761679) (Reporting)</title>
+<link rel="alternate" type="text/html" href="https://www.sec.gov/Archives/edgar/data/1761679/000119312525323408/0001193125-25-323408-index.htm"/>
+<summary type="html">
+ &lt;b&gt;Filed:&lt;/b&gt; 2025-12-17 &lt;b&gt;AccNo:&lt;/b&gt; 0001193125-25-323408 &lt;b&gt;Size:&lt;/b&gt; 9 KB
+</summary>
+<updated>2025-12-17T21:26:10-05:00</updated>
+<category scheme="https://www.sec.gov/" label="form type" term="4"/>
+<id>urn:tag:sec.gov,2008:accession-number=0001193125-25-323408</id>
+</entry>
+<entry>
+<title>4 - Alphabet Inc. (0001652044) (Issuer)</title>
+<link rel="alternate" type="text/html" href="https://www.sec.gov/Archives/edgar/data/1652044/000119312525323408/0001193125-25-323408-index.htm"/>
+<summary type="html">
+ &lt;b&gt;Filed:&lt;/b&gt; 2025-12-17 &lt;b&gt;AccNo:&lt;/b&gt; 0001193125-25-323408 &lt;b&gt;Size:&lt;/b&gt; 9 KB
+</summary>
+<updated>2025-12-17T21:26:10-05:00</updated>
+<category scheme="https://www.sec.gov/" label="form type" term="4"/>
+<id>urn:tag:sec.gov,2008:accession-number=0001193125-25-323408</id>
+</entry>
+<entry>
+<title>4 - Forrester James W Jr (0001962573) (Reporting)</title>
+<link rel="alternate" type="text/html" href="https://www.sec.gov/Archives/edgar/data/1962573/000119312525323404/0001193125-25-323404-index.htm"/>
+<summary type="html">
+ &lt;b&gt;Filed:&lt;/b&gt; 2025-12-17 &lt;b&gt;AccNo:&lt;/b&gt; 0001193125-25-323404 &lt;b&gt;Size:&lt;/b&gt; 5 KB
+</summary>
+<updated>2025-12-17T21:22:18-05:00</updated>
+<category scheme="https://www.sec.gov/" label="form type" term="4"/>
+<id>urn:tag:sec.gov,2008:accession-number=0001193125-25-323404</id>
+</entry>
+<entry>
+<title>4 - United Parks &amp; Resorts Inc. (0001564902) (Issuer)</title>
+<link rel="alternate" type="text/html" href="https://www.sec.gov/Archives/edgar/data/1564902/000119312525323404/0001193125-25-323404-index.htm"/>
+<summary type="html">
+ &lt;b&gt;Filed:&lt;/b&gt; 2025-12-17 &lt;b&gt;AccNo:&lt;/b&gt; 0001193125-25-323404 &lt;b&gt;Size:&lt;/b&gt; 5 KB
+</summary>
+<updated>2025-12-17T21:22:18-05:00</updated>
+<category scheme="https://www.sec.gov/" label="form type" term="4"/>
+<id>urn:tag:sec.gov,2008:accession-number=0001193125-25-323404</id>
+</entry>
+<entry>
+<title>4 - Sprinklr, Inc. (0001569345) (Issuer)</title>
+<link rel="alternate" type="text/html" href="https://www.sec.gov/Archives/edgar/data/1569345/000152859725000006/0001528597-25-000006-index.htm"/>
+<summary type="html">
+ &lt;b&gt;Filed:&lt;/b&gt; 2025-12-17 &lt;b&gt;AccNo:&lt;/b&gt; 0001528597-25-000006 &lt;b&gt;Size:&lt;/b&gt; 5 KB
+</summary>
+<updated>2025-12-17T21:15:13-05:00</updated>
+<category scheme="https://www.sec.gov/" label="form type" term="4"/>
+<id>urn:tag:sec.gov,2008:accession-number=0001528597-25-000006</id>
+</entry>
+<entry>
+<title>4 - READ RORY P (0001528597) (Reporting)</title>
+<link rel="alternate" type="text/html" href="https://www.sec.gov/Archives/edgar/data/1528597/000152859725000006/0001528597-25-000006-index.htm"/>
+<summary type="html">
+ &lt;b&gt;Filed:&lt;/b&gt; 2025-12-17 &lt;b&gt;AccNo:&lt;/b&gt; 0001528597-25-000006 &lt;b&gt;Size:&lt;/b&gt; 5 KB
+</summary>
+<updated>2025-12-17T21:15:13-05:00</updated>
+<category scheme="https://www.sec.gov/" label="form type" term="4"/>
+<id>urn:tag:sec.gov,2008:accession-number=0001528597-25-000006</id>
+</entry>
+<entry>
+<title>4 - Thomas Ragy (0001866802) (Reporting)</title>
+<link rel="alternate" type="text/html" href="https://www.sec.gov/Archives/edgar/data/1866802/000186680225000007/0001866802-25-000007-index.htm"/>
+<summary type="html">
+ &lt;b&gt;Filed:&lt;/b&gt; 2025-12-17 &lt;b&gt;AccNo:&lt;/b&gt; 0001866802-25-000007 &lt;b&gt;Size:&lt;/b&gt; 5 KB
+</summary>
+<updated>2025-12-17T21:15:11-05:00</updated>
+<category scheme="https://www.sec.gov/" label="form type" term="4"/>
+<id>urn:tag:sec.gov,2008:accession-number=0001866802-25-000007</id>
+</entry>
+<entry>
+<title>4 - Sprinklr, Inc. (0001569345) (Issuer)</title>
+<link rel="alternate" type="text/html" href="https://www.sec.gov/Archives/edgar/data/1569345/000186680225000007/0001866802-25-000007-index.htm"/>
+<summary type="html">
+ &lt;b&gt;Filed:&lt;/b&gt; 2025-12-17 &lt;b&gt;AccNo:&lt;/b&gt; 0001866802-25-000007 &lt;b&gt;Size:&lt;/b&gt; 5 KB
+</summary>
+<updated>2025-12-17T21:15:11-05:00</updated>
+<category scheme="https://www.sec.gov/" label="form type" term="4"/>
+<id>urn:tag:sec.gov,2008:accession-number=0001866802-25-000007</id>
+</entry>
+<entry>
+<title>4 - Scott Jacob (0001967575) (Reporting)</title>
+<link rel="alternate" type="text/html" href="https://www.sec.gov/Archives/edgar/data/1967575/000196757525000005/0001967575-25-000005-index.htm"/>
+<summary type="html">
+ &lt;b&gt;Filed:&lt;/b&gt; 2025-12-17 &lt;b&gt;AccNo:&lt;/b&gt; 0001967575-25-000005 &lt;b&gt;Size:&lt;/b&gt; 5 KB
+</summary>
+<updated>2025-12-17T21:15:09-05:00</updated>
+<category scheme="https://www.sec.gov/" label="form type" term="4"/>
+<id>urn:tag:sec.gov,2008:accession-number=0001967575-25-000005</id>
+</entry>
+<entry>
+<title>4 - Sprinklr, Inc. (0001569345) (Issuer)</title>
+<link rel="alternate" type="text/html" href="https://www.sec.gov/Archives/edgar/data/1569345/000196757525000005/0001967575-25-000005-index.htm"/>
+<summary type="html">
+ &lt;b&gt;Filed:&lt;/b&gt; 2025-12-17 &lt;b&gt;AccNo:&lt;/b&gt; 0001967575-25-000005 &lt;b&gt;Size:&lt;/b&gt; 5 KB
+</summary>
+<updated>2025-12-17T21:15:09-05:00</updated>
+<category scheme="https://www.sec.gov/" label="form type" term="4"/>
+<id>urn:tag:sec.gov,2008:accession-number=0001967575-25-000005</id>
+</entry>
+<entry>
+<title>4 - Pattabhiraman Arun (0001929299) (Reporting)</title>
+<link rel="alternate" type="text/html" href="https://www.sec.gov/Archives/edgar/data/1929299/000192929925000005/0001929299-25-000005-index.htm"/>
+<summary type="html">
+ &lt;b&gt;Filed:&lt;/b&gt; 2025-12-17 &lt;b&gt;AccNo:&lt;/b&gt; 0001929299-25-000005 &lt;b&gt;Size:&lt;/b&gt; 5 KB
+</summary>
+<updated>2025-12-17T21:15:07-05:00</updated>
+<category scheme="https://www.sec.gov/" label="form type" term="4"/>
+<id>urn:tag:sec.gov,2008:accession-number=0001929299-25-000005</id>
+</entry>
+<entry>
+<title>4 - Sprinklr, Inc. (0001569345) (Issuer)</title>
+<link rel="alternate" type="text/html" href="https://www.sec.gov/Archives/edgar/data/1569345/000192929925000005/0001929299-25-000005-index.htm"/>
+<summary type="html">
+ &lt;b&gt;Filed:&lt;/b&gt; 2025-12-17 &lt;b&gt;AccNo:&lt;/b&gt; 0001929299-25-000005 &lt;b&gt;Size:&lt;/b&gt; 5 KB
+</summary>
+<updated>2025-12-17T21:15:07-05:00</updated>
+<category scheme="https://www.sec.gov/" label="form type" term="4"/>
+<id>urn:tag:sec.gov,2008:accession-number=0001929299-25-000005</id>
+</entry>
+<entry>
+<title>4 - Misra Amitabh (0002018050) (Reporting)</title>
+<link rel="alternate" type="text/html" href="https://www.sec.gov/Archives/edgar/data/2018050/000201805025000005/0002018050-25-000005-index.htm"/>
+<summary type="html">
+ &lt;b&gt;Filed:&lt;/b&gt; 2025-12-17 &lt;b&gt;AccNo:&lt;/b&gt; 0002018050-25-000005 &lt;b&gt;Size:&lt;/b&gt; 5 KB
+</summary>
+<updated>2025-12-17T21:15:05-05:00</updated>
+<category scheme="https://www.sec.gov/" label="form type" term="4"/>
+<id>urn:tag:sec.gov,2008:accession-number=0002018050-25-000005</id>
+</entry>
+<entry>
+<title>4 - Sprinklr, Inc. (0001569345) (Issuer)</title>
+<link rel="alternate" type="text/html" href="https://www.sec.gov/Archives/edgar/data/1569345/000201805025000005/0002018050-25-000005-index.htm"/>
+<summary type="html">
+ &lt;b&gt;Filed:&lt;/b&gt; 2025-12-17 &lt;b&gt;AccNo:&lt;/b&gt; 0002018050-25-000005 &lt;b&gt;Size:&lt;/b&gt; 5 KB
+</summary>
+<updated>2025-12-17T21:15:05-05:00</updated>
+<category scheme="https://www.sec.gov/" label="form type" term="4"/>
+<id>urn:tag:sec.gov,2008:accession-number=0002018050-25-000005</id>
+</entry>
+<entry>
+<title>4 - Alphabet Inc. (0001652044) (Issuer)</title>
+<link rel="alternate" type="text/html" href="https://www.sec.gov/Archives/edgar/data/1652044/000119312525323394/0001193125-25-323394-index.htm"/>
+<summary type="html">
+ &lt;b&gt;Filed:&lt;/b&gt; 2025-12-17 &lt;b&gt;AccNo:&lt;/b&gt; 0001193125-25-323394 &lt;b&gt;Size:&lt;/b&gt; 11 KB
+</summary>
+<updated>2025-12-17T21:12:23-05:00</updated>
+<category scheme="https://www.sec.gov/" label="form type" term="4"/>
+<id>urn:tag:sec.gov,2008:accession-number=0001193125-25-323394</id>
+</entry>
+<entry>
+<title>4 - CHAVEZ R. MARTIN (0001157983) (Reporting)</title>
+<link rel="alternate" type="text/html" href="https://www.sec.gov/Archives/edgar/data/1157983/000119312525323394/0001193125-25-323394-index.htm"/>
+<summary type="html">
+ &lt;b&gt;Filed:&lt;/b&gt; 2025-12-17 &lt;b&gt;AccNo:&lt;/b&gt; 0001193125-25-323394 &lt;b&gt;Size:&lt;/b&gt; 11 KB
+</summary>
+<updated>2025-12-17T21:12:23-05:00</updated>
+<category scheme="https://www.sec.gov/" label="form type" term="4"/>
+<id>urn:tag:sec.gov,2008:accession-number=0001193125-25-323394</id>
+</entry>
+<entry>
+<title>4 - Swanson Marc (0001570328) (Reporting)</title>
+<link rel="alternate" type="text/html" href="https://www.sec.gov/Archives/edgar/data/1570328/000119312525323393/0001193125-25-323393-index.htm"/>
+<summary type="html">
+ &lt;b&gt;Filed:&lt;/b&gt; 2025-12-17 &lt;b&gt;AccNo:&lt;/b&gt; 0001193125-25-323393 &lt;b&gt;Size:&lt;/b&gt; 5 KB
+</summary>
+<updated>2025-12-17T21:12:22-05:00</updated>
+<category scheme="https://www.sec.gov/" label="form type" term="4"/>
+<id>urn:tag:sec.gov,2008:accession-number=0001193125-25-323393</id>
+</entry>
+<entry>
+<title>4 - United Parks &amp; Resorts Inc. (0001564902) (Issuer)</title>
+<link rel="alternate" type="text/html" href="https://www.sec.gov/Archives/edgar/data/1564902/000119312525323393/0001193125-25-323393-index.htm"/>
+<summary type="html">
+ &lt;b&gt;Filed:&lt;/b&gt; 2025-12-17 &lt;b&gt;AccNo:&lt;/b&gt; 0001193125-25-323393 &lt;b&gt;Size:&lt;/b&gt; 5 KB
+</summary>
+<updated>2025-12-17T21:12:22-05:00</updated>
+<category scheme="https://www.sec.gov/" label="form type" term="4"/>
+<id>urn:tag:sec.gov,2008:accession-number=0001193125-25-323393</id>
+</entry>
+<entry>
+<title>4 - Finazzo Christopher L. (0001801406) (Reporting)</title>
+<link rel="alternate" type="text/html" href="https://www.sec.gov/Archives/edgar/data/1801406/000119312525323385/0001193125-25-323385-index.htm"/>
+<summary type="html">
+ &lt;b&gt;Filed:&lt;/b&gt; 2025-12-17 &lt;b&gt;AccNo:&lt;/b&gt; 0001193125-25-323385 &lt;b&gt;Size:&lt;/b&gt; 5 KB
+</summary>
+<updated>2025-12-17T21:09:55-05:00</updated>
+<category scheme="https://www.sec.gov/" label="form type" term="4"/>
+<id>urn:tag:sec.gov,2008:accession-number=0001193125-25-323385</id>
+</entry>
+<entry>
+<title>4 - United Parks &amp; Resorts Inc. (0001564902) (Issuer)</title>
+<link rel="alternate" type="text/html" href="https://www.sec.gov/Archives/edgar/data/1564902/000119312525323385/0001193125-25-323385-index.htm"/>
+<summary type="html">
+ &lt;b&gt;Filed:&lt;/b&gt; 2025-12-17 &lt;b&gt;AccNo:&lt;/b&gt; 0001193125-25-323385 &lt;b&gt;Size:&lt;/b&gt; 5 KB
+</summary>
+<updated>2025-12-17T21:09:55-05:00</updated>
+<category scheme="https://www.sec.gov/" label="form type" term="4"/>
+<id>urn:tag:sec.gov,2008:accession-number=0001193125-25-323385</id>
+</entry>
+<entry>
+<title>4 - Crespo Jose Luis (0001893770) (Reporting)</title>
+<link rel="alternate" type="text/html" href="https://www.sec.gov/Archives/edgar/data/1893770/000110465925122178/0001104659-25-122178-index.htm"/>
+<summary type="html">
+ &lt;b&gt;Filed:&lt;/b&gt; 2025-12-17 &lt;b&gt;AccNo:&lt;/b&gt; 0001104659-25-122178 &lt;b&gt;Size:&lt;/b&gt; 5 KB
+</summary>
+<updated>2025-12-17T21:06:21-05:00</updated>
+<category scheme="https://www.sec.gov/" label="form type" term="4"/>
+<id>urn:tag:sec.gov,2008:accession-number=0001104659-25-122178</id>
+</entry>
+<entry>
+<title>4 - PLUG POWER INC (0001093691) (Issuer)</title>
+<link rel="alternate" type="text/html" href="https://www.sec.gov/Archives/edgar/data/1093691/000110465925122178/0001104659-25-122178-index.htm"/>
+<summary type="html">
+ &lt;b&gt;Filed:&lt;/b&gt; 2025-12-17 &lt;b&gt;AccNo:&lt;/b&gt; 0001104659-25-122178 &lt;b&gt;Size:&lt;/b&gt; 5 KB
+</summary>
+<updated>2025-12-17T21:06:21-05:00</updated>
+<category scheme="https://www.sec.gov/" label="form type" term="4"/>
+<id>urn:tag:sec.gov,2008:accession-number=0001104659-25-122178</id>
+</entry>
+<entry>
+<title>4 - Lee-Smith Christopher (0002008627) (Reporting)</title>
+<link rel="alternate" type="text/html" href="https://www.sec.gov/Archives/edgar/data/2008627/000090514825004395/0000905148-25-004395-index.htm"/>
+<summary type="html">
+ &lt;b&gt;Filed:&lt;/b&gt; 2025-12-17 &lt;b&gt;AccNo:&lt;/b&gt; 0000905148-25-004395 &lt;b&gt;Size:&lt;/b&gt; 16 KB
+</summary>
+<updated>2025-12-17T21:04:04-05:00</updated>
+<category scheme="https://www.sec.gov/" label="form type" term="4"/>
+<id>urn:tag:sec.gov,2008:accession-number=0000905148-25-004395</id>
+</entry>
+<entry>
+<title>4 - Accelerant Holdings (0001997350) (Issuer)</title>
+<link rel="alternate" type="text/html" href="https://www.sec.gov/Archives/edgar/data/1997350/000090514825004395/0000905148-25-004395-index.htm"/>
+<summary type="html">
+ &lt;b&gt;Filed:&lt;/b&gt; 2025-12-17 &lt;b&gt;AccNo:&lt;/b&gt; 0000905148-25-004395 &lt;b&gt;Size:&lt;/b&gt; 16 KB
+</summary>
+<updated>2025-12-17T21:04:04-05:00</updated>
+<category scheme="https://www.sec.gov/" label="form type" term="4"/>
+<id>urn:tag:sec.gov,2008:accession-number=0000905148-25-004395</id>
+</entry>
+<entry>
+<title>4 - Gline Matthew (0001750094) (Reporting)</title>
+<link rel="alternate" type="text/html" href="https://www.sec.gov/Archives/edgar/data/1750094/000114036125045906/0001140361-25-045906-index.htm"/>
+<summary type="html">
+ &lt;b&gt;Filed:&lt;/b&gt; 2025-12-17 &lt;b&gt;AccNo:&lt;/b&gt; 0001140361-25-045906 &lt;b&gt;Size:&lt;/b&gt; 22 KB
+</summary>
+<updated>2025-12-17T21:00:09-05:00</updated>
+<category scheme="https://www.sec.gov/" label="form type" term="4"/>
+<id>urn:tag:sec.gov,2008:accession-number=0001140361-25-045906</id>
+</entry>
+<entry>
+<title>4 - Roivant Sciences Ltd. (0001635088) (Issuer)</title>
+<link rel="alternate" type="text/html" href="https://www.sec.gov/Archives/edgar/data/1635088/000114036125045906/0001140361-25-045906-index.htm"/>
+<summary type="html">
+ &lt;b&gt;Filed:&lt;/b&gt; 2025-12-17 &lt;b&gt;AccNo:&lt;/b&gt; 0001140361-25-045906 &lt;b&gt;Size:&lt;/b&gt; 22 KB
+</summary>
+<updated>2025-12-17T21:00:09-05:00</updated>
+<category scheme="https://www.sec.gov/" label="form type" term="4"/>
+<id>urn:tag:sec.gov,2008:accession-number=0001140361-25-045906</id>
+</entry>
+<entry>
+<title>4 - Melnikov Dmitry (0001849699) (Reporting)</title>
+<link rel="alternate" type="text/html" href="https://www.sec.gov/Archives/edgar/data/1849699/000162828025057778/0001628280-25-057778-index.htm"/>
+<summary type="html">
+ &lt;b&gt;Filed:&lt;/b&gt; 2025-12-17 &lt;b&gt;AccNo:&lt;/b&gt; 0001628280-25-057778 &lt;b&gt;Size:&lt;/b&gt; 13 KB
+</summary>
+<updated>2025-12-17T21:00:03-05:00</updated>
+<category scheme="https://www.sec.gov/" label="form type" term="4"/>
+<id>urn:tag:sec.gov,2008:accession-number=0001628280-25-057778</id>
+</entry>
+<entry>
+<title>4 - SEMrush Holdings, Inc. (0001831840) (Issuer)</title>
+<link rel="alternate" type="text/html" href="https://www.sec.gov/Archives/edgar/data/1831840/000162828025057778/0001628280-25-057778-index.htm"/>
+<summary type="html">
+ &lt;b&gt;Filed:&lt;/b&gt; 2025-12-17 &lt;b&gt;AccNo:&lt;/b&gt; 0001628280-25-057778 &lt;b&gt;Size:&lt;/b&gt; 13 KB
+</summary>
+<updated>2025-12-17T21:00:03-05:00</updated>
+<category scheme="https://www.sec.gov/" label="form type" term="4"/>
+<id>urn:tag:sec.gov,2008:accession-number=0001628280-25-057778</id>
+</entry>
+<entry>
+<title>4 - Lath Hitesh (0002014154) (Reporting)</title>
+<link rel="alternate" type="text/html" href="https://www.sec.gov/Archives/edgar/data/2014154/000201415425000010/0002014154-25-000010-index.htm"/>
+<summary type="html">
+ &lt;b&gt;Filed:&lt;/b&gt; 2025-12-17 &lt;b&gt;AccNo:&lt;/b&gt; 0002014154-25-000010 &lt;b&gt;Size:&lt;/b&gt; 23 KB
+</summary>
+<updated>2025-12-17T20:55:39-05:00</updated>
+<category scheme="https://www.sec.gov/" label="form type" term="4"/>
+<id>urn:tag:sec.gov,2008:accession-number=0002014154-25-000010</id>
+</entry>
+<entry>
+<title>4 - C3.ai, Inc. (0001577526) (Issuer)</title>
+<link rel="alternate" type="text/html" href="https://www.sec.gov/Archives/edgar/data/1577526/000201415425000010/0002014154-25-000010-index.htm"/>
+<summary type="html">
+ &lt;b&gt;Filed:&lt;/b&gt; 2025-12-17 &lt;b&gt;AccNo:&lt;/b&gt; 0002014154-25-000010 &lt;b&gt;Size:&lt;/b&gt; 23 KB
+</summary>
+<updated>2025-12-17T20:55:39-05:00</updated>
+<category scheme="https://www.sec.gov/" label="form type" term="4"/>
+<id>urn:tag:sec.gov,2008:accession-number=0002014154-25-000010</id>
+</entry>
+<entry>
+<title>4 - StepStone Private Venture &amp; Growth Fund (0001918642) (Issuer)</title>
+<link rel="alternate" type="text/html" href="https://www.sec.gov/Archives/edgar/data/1918642/000119312525323358/0001193125-25-323358-index.htm"/>
+<summary type="html">
+ &lt;b&gt;Filed:&lt;/b&gt; 2025-12-17 &lt;b&gt;AccNo:&lt;/b&gt; 0001193125-25-323358 &lt;b&gt;Size:&lt;/b&gt; 4 KB
+</summary>
+<updated>2025-12-17T20:51:13-05:00</updated>
+<category scheme="https://www.sec.gov/" label="form type" term="4"/>
+<id>urn:tag:sec.gov,2008:accession-number=0001193125-25-323358</id>
+</entry>
+<entry>
+<title>4 - Long Robert W. (0001620091) (Reporting)</title>
+<link rel="alternate" type="text/html" href="https://www.sec.gov/Archives/edgar/data/1620091/000119312525323358/0001193125-25-323358-index.htm"/>
+<summary type="html">
+ &lt;b&gt;Filed:&lt;/b&gt; 2025-12-17 &lt;b&gt;AccNo:&lt;/b&gt; 0001193125-25-323358 &lt;b&gt;Size:&lt;/b&gt; 4 KB
+</summary>
+<updated>2025-12-17T20:51:13-05:00</updated>
+<category scheme="https://www.sec.gov/" label="form type" term="4"/>
+<id>urn:tag:sec.gov,2008:accession-number=0001193125-25-323358</id>
+</entry>
+<entry>
+<title>4 - Alphabet Inc. (0001652044) (Issuer)</title>
+<link rel="alternate" type="text/html" href="https://www.sec.gov/Archives/edgar/data/1652044/000119312525323357/0001193125-25-323357-index.htm"/>
+<summary type="html">
+ &lt;b&gt;Filed:&lt;/b&gt; 2025-12-17 &lt;b&gt;AccNo:&lt;/b&gt; 0001193125-25-323357 &lt;b&gt;Size:&lt;/b&gt; 21 KB
+</summary>
+<updated>2025-12-17T20:51:08-05:00</updated>
+<category scheme="https://www.sec.gov/" label="form type" term="4"/>
+<id>urn:tag:sec.gov,2008:accession-number=0001193125-25-323357</id>
+</entry>
+<entry>
+<title>4 - Pichai Sundar (0001534753) (Reporting)</title>
+<link rel="alternate" type="text/html" href="https://www.sec.gov/Archives/edgar/data/1534753/000119312525323357/0001193125-25-323357-index.htm"/>
+<summary type="html">
+ &lt;b&gt;Filed:&lt;/b&gt; 2025-12-17 &lt;b&gt;AccNo:&lt;/b&gt; 0001193125-25-323357 &lt;b&gt;Size:&lt;/b&gt; 21 KB
+</summary>
+<updated>2025-12-17T20:51:08-05:00</updated>
+<category scheme="https://www.sec.gov/" label="form type" term="4"/>
+<id>urn:tag:sec.gov,2008:accession-number=0001193125-25-323357</id>
+</entry>
+<entry>
+<title>4 - Caruvana Dean Anthony (0002063899) (Reporting)</title>
+<link rel="alternate" type="text/html" href="https://www.sec.gov/Archives/edgar/data/2063899/000119312525323356/0001193125-25-323356-index.htm"/>
+<summary type="html">
+ &lt;b&gt;Filed:&lt;/b&gt; 2025-12-17 &lt;b&gt;AccNo:&lt;/b&gt; 0001193125-25-323356 &lt;b&gt;Size:&lt;/b&gt; 4 KB
+</summary>
+<updated>2025-12-17T20:51:00-05:00</updated>
+<category scheme="https://www.sec.gov/" label="form type" term="4"/>
+<id>urn:tag:sec.gov,2008:accession-number=0001193125-25-323356</id>
+</entry>
+<entry>
+<title>4 - StepStone Private Venture &amp; Growth Fund (0001918642) (Issuer)</title>
+<link rel="alternate" type="text/html" href="https://www.sec.gov/Archives/edgar/data/1918642/000119312525323356/0001193125-25-323356-index.htm"/>
+<summary type="html">
+ &lt;b&gt;Filed:&lt;/b&gt; 2025-12-17 &lt;b&gt;AccNo:&lt;/b&gt; 0001193125-25-323356 &lt;b&gt;Size:&lt;/b&gt; 4 KB
+</summary>
+<updated>2025-12-17T20:51:00-05:00</updated>
+<category scheme="https://www.sec.gov/" label="form type" term="4"/>
+<id>urn:tag:sec.gov,2008:accession-number=0001193125-25-323356</id>
+</entry>
+<entry>
+<title>4 - Urmson Christopher (0001869013) (Reporting)</title>
+<link rel="alternate" type="text/html" href="https://www.sec.gov/Archives/edgar/data/1869013/000186901325000004/0001869013-25-000004-index.htm"/>
+<summary type="html">
+ &lt;b&gt;Filed:&lt;/b&gt; 2025-12-17 &lt;b&gt;AccNo:&lt;/b&gt; 0001869013-25-000004 &lt;b&gt;Size:&lt;/b&gt; 8 KB
+</summary>
+<updated>2025-12-17T20:48:45-05:00</updated>
+<category scheme="https://www.sec.gov/" label="form type" term="4"/>
+<id>urn:tag:sec.gov,2008:accession-number=0001869013-25-000004</id>
+</entry>
+<entry>
+<title>4 - Aurora Innovation, Inc. (0001828108) (Issuer)</title>
+<link rel="alternate" type="text/html" href="https://www.sec.gov/Archives/edgar/data/1828108/000186901325000004/0001869013-25-000004-index.htm"/>
+<summary type="html">
+ &lt;b&gt;Filed:&lt;/b&gt; 2025-12-17 &lt;b&gt;AccNo:&lt;/b&gt; 0001869013-25-000004 &lt;b&gt;Size:&lt;/b&gt; 8 KB
+</summary>
+<updated>2025-12-17T20:48:45-05:00</updated>
+<category scheme="https://www.sec.gov/" label="form type" term="4"/>
+<id>urn:tag:sec.gov,2008:accession-number=0001869013-25-000004</id>
+</entry>
+<entry>
+<title>4 - Sheena Jonathan (0001646649) (Reporting)</title>
+<link rel="alternate" type="text/html" href="https://www.sec.gov/Archives/edgar/data/1646649/000164664925000021/0001646649-25-000021-index.htm"/>
+<summary type="html">
+ &lt;b&gt;Filed:&lt;/b&gt; 2025-12-17 &lt;b&gt;AccNo:&lt;/b&gt; 0001646649-25-000021 &lt;b&gt;Size:&lt;/b&gt; 12 KB
+</summary>
+<updated>2025-12-17T20:35:05-05:00</updated>
+<category scheme="https://www.sec.gov/" label="form type" term="4"/>
+<id>urn:tag:sec.gov,2008:accession-number=0001646649-25-000021</id>
+</entry>
+<entry>
+<title>4 - Natera, Inc. (0001604821) (Issuer)</title>
+<link rel="alternate" type="text/html" href="https://www.sec.gov/Archives/edgar/data/1604821/000164664925000021/0001646649-25-000021-index.htm"/>
+<summary type="html">
+ &lt;b&gt;Filed:&lt;/b&gt; 2025-12-17 &lt;b&gt;AccNo:&lt;/b&gt; 0001646649-25-000021 &lt;b&gt;Size:&lt;/b&gt; 12 KB
+</summary>
+<updated>2025-12-17T20:35:05-05:00</updated>
+<category scheme="https://www.sec.gov/" label="form type" term="4"/>
+<id>urn:tag:sec.gov,2008:accession-number=0001646649-25-000021</id>
+</entry>
+<entry>
+<title>4 - Solo Brands, Inc. (0001870600) (Issuer)</title>
+<link rel="alternate" type="text/html" href="https://www.sec.gov/Archives/edgar/data/1870600/000160933325000005/0001609333-25-000005-index.htm"/>
+<summary type="html">
+ &lt;b&gt;Filed:&lt;/b&gt; 2025-12-17 &lt;b&gt;AccNo:&lt;/b&gt; 0001609333-25-000005 &lt;b&gt;Size:&lt;/b&gt; 8 KB
+</summary>
+<updated>2025-12-17T20:31:25-05:00</updated>
+<category scheme="https://www.sec.gov/" label="form type" term="4"/>
+<id>urn:tag:sec.gov,2008:accession-number=0001609333-25-000005</id>
+</entry>
+<entry>
+<title>4 - Larson John P. (0001609333) (Reporting)</title>
+<link rel="alternate" type="text/html" href="https://www.sec.gov/Archives/edgar/data/1609333/000160933325000005/0001609333-25-000005-index.htm"/>
+<summary type="html">
+ &lt;b&gt;Filed:&lt;/b&gt; 2025-12-17 &lt;b&gt;AccNo:&lt;/b&gt; 0001609333-25-000005 &lt;b&gt;Size:&lt;/b&gt; 8 KB
+</summary>
+<updated>2025-12-17T20:31:25-05:00</updated>
+<category scheme="https://www.sec.gov/" label="form type" term="4"/>
+<id>urn:tag:sec.gov,2008:accession-number=0001609333-25-000005</id>
+</entry>
+<entry>
+<title>4 - Huffman Steve Ladd (0001827011) (Reporting)</title>
+<link rel="alternate" type="text/html" href="https://www.sec.gov/Archives/edgar/data/1827011/000182701125000018/0001827011-25-000018-index.htm"/>
+<summary type="html">
+ &lt;b&gt;Filed:&lt;/b&gt; 2025-12-17 &lt;b&gt;AccNo:&lt;/b&gt; 0001827011-25-000018 &lt;b&gt;Size:&lt;/b&gt; 28 KB
+</summary>
+<updated>2025-12-17T20:30:54-05:00</updated>
+<category scheme="https://www.sec.gov/" label="form type" term="4"/>
+<id>urn:tag:sec.gov,2008:accession-number=0001827011-25-000018</id>
+</entry>
+<entry>
+<title>4 - Reddit, Inc. (0001713445) (Issuer)</title>
+<link rel="alternate" type="text/html" href="https://www.sec.gov/Archives/edgar/data/1713445/000182701125000018/0001827011-25-000018-index.htm"/>
+<summary type="html">
+ &lt;b&gt;Filed:&lt;/b&gt; 2025-12-17 &lt;b&gt;AccNo:&lt;/b&gt; 0001827011-25-000018 &lt;b&gt;Size:&lt;/b&gt; 28 KB
+</summary>
+<updated>2025-12-17T20:30:54-05:00</updated>
+<category scheme="https://www.sec.gov/" label="form type" term="4"/>
+<id>urn:tag:sec.gov,2008:accession-number=0001827011-25-000018</id>
+</entry>
+<entry>
+<title>4 - Walker Karen Marie (0002008556) (Reporting)</title>
+<link rel="alternate" type="text/html" href="https://www.sec.gov/Archives/edgar/data/2008556/000119312525323332/0001193125-25-323332-index.htm"/>
+<summary type="html">
+ &lt;b&gt;Filed:&lt;/b&gt; 2025-12-17 &lt;b&gt;AccNo:&lt;/b&gt; 0001193125-25-323332 &lt;b&gt;Size:&lt;/b&gt; 8 KB
+</summary>
+<updated>2025-12-17T20:30:03-05:00</updated>
+<category scheme="https://www.sec.gov/" label="form type" term="4"/>
+<id>urn:tag:sec.gov,2008:accession-number=0001193125-25-323332</id>
+</entry>
+<entry>
+<title>4 - Kyverna Therapeutics, Inc. (0001994702) (Issuer)</title>
+<link rel="alternate" type="text/html" href="https://www.sec.gov/Archives/edgar/data/1994702/000119312525323332/0001193125-25-323332-index.htm"/>
+<summary type="html">
+ &lt;b&gt;Filed:&lt;/b&gt; 2025-12-17 &lt;b&gt;AccNo:&lt;/b&gt; 0001193125-25-323332 &lt;b&gt;Size:&lt;/b&gt; 8 KB
+</summary>
+<updated>2025-12-17T20:30:03-05:00</updated>
+<category scheme="https://www.sec.gov/" label="form type" term="4"/>
+<id>urn:tag:sec.gov,2008:accession-number=0001193125-25-323332</id>
+</entry>
+<entry>
+<title>4 - Page Tyler (0001887623) (Reporting)</title>
+<link rel="alternate" type="text/html" href="https://www.sec.gov/Archives/edgar/data/1887623/000188762325000010/0001887623-25-000010-index.htm"/>
+<summary type="html">
+ &lt;b&gt;Filed:&lt;/b&gt; 2025-12-17 &lt;b&gt;AccNo:&lt;/b&gt; 0001887623-25-000010 &lt;b&gt;Size:&lt;/b&gt; 13 KB
+</summary>
+<updated>2025-12-17T20:21:47-05:00</updated>
+<category scheme="https://www.sec.gov/" label="form type" term="4"/>
+<id>urn:tag:sec.gov,2008:accession-number=0001887623-25-000010</id>
+</entry>
+<entry>
+<title>4 - Cipher Mining Inc. (0001819989) (Issuer)</title>
+<link rel="alternate" type="text/html" href="https://www.sec.gov/Archives/edgar/data/1819989/000188762325000010/0001887623-25-000010-index.htm"/>
+<summary type="html">
+ &lt;b&gt;Filed:&lt;/b&gt; 2025-12-17 &lt;b&gt;AccNo:&lt;/b&gt; 0001887623-25-000010 &lt;b&gt;Size:&lt;/b&gt; 13 KB
+</summary>
+<updated>2025-12-17T20:21:47-05:00</updated>
+<category scheme="https://www.sec.gov/" label="form type" term="4"/>
+<id>urn:tag:sec.gov,2008:accession-number=0001887623-25-000010</id>
+</entry>
+<entry>
+<title>4 - Kelly Patrick Arthur (0001887616) (Reporting)</title>
+<link rel="alternate" type="text/html" href="https://www.sec.gov/Archives/edgar/data/1887616/000188761625000012/0001887616-25-000012-index.htm"/>
+<summary type="html">
+ &lt;b&gt;Filed:&lt;/b&gt; 2025-12-17 &lt;b&gt;AccNo:&lt;/b&gt; 0001887616-25-000012 &lt;b&gt;Size:&lt;/b&gt; 15 KB
+</summary>
+<updated>2025-12-17T20:20:57-05:00</updated>
+<category scheme="https://www.sec.gov/" label="form type" term="4"/>
+<id>urn:tag:sec.gov,2008:accession-number=0001887616-25-000012</id>
+</entry>
+<entry>
+<title>4 - Cipher Mining Inc. (0001819989) (Issuer)</title>
+<link rel="alternate" type="text/html" href="https://www.sec.gov/Archives/edgar/data/1819989/000188761625000012/0001887616-25-000012-index.htm"/>
+<summary type="html">
+ &lt;b&gt;Filed:&lt;/b&gt; 2025-12-17 &lt;b&gt;AccNo:&lt;/b&gt; 0001887616-25-000012 &lt;b&gt;Size:&lt;/b&gt; 15 KB
+</summary>
+<updated>2025-12-17T20:20:57-05:00</updated>
+<category scheme="https://www.sec.gov/" label="form type" term="4"/>
+<id>urn:tag:sec.gov,2008:accession-number=0001887616-25-000012</id>
+</entry>
+<entry>
+<title>4 - Iwaschuk William (0001887627) (Reporting)</title>
+<link rel="alternate" type="text/html" href="https://www.sec.gov/Archives/edgar/data/1887627/000188762725000009/0001887627-25-000009-index.htm"/>
+<summary type="html">
+ &lt;b&gt;Filed:&lt;/b&gt; 2025-12-17 &lt;b&gt;AccNo:&lt;/b&gt; 0001887627-25-000009 &lt;b&gt;Size:&lt;/b&gt; 13 KB
+</summary>
+<updated>2025-12-17T20:19:57-05:00</updated>
+<category scheme="https://www.sec.gov/" label="form type" term="4"/>
+<id>urn:tag:sec.gov,2008:accession-number=0001887627-25-000009</id>
+</entry>
+<entry>
+<title>4 - Cipher Mining Inc. (0001819989) (Issuer)</title>
+<link rel="alternate" type="text/html" href="https://www.sec.gov/Archives/edgar/data/1819989/000188762725000009/0001887627-25-000009-index.htm"/>
+<summary type="html">
+ &lt;b&gt;Filed:&lt;/b&gt; 2025-12-17 &lt;b&gt;AccNo:&lt;/b&gt; 0001887627-25-000009 &lt;b&gt;Size:&lt;/b&gt; 13 KB
+</summary>
+<updated>2025-12-17T20:19:57-05:00</updated>
+<category scheme="https://www.sec.gov/" label="form type" term="4"/>
+<id>urn:tag:sec.gov,2008:accession-number=0001887627-25-000009</id>
+</entry>
+<entry>
+<title>4 - Brown Kyle Steven (0001796795) (Reporting)</title>
+<link rel="alternate" type="text/html" href="https://www.sec.gov/Archives/edgar/data/1796795/000119312525323326/0001193125-25-323326-index.htm"/>
+<summary type="html">
+ &lt;b&gt;Filed:&lt;/b&gt; 2025-12-17 &lt;b&gt;AccNo:&lt;/b&gt; 0001193125-25-323326 &lt;b&gt;Size:&lt;/b&gt; 6 KB
+</summary>
+<updated>2025-12-17T20:19:29-05:00</updated>
+<category scheme="https://www.sec.gov/" label="form type" term="4"/>
+<id>urn:tag:sec.gov,2008:accession-number=0001193125-25-323326</id>
+</entry>
+<entry>
+<title>4 - Trinity Capital Inc. (0001786108) (Issuer)</title>
+<link rel="alternate" type="text/html" href="https://www.sec.gov/Archives/edgar/data/1786108/000119312525323326/0001193125-25-323326-index.htm"/>
+<summary type="html">
+ &lt;b&gt;Filed:&lt;/b&gt; 2025-12-17 &lt;b&gt;AccNo:&lt;/b&gt; 0001193125-25-323326 &lt;b&gt;Size:&lt;/b&gt; 6 KB
+</summary>
+<updated>2025-12-17T20:19:29-05:00</updated>
+<category scheme="https://www.sec.gov/" label="form type" term="4"/>
+<id>urn:tag:sec.gov,2008:accession-number=0001193125-25-323326</id>
+</entry>
+<entry>
+<title>4 - Courtemanche Craig F. Jr. (0001805735) (Reporting)</title>
+<link rel="alternate" type="text/html" href="https://www.sec.gov/Archives/edgar/data/1805735/000162828025057775/0001628280-25-057775-index.htm"/>
+<summary type="html">
+ &lt;b&gt;Filed:&lt;/b&gt; 2025-12-17 &lt;b&gt;AccNo:&lt;/b&gt; 0001628280-25-057775 &lt;b&gt;Size:&lt;/b&gt; 10 KB
+</summary>
+<updated>2025-12-17T20:15:50-05:00</updated>
+<category scheme="https://www.sec.gov/" label="form type" term="4"/>
+<id>urn:tag:sec.gov,2008:accession-number=0001628280-25-057775</id>
+</entry>
+<entry>
+<title>4 - PROCORE TECHNOLOGIES, INC. (0001611052) (Issuer)</title>
+<link rel="alternate" type="text/html" href="https://www.sec.gov/Archives/edgar/data/1611052/000162828025057775/0001628280-25-057775-index.htm"/>
+<summary type="html">
+ &lt;b&gt;Filed:&lt;/b&gt; 2025-12-17 &lt;b&gt;AccNo:&lt;/b&gt; 0001628280-25-057775 &lt;b&gt;Size:&lt;/b&gt; 10 KB
+</summary>
+<updated>2025-12-17T20:15:50-05:00</updated>
+<category scheme="https://www.sec.gov/" label="form type" term="4"/>
+<id>urn:tag:sec.gov,2008:accession-number=0001628280-25-057775</id>
+</entry>
+<entry>
+<title>4 - McBee Brannin (0002058103) (Reporting)</title>
+<link rel="alternate" type="text/html" href="https://www.sec.gov/Archives/edgar/data/2058103/000176962825000118/0001769628-25-000118-index.htm"/>
+<summary type="html">
+ &lt;b&gt;Filed:&lt;/b&gt; 2025-12-17 &lt;b&gt;AccNo:&lt;/b&gt; 0001769628-25-000118 &lt;b&gt;Size:&lt;/b&gt; 15 KB
+</summary>
+<updated>2025-12-17T20:14:52-05:00</updated>
+<category scheme="https://www.sec.gov/" label="form type" term="4"/>
+<id>urn:tag:sec.gov,2008:accession-number=0001769628-25-000118</id>
+</entry>
+<entry>
+<title>4 - CoreWeave, Inc. (0001769628) (Issuer)</title>
+<link rel="alternate" type="text/html" href="https://www.sec.gov/Archives/edgar/data/1769628/000176962825000118/0001769628-25-000118-index.htm"/>
+<summary type="html">
+ &lt;b&gt;Filed:&lt;/b&gt; 2025-12-17 &lt;b&gt;AccNo:&lt;/b&gt; 0001769628-25-000118 &lt;b&gt;Size:&lt;/b&gt; 15 KB
+</summary>
+<updated>2025-12-17T20:14:52-05:00</updated>
+<category scheme="https://www.sec.gov/" label="form type" term="4"/>
+<id>urn:tag:sec.gov,2008:accession-number=0001769628-25-000118</id>
+</entry>
+<entry>
+<title>4 - McBee Brannin (0002058103) (Reporting)</title>
+<link rel="alternate" type="text/html" href="https://www.sec.gov/Archives/edgar/data/2058103/000176962825000116/0001769628-25-000116-index.htm"/>
+<summary type="html">
+ &lt;b&gt;Filed:&lt;/b&gt; 2025-12-17 &lt;b&gt;AccNo:&lt;/b&gt; 0001769628-25-000116 &lt;b&gt;Size:&lt;/b&gt; 50 KB
+</summary>
+<updated>2025-12-17T20:13:12-05:00</updated>
+<category scheme="https://www.sec.gov/" label="form type" term="4"/>
+<id>urn:tag:sec.gov,2008:accession-number=0001769628-25-000116</id>
+</entry>
+<entry>
+<title>4 - CoreWeave, Inc. (0001769628) (Issuer)</title>
+<link rel="alternate" type="text/html" href="https://www.sec.gov/Archives/edgar/data/1769628/000176962825000116/0001769628-25-000116-index.htm"/>
+<summary type="html">
+ &lt;b&gt;Filed:&lt;/b&gt; 2025-12-17 &lt;b&gt;AccNo:&lt;/b&gt; 0001769628-25-000116 &lt;b&gt;Size:&lt;/b&gt; 50 KB
+</summary>
+<updated>2025-12-17T20:13:12-05:00</updated>
+<category scheme="https://www.sec.gov/" label="form type" term="4"/>
+<id>urn:tag:sec.gov,2008:accession-number=0001769628-25-000116</id>
+</entry>
+<entry>
+<title>4 - Garrison Michael David (0001944816) (Reporting)</title>
+<link rel="alternate" type="text/html" href="https://www.sec.gov/Archives/edgar/data/1944816/000162828025057774/0001628280-25-057774-index.htm"/>
+<summary type="html">
+ &lt;b&gt;Filed:&lt;/b&gt; 2025-12-17 &lt;b&gt;AccNo:&lt;/b&gt; 0001628280-25-057774 &lt;b&gt;Size:&lt;/b&gt; 4 KB
+</summary>
+<updated>2025-12-17T20:12:57-05:00</updated>
+<category scheme="https://www.sec.gov/" label="form type" term="4"/>
+<id>urn:tag:sec.gov,2008:accession-number=0001628280-25-057774</id>
+</entry>
+<entry>
+<title>4 - BECTON DICKINSON &amp; CO (0000010795) (Issuer)</title>
+<link rel="alternate" type="text/html" href="https://www.sec.gov/Archives/edgar/data/10795/000162828025057774/0001628280-25-057774-index.htm"/>
+<summary type="html">
+ &lt;b&gt;Filed:&lt;/b&gt; 2025-12-17 &lt;b&gt;AccNo:&lt;/b&gt; 0001628280-25-057774 &lt;b&gt;Size:&lt;/b&gt; 4 KB
+</summary>
+<updated>2025-12-17T20:12:57-05:00</updated>
+<category scheme="https://www.sec.gov/" label="form type" term="4"/>
+<id>urn:tag:sec.gov,2008:accession-number=0001628280-25-057774</id>
+</entry>
+<entry>
+<title>4 - Krawiec Peter (0001891037) (Reporting)</title>
+<link rel="alternate" type="text/html" href="https://www.sec.gov/Archives/edgar/data/1891037/000189103725000010/0001891037-25-000010-index.htm"/>
+<summary type="html">
+ &lt;b&gt;Filed:&lt;/b&gt; 2025-12-17 &lt;b&gt;AccNo:&lt;/b&gt; 0001891037-25-000010 &lt;b&gt;Size:&lt;/b&gt; 7 KB
+</summary>
+<updated>2025-12-17T20:11:58-05:00</updated>
+<category scheme="https://www.sec.gov/" label="form type" term="4"/>
+<id>urn:tag:sec.gov,2008:accession-number=0001891037-25-000010</id>
+</entry>
+<entry>
+<title>4 - Rivian Automotive, Inc. / DE (0001874178) (Issuer)</title>
+<link rel="alternate" type="text/html" href="https://www.sec.gov/Archives/edgar/data/1874178/000189103725000010/0001891037-25-000010-index.htm"/>
+<summary type="html">
+ &lt;b&gt;Filed:&lt;/b&gt; 2025-12-17 &lt;b&gt;AccNo:&lt;/b&gt; 0001891037-25-000010 &lt;b&gt;Size:&lt;/b&gt; 7 KB
+</summary>
+<updated>2025-12-17T20:11:58-05:00</updated>
+<category scheme="https://www.sec.gov/" label="form type" term="4"/>
+<id>urn:tag:sec.gov,2008:accession-number=0001891037-25-000010</id>
+</entry>
+<entry>
+<title>4 - TYSOE RONALD W (0001184472) (Reporting)</title>
+<link rel="alternate" type="text/html" href="https://www.sec.gov/Archives/edgar/data/1184472/000095010325016279/0000950103-25-016279-index.htm"/>
+<summary type="html">
+ &lt;b&gt;Filed:&lt;/b&gt; 2025-12-17 &lt;b&gt;AccNo:&lt;/b&gt; 0000950103-25-016279 &lt;b&gt;Size:&lt;/b&gt; 34 KB
+</summary>
+<updated>2025-12-17T20:11:14-05:00</updated>
+<category scheme="https://www.sec.gov/" label="form type" term="4"/>
+<id>urn:tag:sec.gov,2008:accession-number=0000950103-25-016279</id>
+</entry>
+<entry>
+<title>4 - CINTAS CORP (0000723254) (Issuer)</title>
+<link rel="alternate" type="text/html" href="https://www.sec.gov/Archives/edgar/data/723254/000095010325016279/0000950103-25-016279-index.htm"/>
+<summary type="html">
+ &lt;b&gt;Filed:&lt;/b&gt; 2025-12-17 &lt;b&gt;AccNo:&lt;/b&gt; 0000950103-25-016279 &lt;b&gt;Size:&lt;/b&gt; 34 KB
+</summary>
+<updated>2025-12-17T20:11:14-05:00</updated>
+<category scheme="https://www.sec.gov/" label="form type" term="4"/>
+<id>urn:tag:sec.gov,2008:accession-number=0000950103-25-016279</id>
+</entry>
+<entry>
+<title>4 - McBee Brannin (0002058103) (Reporting)</title>
+<link rel="alternate" type="text/html" href="https://www.sec.gov/Archives/edgar/data/2058103/000176962825000114/0001769628-25-000114-index.htm"/>
+<summary type="html">
+ &lt;b&gt;Filed:&lt;/b&gt; 2025-12-17 &lt;b&gt;AccNo:&lt;/b&gt; 0001769628-25-000114 &lt;b&gt;Size:&lt;/b&gt; 67 KB
+</summary>
+<updated>2025-12-17T20:11:02-05:00</updated>
+<category scheme="https://www.sec.gov/" label="form type" term="4"/>
+<id>urn:tag:sec.gov,2008:accession-number=0001769628-25-000114</id>
+</entry>
+<entry>
+<title>4 - CoreWeave, Inc. (0001769628) (Issuer)</title>
+<link rel="alternate" type="text/html" href="https://www.sec.gov/Archives/edgar/data/1769628/000176962825000114/0001769628-25-000114-index.htm"/>
+<summary type="html">
+ &lt;b&gt;Filed:&lt;/b&gt; 2025-12-17 &lt;b&gt;AccNo:&lt;/b&gt; 0001769628-25-000114 &lt;b&gt;Size:&lt;/b&gt; 67 KB
+</summary>
+<updated>2025-12-17T20:11:02-05:00</updated>
+<category scheme="https://www.sec.gov/" label="form type" term="4"/>
+<id>urn:tag:sec.gov,2008:accession-number=0001769628-25-000114</id>
+</entry>
+<entry>
+<title>4 - Eagle Point DIF GP I LLC (0001836609) (Reporting)</title>
+<link rel="alternate" type="text/html" href="https://www.sec.gov/Archives/edgar/data/1836609/000110465925122155/0001104659-25-122155-index.htm"/>
+<summary type="html">
+ &lt;b&gt;Filed:&lt;/b&gt; 2025-12-17 &lt;b&gt;AccNo:&lt;/b&gt; 0001104659-25-122155 &lt;b&gt;Size:&lt;/b&gt; 9 KB
+</summary>
+<updated>2025-12-17T20:10:43-05:00</updated>
+<category scheme="https://www.sec.gov/" label="form type" term="4"/>
+<id>urn:tag:sec.gov,2008:accession-number=0001104659-25-122155</id>
+</entry>
+<entry>
+<title>4 - Eagle Point Credit Management LLC (0001607203) (Reporting)</title>
+<link rel="alternate" type="text/html" href="https://www.sec.gov/Archives/edgar/data/1607203/000110465925122155/0001104659-25-122155-index.htm"/>
+<summary type="html">
+ &lt;b&gt;Filed:&lt;/b&gt; 2025-12-17 &lt;b&gt;AccNo:&lt;/b&gt; 0001104659-25-122155 &lt;b&gt;Size:&lt;/b&gt; 9 KB
+</summary>
+<updated>2025-12-17T20:10:43-05:00</updated>
+<category scheme="https://www.sec.gov/" label="form type" term="4"/>
+<id>urn:tag:sec.gov,2008:accession-number=0001104659-25-122155</id>
+</entry>
+<entry>
+<title>4 - ACRES Commercial Realty Corp. (0001332551) (Issuer)</title>
+<link rel="alternate" type="text/html" href="https://www.sec.gov/Archives/edgar/data/1332551/000110465925122155/0001104659-25-122155-index.htm"/>
+<summary type="html">
+ &lt;b&gt;Filed:&lt;/b&gt; 2025-12-17 &lt;b&gt;AccNo:&lt;/b&gt; 0001104659-25-122155 &lt;b&gt;Size:&lt;/b&gt; 9 KB
+</summary>
+<updated>2025-12-17T20:10:43-05:00</updated>
+<category scheme="https://www.sec.gov/" label="form type" term="4"/>
+<id>urn:tag:sec.gov,2008:accession-number=0001104659-25-122155</id>
+</entry>
+<entry>
+<title>4 - TYSOE RONALD W (0001184472) (Reporting)</title>
+<link rel="alternate" type="text/html" href="https://www.sec.gov/Archives/edgar/data/1184472/000095010325016278/0000950103-25-016278-index.htm"/>
+<summary type="html">
+ &lt;b&gt;Filed:&lt;/b&gt; 2025-12-17 &lt;b&gt;AccNo:&lt;/b&gt; 0000950103-25-016278 &lt;b&gt;Size:&lt;/b&gt; 68 KB
+</summary>
+<updated>2025-12-17T20:10:28-05:00</updated>
+<category scheme="https://www.sec.gov/" label="form type" term="4"/>
+<id>urn:tag:sec.gov,2008:accession-number=0000950103-25-016278</id>
+</entry>
+</feed>

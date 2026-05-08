@@ -1,0 +1,63 @@
+{
+  "timestamp": "2025-12-25T17:32:49.057913",
+  "symbol": "AMZN",
+  "crash_score": 0.3362518758177757,
+  "alert_level": 1,
+  "early_warning_score": 0.4604290001869201,
+  "early_warning_level": 1,
+  "horizon": "short_term",
+  "horizon_days": 7,
+  "components": {
+    "macro": 0.31786250233650204,
+    "onchain": 0.5,
+    "sentiment": 0.5,
+    "technical": 0.0
+  },
+  "volatility_regime": "LOW",
+  "confidence_weight": 1.0,
+  "simulation_results": {
+    "simulations_run": 500,
+    "horizon_days": 7,
+    "tail_probability_10pct": 0.40350225098133086,
+    "tail_probability_25pct": 0.3362518758177757,
+    "expected_return": -0.06725037516355514,
+    "downside_scenarios": 168
+  },
+  "price_projection": {
+    "symbol": "AMZN",
+    "current_price": 232.3800048828125,
+    "horizon_days": 7,
+    "moderate_drop_pct": 0.10760060026168823,
+    "severe_drop_pct": 0.15760060026168823,
+    "moderate_drop_target": 207.37577686860783,
+    "severe_stress_floor": 195.75677662446722,
+    "note": "Targets are based on Monte Carlo crash scenarios and typical behaviour in leveraged, thin-liquidity sell-offs (fast wicks then stabilization)."
+  },
+  "crash_drivers": [
+    {
+      "type": "NO_CLEAR_DRIVER",
+      "label": "Normal Volatility",
+      "reason": "Risk metrics do not point to a single dominant crash driver. Moves here look more like normal volatility than a structural deleveraging event."
+    }
+  ],
+  "ecosystem_contagion": {},
+  "early_warning": {
+    "score": 0.4604290001869201,
+    "level": 1,
+    "label": "SUBTLE_STRESS",
+    "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+    "signals": []
+  },
+  "recommendation": {
+    "action": "REDUCE_RISK",
+    "specifics": [
+      "REDUCE position sizes by 30%",
+      "FAVOR defensive strategies",
+      "INCREASE cash allocation"
+    ],
+    "urgency": "MODERATE"
+  },
+  "reasoning": [
+    "\ud83d\udcc8 Macro risk low (score: 0.32)"
+  ]
+}

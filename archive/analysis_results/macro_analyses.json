@@ -1,0 +1,17 @@
+{
+  "analyses": {
+    "GDP": {
+      "event_name": "GDP",
+      "event_date": "2025-12-11T02:46:48.778821",
+      "forecast_value": 0.0,
+      "market_probability": 0.63,
+      "ai_adjusted_probability": 0.5,
+      "surprise_probability": 0.5,
+      "market_reaction_prediction": 0.0702,
+      "easy_trade_confidence": 0.5,
+      "rationale": "Economic indicator: Gross Domestic Product | Historical accuracy: 80.0% | Typical surprise: \u00b10.30 % | Market reaction strength: 0.9 | Surprise probability: 50.0% | Insufficient historical data | Bias: Historically downside surprises are 10.0% more likely | Post-event drift: 50.0% of initial move typically reverses",
+      "recommended_action": "MONITOR - Mixed signals, wait for more data"
+    }
+  },
+  "last_updated": "2025-12-11T02:46:48.778821"
+}

@@ -1,0 +1,89 @@
+{
+  "predictions": [
+    {
+      "id": "pred_1764532282_FED_CUT_Q1",
+      "event_id": "FED_CUT_Q1",
+      "event_description": "Fed cuts rates in Q1 2025",
+      "predicted_probability": 0.75,
+      "predicted_confidence": 0.8,
+      "actual_outcome": true,
+      "actual_outcome_date": "2025-11-30T14:51:22.063637",
+      "prediction_date": "2025-11-30T14:51:22.060529",
+      "source": "kalshi",
+      "market_data": {}
+    },
+    {
+      "id": "pred_1764532282_BTC_200K_EOFY",
+      "event_id": "BTC_200K_EOFY",
+      "event_description": "BTC hits 200K by end of 2025",
+      "predicted_probability": 0.25,
+      "predicted_confidence": 0.8,
+      "actual_outcome": false,
+      "actual_outcome_date": "2025-11-30T14:51:22.067699",
+      "prediction_date": "2025-11-30T14:51:22.063637",
+      "source": "kalshi",
+      "market_data": {}
+    },
+    {
+      "id": "pred_1764532282_AI_BREAKTHROUGH_25",
+      "event_id": "AI_BREAKTHROUGH_25",
+      "event_description": "Major AI breakthrough in 2025",
+      "predicted_probability": 0.85,
+      "predicted_confidence": 0.8,
+      "actual_outcome": true,
+      "actual_outcome_date": "2025-11-30T14:51:22.071519",
+      "prediction_date": "2025-11-30T14:51:22.069516",
+      "source": "kalshi",
+      "market_data": {}
+    },
+    {
+      "id": "pred_1764532282_CPI_ABOVE_3",
+      "event_id": "CPI_ABOVE_3",
+      "event_description": "CPI exceeds 3% in 2025",
+      "predicted_probability": 0.9,
+      "predicted_confidence": 0.8,
+      "actual_outcome": false,
+      "actual_outcome_date": "2025-11-30T14:51:22.071519",
+      "prediction_date": "2025-11-30T14:51:22.071519",
+      "source": "kalshi",
+      "market_data": {}
+    },
+    {
+      "id": "pred_1764532282_ELECTION_DEM",
+      "event_id": "ELECTION_DEM",
+      "event_description": "Democrat wins 2024 election",
+      "predicted_probability": 0.45,
+      "predicted_confidence": 0.8,
+      "actual_outcome": true,
+      "actual_outcome_date": "2025-11-30T14:51:22.074140",
+      "prediction_date": "2025-11-30T14:51:22.074140",
+      "source": "kalshi",
+      "market_data": {}
+    },
+    {
+      "id": "pred_1764532282_OIL_150",
+      "event_id": "OIL_150",
+      "event_description": "Oil hits 150/barrel in 2025",
+      "predicted_probability": 0.3,
+      "predicted_confidence": 0.8,
+      "actual_outcome": false,
+      "actual_outcome_date": "2025-11-30T14:51:22.076904",
+      "prediction_date": "2025-11-30T14:51:22.076904",
+      "source": "kalshi",
+      "market_data": {}
+    },
+    {
+      "id": "pred_1764532502_FED_TEST",
+      "event_id": "FED_TEST",
+      "event_description": "Fed rate cut test",
+      "predicted_probability": 0.65,
+      "predicted_confidence": 0.8,
+      "actual_outcome": null,
+      "actual_outcome_date": null,
+      "prediction_date": "2025-11-30T14:55:02.292452",
+      "source": "kalshi",
+      "market_data": {}
+    }
+  ],
+  "last_updated": "2025-11-30T14:55:02.292452"
+}

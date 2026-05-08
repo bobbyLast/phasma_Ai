@@ -1,0 +1,40 @@
+{
+    "trading_budget": {
+        "max_price_per_share": 1000,
+        "max_price_per_share_geo": 2000,
+        "max_position_size": 10000,
+        "enable_expensive_stocks": true
+    },
+    "symbol_sources": {
+        "use_infinite_symbols": true,
+        "sources": [
+            "sp500",
+            "nasdaq100",
+            "russell2000",
+            "crypto_top100",
+            "etf_all",
+            "commodities",
+            "forex_major"
+        ],
+        "fallback_symbols": [
+            "AAPL", "MSFT", "GOOGL", "AMZN", "NVDA", "META", "TSLA", "BRK.B", "JPM", "V",
+            "JNJ", "WMT", "PG", "MA", "UNH", "HD", "BAC", "XOM", "PFE", "CSCO",
+            "ADBE", "CRM", "NFLX", "INTC", "CMCSA", "PEP", "COST", "TMO", "AVGO", "TXN",
+            "ABT", "DHR", "VZ", "ACN", "NKE", "LLY", "MDT", "KO", "MRK", "NEE",
+            "BTC-USD", "ETH-USD", "BNB-USD", "XRP-USD", "ADA-USD", "SOL-USD", "DOGE-USD", "DOT-USD",
+            "SPY", "QQQ", "DIA", "IWM", "GLD", "SLV", "TLT", "HYG", "LQD", "USO",
+            "EURUSD=X", "GBPUSD=X", "USDJPY=X", "USDCHF=X", "AUDUSD=X", "USDCAD=X"
+        ]
+    },
+    "data_sources": {
+        "primary": "yfinance",
+        "fallback": [
+            "alpha_vantage",
+            "finnhub",
+            "iex_cloud"
+        ],
+        "cache_duration": 300,
+        "retry_attempts": 3,
+        "retry_delay": 1
+    }
+}

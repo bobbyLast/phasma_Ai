@@ -1,0 +1,70 @@
+[
+  {
+    "title": "Putin signals Russia may start nuclear weapons tests in response to Trump",
+    "link": "https://www.ft.com/content/8041cdfc-d36b-4e9b-ac28-ab858312172d",
+    "published": "Wed, 05 Nov 2025 22:22:44 GMT",
+    "summary": "Russian president asks officials to draft proposals amid fears of a new atomic arms race",
+    "source": "https://www.ft.com/?format=rss",
+    "category": "BUSINESS_GENERAL",
+    "fetch_time": "2025-11-05T22:39:12.528910",
+    "symbols": [
+      "PUTIN",
+      "MAY",
+      "START",
+      "TESTS",
+      "IN",
+      "TO",
+      "TRUMP",
+      "ASKS",
+      "DRAFT",
+      "AMID",
+      "FEARS",
+      "OF",
+      "ARMS",
+      "RACE"
+    ],
+    "hash": "73f37e16a58bb236b1df6b5c2e8a6dce",
+    "stored_at": "2025-11-05T22:40:02.968249"
+  },
+  {
+    "title": "Trump admin secretly working with Russia to draft Ukraine ceasefire- Axios",
+    "link": "https://www.investing.com/news/economy/trump-admin-secretly-working-with-russia-to-draft-ukraine-ceasefire-axios-4366649",
+    "published": "2025-11-19 01:37:04",
+    "summary": "",
+    "source": "https://www.investing.com/rss/news_14.rss",
+    "category": "FINANCIAL_SECTOR_SPECIFIC",
+    "fetch_time": "2025-11-19T01:06:03.405848",
+    "symbols": [
+      "TRUMP",
+      "ADMIN",
+      "TO",
+      "DRAFT",
+      "AXIOS"
+    ],
+    "hash": "9b099f1c26481e8dfeceb20b1f00df5c",
+    "stored_at": "2025-11-19T01:07:19.179737"
+  },
+  {
+    "title": "White House threatens to pull support for crypto bill after Coinbase standoff: Report",
+    "link": "https://cointelegraph.com/news/white-house-considers-dropping-crypto-bill-after-coinbase-withdrawal?utm_source=rss_feed&utm_medium=rss&utm_campaign=rss_partner_inbound",
+    "published": "Sat, 17 Jan 2026 06:44:04 +0000",
+    "summary": "Coinbase withdrew support for the CLARITY Act, warning the draft would restrict DeFi, ban tokenized equities and eliminate stablecoin rewards.",
+    "source": "https://cointelegraph.com/rss",
+    "category": "CRYPTO_BLOCKCHAIN",
+    "fetch_time": "2026-01-17T15:56:54.532003",
+    "symbols": [
+      "WHITE",
+      "HOUSE",
+      "TO",
+      "PULL",
+      "BILL",
+      "ACT",
+      "DRAFT",
+      "WOULD",
+      "DEFI",
+      "BAN"
+    ],
+    "hash": "a6a91fc63d7db3b8208c90e5edd05fa6",
+    "stored_at": "2026-01-17T16:00:15.486377"
+  }
+]

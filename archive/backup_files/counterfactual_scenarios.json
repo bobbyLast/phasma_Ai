@@ -1,0 +1,38 @@
+{
+  "scenarios": {
+    "counterfactual_1764532502": {
+      "id": "counterfactual_1764532502",
+      "description": "What if FED_RATE_DECISION changes?",
+      "intervention": {
+        "FED_RATE_DECISION": 0.5
+      },
+      "baseline_state": {
+        "FED_RATE_DECISION": 0.25,
+        "SPY": 450.0,
+        "BTC-USD": 95000.0,
+        "FED_RATE_DECISION_price": 0.25,
+        "SPY_price": 450.0,
+        "BTC-USD_price": 95000.0
+      },
+      "counterfactual_state": {
+        "FED_RATE_DECISION": 0.5,
+        "SPY": -0.3,
+        "BTC-USD": -0.25,
+        "FED_RATE_DECISION_price": 0.25,
+        "SPY_price": 450.0,
+        "BTC-USD_price": 95000.0,
+        "QQQ": -0.35
+      },
+      "affected_variables": [
+        "SPY",
+        "FED_RATE_DECISION",
+        "QQQ",
+        "BTC-USD"
+      ],
+      "expected_impact": 0.8999999999999999,
+      "confidence": 0.726848237132856,
+      "created_at": "2025-11-30T14:55:02.288821"
+    }
+  },
+  "last_updated": "2025-11-30T14:55:02.291168"
+}

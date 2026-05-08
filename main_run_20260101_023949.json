@@ -1,0 +1,23 @@
+{
+  "timestamp": "2026-01-01T02:39:49.870630",
+  "results": {
+    "timestamp": "2026-01-01T02:39:49.867056",
+    "total_sources": 18,
+    "max_possible": 19,
+    "success_rate": 94.73684210526315,
+    "status": "100% COMPLETE",
+    "articles_per_fetch": 120,
+    "market_tickers": 5,
+    "sec_filings": 10,
+    "monthly_cost": 0,
+    "breakdown": {
+      "news_apis": 4,
+      "rss_feeds": 10,
+      "sec_data": 1,
+      "market_data": 1,
+      "sentiment_data": 1,
+      "social_frameworks": 2
+    }
+  },
+  "status": "success"
+}

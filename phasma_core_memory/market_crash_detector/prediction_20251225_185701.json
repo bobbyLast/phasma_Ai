@@ -1,0 +1,66 @@
+{
+  "timestamp": "2025-12-25T18:57:01.541438",
+  "symbol": "COIN",
+  "crash_score": 0.5362518758177757,
+  "alert_level": 2,
+  "early_warning_score": 0.42900150065422055,
+  "early_warning_level": 1,
+  "horizon": "short_term",
+  "horizon_days": 7,
+  "components": {
+    "macro": 0.31786250233650204,
+    "onchain": 0.5,
+    "sentiment": 0.5,
+    "technical": 1.0
+  },
+  "volatility_regime": "LOW",
+  "confidence_weight": 1.0,
+  "simulation_results": {
+    "simulations_run": 500,
+    "horizon_days": 7,
+    "tail_probability_10pct": 0.6435022509813307,
+    "tail_probability_25pct": 0.5362518758177757,
+    "expected_return": -0.10725037516355514,
+    "downside_scenarios": 268
+  },
+  "price_projection": {
+    "symbol": "COIN",
+    "current_price": 239.72999572753906,
+    "horizon_days": 7,
+    "moderate_drop_pct": 0.17160060026168822,
+    "severe_drop_pct": 0.24131334411799904,
+    "moderate_drop_target": 198.5921845599614,
+    "severe_stress_floor": 181.87994877313298,
+    "note": "Targets are based on Monte Carlo crash scenarios and typical behaviour in leveraged, thin-liquidity sell-offs (fast wicks then stabilization)."
+  },
+  "crash_drivers": [
+    {
+      "type": "TECHNICAL_BREAKDOWN",
+      "label": "Technical Breakdown",
+      "reason": "Trend and momentum indicators (MACD/RSI/MA) are aligned to the downside, which often accelerates sell-offs as systematic traders and algos exit together."
+    }
+  ],
+  "ecosystem_contagion": {},
+  "early_warning": {
+    "score": 0.42900150065422055,
+    "level": 1,
+    "label": "SUBTLE_STRESS",
+    "summary": "Multiple quiet risk factors are lining up even though the headline crash score is not yet in the red zone.",
+    "signals": []
+  },
+  "recommendation": {
+    "action": "CAUTIOUS",
+    "specifics": [
+      "RESTRICT to BUY_PUT only",
+      "REDUCE position sizes by 50%",
+      "TIGHTEN stop losses",
+      "MONITOR macro conditions closely"
+    ],
+    "urgency": "HIGH"
+  },
+  "reasoning": [
+    "\ud83d\udcc8 Macro risk low (score: 0.32)",
+    "\ud83d\udcca Technical signals bearish (score: 1.00)",
+    "\ud83d\udea8 MEDIUM_CORRECTION: Reduce size 50% + buy puts"
+  ]
+}

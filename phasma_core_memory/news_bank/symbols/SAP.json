@@ -1,0 +1,63 @@
+[
+  {
+    "title": "Tesla\u2019s fourth quarter sales fell a lot more than expected",
+    "link": "https://www.theverge.com/news/852649/tesla-q4-2025-sales-production-delivery-elon-musk",
+    "published": "2026-01-02T09:31:18-05:00",
+    "summary": "Tesla's sales fell in the fourth quarter of 2025, as rising competition and the expiration of the federal EV tax credit continued to sap the company's global ambitions. The sales drop has led to Tesla losing its title as the world's best-selling EV maker to China's BYD, which sold 2.26 million vehicles last year. The [\u2026]",
+    "source": "https://www.theverge.com/rss/index.xml",
+    "category": "TECH_AI_SECTOR",
+    "fetch_time": "2026-01-03T14:42:48.414194",
+    "symbols": [
+      "TESLA",
+      "SALES",
+      "FELL",
+      "LOT",
+      "IN",
+      "OF",
+      "AS",
+      "EV",
+      "TAX",
+      "TO",
+      "SAP",
+      "DROP",
+      "LED",
+      "TITLE",
+      "WORLD",
+      "BEST",
+      "MAKER",
+      "CHINA",
+      "BYD",
+      "WHICH",
+      "SOLD",
+      "LAST"
+    ],
+    "hash": "7be7797041c8725505c00b06d427d3c2",
+    "stored_at": "2026-01-03T14:44:32.454109"
+  },
+  {
+    "title": "SAP and Fresenius to build sovereign AI backbone for healthcare",
+    "link": "https://www.artificialintelligence-news.com/news/sap-and-fresenius-build-sovereign-ai-backbone-for-healthcare/",
+    "published": "Mon, 19 Jan 2026 17:19:33 +0000",
+    "summary": "SAP and Fresenius are building a sovereign AI platform for healthcare that brings secure data processing to clinical settings. For data leaders in the medical sector, deploying AI requires strict governance that public cloud solutions often lack. This collaboration addresses that gap by creating a \u201ccontrolled environment\u201d where AI models can operate without compromising data [\u2026]The postSAP and Fresenius to build sovereign AI backbone for healthcareappeared first onAI News.",
+    "source": "https://www.artificialintelligence-news.com/feed/",
+    "category": "TECH_AI_SECTOR",
+    "fetch_time": "2026-01-19T13:14:42.297338",
+    "symbols": [
+      "SAP",
+      "TO",
+      "BUILD",
+      "AI",
+      "DATA",
+      "IN",
+      "CLOUD",
+      "OFTEN",
+      "LACK",
+      "GAP",
+      "BY",
+      "WHERE",
+      "ONAI"
+    ],
+    "hash": "bef859562fc97aa61efbb2c3c6eb777a",
+    "stored_at": "2026-01-19T13:16:12.261242"
+  }
+]

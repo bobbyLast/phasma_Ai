@@ -1,0 +1,95 @@
+[
+  {
+    "title": "Putin signals Russia may start nuclear weapons tests in response to Trump",
+    "link": "https://www.ft.com/content/8041cdfc-d36b-4e9b-ac28-ab858312172d",
+    "published": "Wed, 05 Nov 2025 22:22:44 GMT",
+    "summary": "Russian president asks officials to draft proposals amid fears of a new atomic arms race",
+    "source": "https://www.ft.com/?format=rss",
+    "category": "BUSINESS_GENERAL",
+    "fetch_time": "2025-11-05T22:39:12.528910",
+    "symbols": [
+      "PUTIN",
+      "MAY",
+      "START",
+      "TESTS",
+      "IN",
+      "TO",
+      "TRUMP",
+      "ASKS",
+      "DRAFT",
+      "AMID",
+      "FEARS",
+      "OF",
+      "ARMS",
+      "RACE"
+    ],
+    "hash": "73f37e16a58bb236b1df6b5c2e8a6dce",
+    "stored_at": "2025-11-05T22:40:02.968249"
+  },
+  {
+    "title": "Trump calls for ABC's license to be revoked after reporter asks about Jeffrey Epstein files",
+    "link": "https://www.cnbc.com/2025/11/18/trump-epstein-files-abc-license.html",
+    "published": "Tue, 18 Nov 2025 22:13:07 GMT",
+    "summary": "Trump insulted ABC News reporter Mary Bruce days after telling a female reporter to be \"quiet, piggy,\" when she asked about Jeffrey Epstein.",
+    "source": "https://www.cnbc.com/id/100003114/device/rss/rss.html",
+    "category": "FINANCIAL_HIGH_PRIORITY",
+    "fetch_time": "2025-11-19T01:06:03.294859",
+    "symbols": [
+      "TRUMP",
+      "CALLS",
+      "ABC",
+      "TO",
+      "BE",
+      "ASKS",
+      "ABOUT",
+      "FILES",
+      "MARY",
+      "BRUCE",
+      "DAYS",
+      "QUIET",
+      "PIGGY",
+      "SHE",
+      "ASKED"
+    ],
+    "hash": "73ddd17e199b05eeb154b88f609cd85e",
+    "stored_at": "2025-11-19T01:06:23.655967"
+  },
+  {
+    "title": "Reeves asks UK regulator to investigate private dental charges",
+    "link": "https://www.ft.com/content/c97e1e3d-cd49-4c97-a2e0-7f2ed9861e94",
+    "published": "Tue, 18 Nov 2025 22:30:02 GMT",
+    "summary": "Competition and Markets Authority set to probe dentistry sector after sharp increase in prices",
+    "source": "https://www.ft.com/?format=rss",
+    "category": "BUSINESS_GENERAL",
+    "fetch_time": "2025-11-19T01:45:02.525024",
+    "symbols": [
+      "ASKS",
+      "UK",
+      "TO",
+      "SET",
+      "PROBE",
+      "SHARP",
+      "IN"
+    ],
+    "hash": "8a887917238d50f88158a3aceddfe2ac",
+    "stored_at": "2025-11-19T01:45:12.339058"
+  },
+  {
+    "title": "Justice Department asks federal judge to deny special master for Epstein files",
+    "link": "https://www.investing.com/news/politics-news/justice-department-asks-federal-judge-to-deny-special-master-for-epstein-files-4453181",
+    "published": "2026-01-17 19:36:26",
+    "summary": "",
+    "source": "https://www.investing.com/rss/news.rss",
+    "category": "FINANCIAL_HIGH_PRIORITY",
+    "fetch_time": "2026-01-17T15:56:49.547193",
+    "symbols": [
+      "ASKS",
+      "JUDGE",
+      "TO",
+      "DENY",
+      "FILES"
+    ],
+    "hash": "0c34258dc676a3fab5ff9761a5c65fdf",
+    "stored_at": "2026-01-17T15:57:23.827070"
+  }
+]

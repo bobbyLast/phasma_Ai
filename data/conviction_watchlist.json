@@ -1,0 +1,47 @@
+{
+  "SOFI": {
+    "ticker": "SOFI",
+    "name": "SoFi Technologies",
+    "thesis": "Fintech disruptor targeting millennial/Gen Z with full financial ecosystem. Lending, investing, banking all-in-one platform with massive TAM.",
+    "potential": "10x-50x",
+    "last_price": 0,
+    "avg_cost": 0,
+    "position_size": 0
+  },
+  "PLTR": {
+    "ticker": "PLTR",
+    "name": "Palantir Technologies",
+    "thesis": "AI-powered data analytics for government and enterprise. Moat in complex data integration, expanding into commercial markets.",
+    "potential": "10x-30x",
+    "last_price": 0,
+    "avg_cost": 0,
+    "position_size": 0
+  },
+  "RIVN": {
+    "ticker": "RIVN",
+    "name": "Rivian Automotive",
+    "thesis": "EV manufacturer with Amazon backing. First-mover in electric adventure vehicles, potential to challenge Tesla in premium EV segment.",
+    "potential": "20x-100x",
+    "last_price": 0,
+    "avg_cost": 0,
+    "position_size": 0
+  },
+  "LCID": {
+    "ticker": "LCID",
+    "name": "Lucid Motors",
+    "thesis": "Luxury EV maker with superior technology. Air sedan has best-in-class range, targeting high-margin luxury segment.",
+    "potential": "10x-50x",
+    "last_price": 0,
+    "avg_cost": 0,
+    "position_size": 0
+  },
+  "AI": {
+    "ticker": "AI",
+    "name": "C3.ai",
+    "thesis": "Enterprise AI platform-as-a-service. First pure-play AI SaaS, positioned for massive enterprise AI adoption.",
+    "potential": "20x-100x",
+    "last_price": 0,
+    "avg_cost": 0,
+    "position_size": 0
+  }
+}
