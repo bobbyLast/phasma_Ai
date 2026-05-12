@@ -136,16 +136,16 @@ from utils.randomness_pattern_analyzer import RandomnessPatternAnalyzer
 from utils.volatility_lookup import VolatilityLookup
 
 # Import unified trading system
-from unified_trading_system import UnifiedTradingSystem
+from trading.unified_trading_system import UnifiedTradingSystem
 from services.confluence_service import ConfluenceService
 from engines.underground_stock_discovery import UndergroundStockDiscovery
 
 from engines.smart_trading_strategy import SmartTradingStrategy
 from engines.geopolitical_analyzer import GeopoliticalImpactAnalyzer
-from multi_platform_scanner import MultiPlatformScanner
+from engines.multi_platform_scanner import MultiPlatformScanner
 
 try:
-    from geopolitical_monitor import GeopoliticalNewsMonitor
+    from engines.geopolitical_monitor import GeopoliticalNewsMonitor
 except Exception:
     GeopoliticalNewsMonitor = None
 
@@ -2489,7 +2489,7 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
         print("✓ Kalshi Integration (events)")
         print("=" * 60)
 
-        from unified_meta_brain import UnifiedMetaBrain
+        from brain.unified_meta_brain import UnifiedMetaBrain
 
         # Reuse the unified brain instance across cycles to avoid cold-start overhead.
         if not hasattr(s, "_unified_brain") or s._unified_brain is None:

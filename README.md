@@ -38,11 +38,27 @@
 - Risk governance and portfolio management
 - Real-time decision optimization
 
+## Repository layout
+
+- **`main.py`** — primary entrypoint; run from the repository root.
+- **`brain/`**, **`core/`**, **`engines/`**, **`trading/`**, **`utils/`**, **`compliance/`**, **`services/`**, **`brains/`** — packages used by the live system.
+- **`config/`**, **`data/`** — configuration and reference data.
+- **`scripts/`** — optional tooling and older drivers:
+  - **`scripts/monitoring/`** — `monitor.py` (called by `start_monitor.bat`).
+  - **`scripts/alternate_mains/`** — alternate entry scripts (for example `main_production.py`).
+  - **`scripts/demos/`** — demos.
+  - **`scripts/ops/`** — Telegram bot, production launcher, preflight helpers.
+  - **`scripts/legacy/`** — one-off integrators, experiments, and maintenance scripts (not required to run `main.py`).
+- **`docs/`** — documentation; planning write-ups are under **`docs/project_notes/`**, tickets under **`docs/tickets/`**.
+- **`yfinance.py`** — compatibility shim kept at the repo root so `import yfinance` resolves when running from this directory.
+
+Root-level **`test_*.py`** files and the old **`tests/`** package were removed; they were not part of the production path for `main.py`.
+
 ## Usage
 
 ### Quick Start
 ```bash
-cd phasma
+cd path/to/phasma_Ai
 python main.py
 ```
 

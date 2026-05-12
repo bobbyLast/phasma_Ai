@@ -5,7 +5,7 @@ echo.
 echo Starting continuous monitoring for trading opportunities...
 echo.
 
-python monitor.py %1
+python "%~dp0scripts\monitoring\monitor.py" %1
 
 echo.
 echo ✅ Monitoring session complete
