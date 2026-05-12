@@ -27,6 +27,48 @@ phasma_state*.json
 *_summary*.json
 *_report*.json
 
+# Runtime caches and model outputs (regenerated locally)
+phasma_core_memory/
+
+# Root-level dumps / script outputs (keep only config.json in version control)
+discovery_history.json
+scenario_graph.json
+trade_memory.json
+working_signals.json
+pipeline_simulation.json
+plan_to_100_percent.json
+refactored_sources.json
+additional_sources_plan.json
+geopolitical_analysis_*.json
+multi_platform_scan_*.json
+paper_trading_audit_*.json
+main_run_*.json
+main_performance_*.json
+production_cycle_*.json
+production_run_*.json
+unified_brain_results_*.json
+*_test_results.json
+*_integration_results.json
+*_integration_summary.json
+*_integration_test_report.json
+complete_integration_results.json
+comprehensive_performance_test_results.json
+data_integration_results.json
+enhanced_system_results.json
+final_100_percent_results.json
+last_run_results.json
+live_cycle_results.json
+performance_report_*.json
+secure_integration_results.json
+system_test_results.json
+ultimate_20_sources_results.json
+ultimate_integration_summary.json
+api_test_results.json
+fix_results.json
+all_sources_test_results.json
+main_production_test_results.json
+refactored_final_results.json
+
 .DS_Store
 Thumbs.db
 
