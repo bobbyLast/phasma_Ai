@@ -46,8 +46,8 @@ class AutoExitManager:
             'theta_threshold': -0.15      # Exit if theta > 15% of position
         }
 
-        # Memory path
-        self.memory_path = 'phasma_core_memory/auto_exits'
+        from core.runtime_paths import memory_path
+        self.memory_path = memory_path("auto_exits")
         os.makedirs(self.memory_path, exist_ok=True)
 
         # Initialize Monte Carlo engine for simulation-based exits

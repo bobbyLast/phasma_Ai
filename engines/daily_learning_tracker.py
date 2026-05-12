@@ -17,7 +17,8 @@ class DailyLearningTracker:
         self.logger = logging.getLogger(__name__)
         
         # Storage paths
-        self.data_dir = 'phasma_core_memory/daily_learning'
+        from core.runtime_paths import memory_path
+        self.data_dir = memory_path("daily_learning")
         os.makedirs(self.data_dir, exist_ok=True)
         
         # Daily tracking

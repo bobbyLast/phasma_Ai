@@ -22,13 +22,16 @@ class TradeLogger:
     Handles formatting and logging of final trade decisions
     """
     
-    def __init__(self, base_dir: str = "phasma_core_memory/signals"):
+    def __init__(self, base_dir: Optional[str] = None):
         """
         Initialize the trade logger
         
         Args:
-            base_dir: Base directory for storing trade logs
+            base_dir: Base directory for storing trade logs (default: data/runtime/phasma_core_memory/signals)
         """
+        if base_dir is None:
+            from core.runtime_paths import memory_path
+            base_dir = str(memory_path("signals"))
         self.base_dir = Path(base_dir)
         self.base_dir.mkdir(parents=True, exist_ok=True)
     

@@ -9,7 +9,10 @@ from typing import Set, Dict, List
 class TradeMemory:
     """Tracks recently traded symbols to prevent duplicates"""
     
-    def __init__(self, memory_file='trade_memory.json', cooldown_days=7):
+    def __init__(self, memory_file=None, cooldown_days=7):
+        if memory_file is None:
+            from core.runtime_paths import runtime_path
+            memory_file = runtime_path("trade_memory.json")
         self.memory_file = memory_file
         self.cooldown_days = cooldown_days
         self.recent_trades = self._load_memory()

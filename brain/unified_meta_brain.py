@@ -578,12 +578,14 @@ class UnifiedMetaBrain:
     
     async def _save_unified_results(self, results: Dict):
         """Save unified results"""
+        from core.runtime_paths import runtime_path
         filename = f"unified_brain_results_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+        path = runtime_path(filename)
         
-        with open(filename, 'w') as f:
+        with open(path, 'w') as f:
             json.dump(results, f, indent=2)
         
-        print(f"\n💾 Results saved to {filename}")
+        print(f"\n💾 Results saved to {path}")
 
 # Main execution function
 async def run_unified_brain():

@@ -43,6 +43,7 @@
 - **`main.py`** — primary entrypoint; run from the repository root.
 - **`brain/`**, **`core/`**, **`engines/`**, **`trading/`**, **`utils/`**, **`compliance/`**, **`services/`**, **`brains/`** — packages used by the live system.
 - **`config/`**, **`data/`** — configuration and reference data.
+- **`data/runtime/`** — generated state (ignored by git): `phasma_state.json`, caches, signal logs, brain run snapshots, etc. On first run, legacy files from the repo root or `./phasma_core_memory/` are copied or moved here automatically.
 - **`scripts/`** — optional tooling and older drivers:
   - **`scripts/monitoring/`** — `monitor.py` (called by `start_monitor.bat`).
   - **`scripts/alternate_mains/`** — alternate entry scripts (for example `main_production.py`).

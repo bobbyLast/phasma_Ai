@@ -28,6 +28,7 @@ phasma_state*.json
 *_report*.json
 
 # Runtime caches and model outputs (regenerated locally)
+data/runtime/
 phasma_core_memory/
 
 # Root-level dumps / script outputs (keep only config.json in version control)

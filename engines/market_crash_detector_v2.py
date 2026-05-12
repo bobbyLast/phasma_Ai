@@ -82,9 +82,10 @@ class MarketCrashDetectorV2:
             '3m': {'weight': 0.40, 'threshold': -0.30}
         }
         
-        # Memory paths
-        self.memory_path = 'phasma_core_memory/market_crash_detector'
-        self.alerts_path = 'phasma_core_memory/crash_alerts'
+        # Memory paths (under data/runtime/phasma_core_memory/)
+        from core.runtime_paths import memory_path
+        self.memory_path = memory_path("market_crash_detector")
+        self.alerts_path = memory_path("crash_alerts")
         self._ensure_directories()
         
         # Crash profit components

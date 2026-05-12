@@ -21,8 +21,11 @@ class NewsMemoryBank:
     - Symbol-based indexing
     """
     
-    def __init__(self, memory_path: str = 'phasma_core_memory/news_bank'):
+    def __init__(self, memory_path: Optional[str] = None):
         """Initialize memory bank"""
+        if memory_path is None:
+            from core.runtime_paths import memory_path as _mem_path
+            memory_path = _mem_path("news_bank")
         self.memory_path = memory_path
         self.logger = logging.getLogger(__name__)
         

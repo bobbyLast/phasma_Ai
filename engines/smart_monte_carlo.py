@@ -42,8 +42,8 @@ class SmartMonteCarlo:
             'correlation_sims': {'improvement_rate': 0.0, 'usage_count': 0}
         }
         
-        # Memory path
-        self.memory_path = 'phasma_core_memory/smart_monte_carlo'
+        from core.runtime_paths import memory_path
+        self.memory_path = memory_path("smart_monte_carlo")
         os.makedirs(self.memory_path, exist_ok=True)
         
         # Load historical effectiveness

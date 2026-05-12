@@ -437,7 +437,12 @@ class ExpansionEngine:
     def _load_discovery_history(self):
         """Load previous discovery history"""
         try:
-            with open('discovery_history.json', 'r') as f:
+            from core.runtime_paths import runtime_path
+            path = runtime_path("discovery_history.json")
+            if not os.path.exists(path):
+                self.discovery_history = []
+                return
+            with open(path, 'r') as f:
                 data = json.load(f)
                 self.discovery_history = data.get('history', [])
                 
@@ -451,12 +456,15 @@ class ExpansionEngine:
     
     def _save_discovery_history(self):
         """Save discovery history"""
+        from core.runtime_paths import runtime_path
         data = {
             'last_updated': datetime.now().isoformat(),
             'history': self.discovery_history[-1000:]  # Keep last 1000
         }
         
-        with open('discovery_history.json', 'w') as f:
+        path = runtime_path("discovery_history.json")
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        with open(path, 'w') as f:
             json.dump(data, f, indent=2)
 
 # Integration function

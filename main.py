@@ -40,6 +40,7 @@ from core.config import PhasmaConfig
 from core.application_context import ApplicationContext
 from core.trade_classifier import TradeClassifier, TradeClass
 from core.trade_logger import TradeLogger
+from core.runtime_paths import memory_path, phasma_state_file
 
 # Import Signal Framework
 from trading.signal_framework import (
@@ -359,7 +360,7 @@ class PhasmaTradingSystem:
 
         # Load any previous Meta-Brain state
         try:
-            self.meta_brain.load_state('phasma_state.json')
+            self.meta_brain.load_state(phasma_state_file())
             print("♻️ Loaded previous Meta-Brain state")
         except Exception as e:
             print(f"⚠️ Could not load previous Meta-Brain state: {e}")
@@ -538,7 +539,7 @@ class PhasmaTradingSystem:
         """Load previously posted signals from persistent storage"""
         import os
         import json
-        signals_file = 'phasma_core_memory/posted_signals.json'
+        signals_file = memory_path("posted_signals.json")
         try:
             if os.path.exists(signals_file):
                 with open(signals_file, 'r') as f:
@@ -562,9 +563,9 @@ class PhasmaTradingSystem:
         import os
         import json
         import time
-        signals_file = 'phasma_core_memory/posted_signals.json'
+        signals_file = memory_path("posted_signals.json")
         try:
-            os.makedirs('phasma_core_memory', exist_ok=True)
+            os.makedirs(os.path.dirname(signals_file), exist_ok=True)
             # Load existing data
             existing = {}
             if os.path.exists(signals_file):
@@ -832,7 +833,7 @@ class PhasmaTradingSystem:
 
         # Load any previous Meta-Brain state (open positions, performance)
         try:
-            self.meta_brain.load_state('phasma_state.json')
+            self.meta_brain.load_state(phasma_state_file())
             print("♻️ Loaded previous Meta-Brain state (open positions, performance)")
         except Exception as e:
             print(f"⚠️  Could not load previous Meta-Brain state: {e}")
@@ -5321,7 +5322,7 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
         self.min_options_volume = ctx.config.get('trading.min_options_volume', 5000)
         self.min_implied_volatility = ctx.config.get('trading.min_implied_volatility', 50.0)
 
-        self.meta_brain.save_state('phasma_state.json')
+        self.meta_brain.save_state(phasma_state_file())
 
         return approved_signals
 

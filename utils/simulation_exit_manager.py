@@ -77,8 +77,9 @@ class SimulationExitManager:
     def _load_positions(self):
         """Load positions from state file"""
         try:
-            # Load from phasma_state.json
-            state_file = "phasma_state.json"
+            # Load from phasma_state.json (under data/runtime/)
+            from core.runtime_paths import phasma_state_file
+            state_file = phasma_state_file()
             if os.path.exists(state_file):
                 with open(state_file, 'r') as f:
                     state = json.load(f)

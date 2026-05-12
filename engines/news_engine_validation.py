@@ -124,8 +124,8 @@ class CompanyValidator:
     def _load_symbols_from_config(self) -> Dict[str, List[str]]:
         """Load symbols from phasma_state.json sector watchlist instead of hardcoded lists."""
         try:
-            # Load phasma_state.json
-            config_path = os.path.join(os.path.dirname(__file__), "..", "phasma_state.json")
+            from core.runtime_paths import phasma_state_file
+            config_path = phasma_state_file()
             with open(config_path, 'r') as f:
                 config = json.load(f)
             

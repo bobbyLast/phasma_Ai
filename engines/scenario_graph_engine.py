@@ -136,7 +136,8 @@ class ScenarioGraphEngine:
         self.nodes: Dict[str, GraphNode] = {}
         self.edges: List[GraphEdge] = []
         self.scenarios: Dict[str, ScenarioTree] = {}
-        self.graph_file = "scenario_graph.json"
+        from core.runtime_paths import runtime_path
+        self.graph_file = runtime_path("scenario_graph.json")
         self._load_graph()
 
     def _load_graph(self):
