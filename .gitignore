@@ -29,3 +29,6 @@ phasma_state*.json
 
 .DS_Store
 Thumbs.db
+
+# Windows reserved device name; cannot be added to Git reliably
+phasma_core_memory/news_bank/symbols/CON.json
