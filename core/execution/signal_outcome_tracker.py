@@ -12,10 +12,12 @@ from core.runtime_paths import runtime_path
 
 
 class SignalOutcomeTracker:
-    """Storage + hooks for signal outcome grading (1h, EOD, 1D, 3D, 5D, MFE/MAE)."""
+    """Storage for signal outcome grading (1h, EOD, 1D, 3D, 5D, MFE/MAE)."""
+
+    HORIZONS = ("1h", "eod", "1d", "3d", "5d")
 
     def __init__(self, storage_file: Optional[str] = None):
-        self.storage_file = storage_file or runtime_path("signal_outcomes.json")
+        self.storage_file = storage_file or runtime_path("outcomes", "signals.json")
         self._records: List[Dict[str, Any]] = self._load()
 
     def _load(self) -> List[Dict[str, Any]]:
@@ -32,6 +34,9 @@ class SignalOutcomeTracker:
         os.makedirs(os.path.dirname(self.storage_file) or ".", exist_ok=True)
         with open(self.storage_file, "w", encoding="utf-8") as f:
             json.dump(self._records, f, indent=2)
+
+    def _empty_horizon_grades(self) -> Dict[str, Any]:
+        return {h: None for h in self.HORIZONS}
 
     def record_approved_signal(
         self,
@@ -63,13 +68,22 @@ class SignalOutcomeTracker:
     ) -> str:
         record_id = str(uuid.uuid4())
         entry_price = signal.get("entry_price") or signal.get("current_price")
+        confidence = signal.get("confidence")
+        if isinstance(confidence, (int, float)) and confidence <= 1:
+            confidence_pct = float(confidence) * 100.0
+        else:
+            try:
+                confidence_pct = float(confidence) if confidence is not None else None
+            except (TypeError, ValueError):
+                confidence_pct = None
+
         record = {
             "id": record_id,
             "timestamp": datetime.now().isoformat(),
             "ticker": signal.get("symbol"),
             "side": signal.get("action"),
             "entry_reference_price": entry_price,
-            "confidence": signal.get("confidence"),
+            "confidence": confidence_pct,
             "score_components": {
                 "pop_from_sim": signal.get("pop_from_sim"),
                 "monte_carlo_sim_score": signal.get("monte_carlo_sim_score"),
@@ -78,19 +92,17 @@ class SignalOutcomeTracker:
                 "divergence_score": signal.get("divergence_score"),
                 "win_rate": signal.get("win_rate"),
             },
-            "source_types": signal.get("source"),
+            "source_type": signal.get("source"),
+            "strategy": signal.get("strategy"),
             "market_regime": signal.get("market_regime"),
             "execution_mode": execution.get("execution_mode"),
             "execution_decision": execution.get("execution_decision"),
             "execution_reason": execution.get("execution_reason"),
             "alerted_only": alerted_only,
-            "executed": executed,
+            "paper_traded": executed,
+            "signal_snapshot": dict(signal),
             "grading": {
-                "result_1h": None,
-                "result_eod": None,
-                "result_1d": None,
-                "result_3d": None,
-                "result_5d": None,
+                "horizons": self._empty_horizon_grades(),
                 "mfe": None,
                 "mae": None,
                 "final_outcome": None,
@@ -104,8 +116,27 @@ class SignalOutcomeTracker:
         self._save()
         return record_id
 
+    def get_all_records(self) -> List[Dict[str, Any]]:
+        return list(self._records)
+
+    def get_record(self, record_id: str) -> Optional[Dict[str, Any]]:
+        for record in self._records:
+            if record.get("id") == record_id:
+                return record
+        return None
+
+    def update_record(self, record_id: str, updates: Dict[str, Any]) -> bool:
+        for record in self._records:
+            if record.get("id") == record_id:
+                record.update(updates)
+                self._save()
+                return True
+        return False
+
     def get_pending_grading(self) -> List[Dict[str, Any]]:
-        return [
-            r for r in self._records
-            if r.get("grading", {}).get("final_outcome") is None
-        ]
+        pending = []
+        for record in self._records:
+            horizons = (record.get("grading") or {}).get("horizons") or {}
+            if any(horizons.get(h) is None for h in self.HORIZONS):
+                pending.append(record)
+        return pending
