@@ -32,28 +32,59 @@ class TradeMemory:
         with open(self.memory_file, 'w') as f:
             json.dump(self.recent_trades, f, indent=2)
     
+    def _last_trade_iso(self, symbol: str) -> str:
+        raw = self.recent_trades.get(symbol)
+        if raw is None:
+            return ""
+        if isinstance(raw, dict):
+            return str(raw.get("last_trade") or "")
+        return str(raw)
+
     def is_recently_traded(self, symbol: str) -> bool:
         """Check if symbol was traded recently"""
-        if symbol not in self.recent_trades:
+        last_iso = self._last_trade_iso(symbol)
+        if not last_iso:
             return False
-        
-        last_trade_date = datetime.fromisoformat(self.recent_trades[symbol])
+        try:
+            last_trade_date = datetime.fromisoformat(last_iso)
+        except (TypeError, ValueError):
+            return False
         days_ago = (datetime.now() - last_trade_date).days
-        
         return days_ago < self.cooldown_days
     
-    def add_trade(self, symbol: str):
-        """Record a new trade"""
-        self.recent_trades[symbol] = datetime.now().isoformat()
+    def add_trade(self, symbol: str, metadata: dict = None):
+        """Record a new trade (called on fills)."""
+        entry = {
+            "last_trade": datetime.now().isoformat(),
+            "metadata": metadata or {},
+        }
+        self.recent_trades[symbol] = entry
         self._save_memory()
-        print(f"   📝 Trade Memory: Recorded {symbol} (cooldown: {self.cooldown_days} days)")
+        print(f"   Trade Memory: Recorded {symbol} (cooldown: {self.cooldown_days} days)")
+
+    def record_event(self, symbol: str, event: str, metadata: dict = None):
+        """Record submit/reject/skip events for debugging."""
+        key = f"_events_{symbol}"
+        events = self.recent_trades.get(key, [])
+        if not isinstance(events, list):
+            events = []
+        events.append({
+            "event": event,
+            "timestamp": datetime.now().isoformat(),
+            "metadata": metadata or {},
+        })
+        self.recent_trades[key] = events[-20:]
+        self._save_memory()
     
     def get_days_since_trade(self, symbol: str) -> int:
         """Get days since last trade of this symbol"""
-        if symbol not in self.recent_trades:
-            return 999  # Never traded
-        
-        last_trade_date = datetime.fromisoformat(self.recent_trades[symbol])
+        last_iso = self._last_trade_iso(symbol)
+        if not last_iso:
+            return 999
+        try:
+            last_trade_date = datetime.fromisoformat(last_iso)
+        except (TypeError, ValueError):
+            return 999
         return (datetime.now() - last_trade_date).days
     
     def clean_old_trades(self):
@@ -62,7 +93,15 @@ class TradeMemory:
         
         symbols_to_remove = []
         for symbol, trade_date_str in self.recent_trades.items():
-            trade_date = datetime.fromisoformat(trade_date_str)
+            if symbol.startswith("_events_"):
+                continue
+            iso = self._last_trade_iso(symbol) if isinstance(trade_date_str, dict) else str(trade_date_str)
+            if not iso:
+                continue
+            try:
+                trade_date = datetime.fromisoformat(iso)
+            except (TypeError, ValueError):
+                continue
             if trade_date < cutoff_date:
                 symbols_to_remove.append(symbol)
         
@@ -83,7 +122,9 @@ class TradeMemory:
             return "No recent trades"
         
         summary = []
-        for symbol, trade_date_str in sorted(self.recent_trades.items()):
+        for symbol in sorted(self.recent_trades.keys()):
+            if symbol.startswith("_events_"):
+                continue
             days_ago = self.get_days_since_trade(symbol)
             summary.append(f"{symbol}: {days_ago}d ago")
         

@@ -80,8 +80,16 @@ class PhasmaMonteCarloEngine:
 
     def run_stock_simulation(self, signal: Dict) -> Dict:
         """Run Monte Carlo simulation for regular stock trades (no options)"""
-        symbol = signal.get('symbol', 'UNKNOWN')
-        current_price = signal.get('current_price', 0)
+        symbol = signal.get('symbol') or signal.get('ticker') or 'N/A'
+        current_price = signal.get('current_price') or 0
+        try:
+            current_price = float(current_price)
+        except (TypeError, ValueError):
+            current_price = 0.0
+        if current_price <= 0:
+            from utils.company_resolver import get_resolver
+            sector_hint = get_resolver().sector(symbol, signal.get('title'))
+            signal['sector'] = signal.get('sector') or sector_hint
         target_price = signal.get('target_price', current_price * 1.1)  # Default 10% target
         stop_loss = signal.get('stop_loss', current_price * 0.9)  # Default 10% stop
         confidence = signal.get('confidence', 0.5)
@@ -141,7 +149,7 @@ class PhasmaMonteCarloEngine:
     
     def run_monte_carlo_simulation(self, signal: Dict, num_sims: int = None) -> Dict:
         """Advanced Monte Carlo simulation with safety governors and variance reduction"""
-        symbol = signal.get('symbol', 'UNKNOWN')
+        symbol = signal.get('symbol') or signal.get('ticker') or 'N/A'
         confidence = signal.get('confidence', 0.5)
 
         # CHECK CACHE FIRST: Prevent duplicate simulation calls (TEMPORARILY DISABLED)
@@ -226,9 +234,13 @@ class PhasmaMonteCarloEngine:
                 drift *= 2.0  # 16% max for moonshots (vs previous 240%)
 
         # ADVANCED MONTE CARLO: Vectorized with variance reduction
-        current_price = signal.get('current_price', 100.0)
-        strike_price = signal.get('strike', current_price)
-        premium = signal.get('premium', 5.0)
+        current_price = signal.get('current_price') or signal.get('entry_price') or 100.0
+        try:
+            current_price = float(current_price)
+        except (TypeError, ValueError):
+            current_price = 100.0
+        strike_price = signal.get('strike') or current_price
+        premium = signal.get('premium') or 5.0
         days_to_expiry = signal.get('days_to_expiry', 7)
 
         # DEBUG: Show key parameters

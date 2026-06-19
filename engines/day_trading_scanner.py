@@ -4,16 +4,17 @@ import yfinance as yf
 import pandas as pd
 import numpy as np
 from datetime import datetime, timedelta
-import random
 
 class DayTradingScanner:
     """Scanner for regular day trading stocks with momentum and volume analysis"""
     
     def __init__(self, config=None):
         self.config = config or {}
+        from utils.price_filter_config import resolve_price_filter
+        self.price_filter_enabled, cap = resolve_price_filter(self.config)
         self.min_volume = 100000  # Minimum average volume
         self.min_price = 5.0  # Minimum stock price
-        self.max_price = 50.0  # Maximum stock price (matches $50 bankroll)
+        self.max_price = cap if self.price_filter_enabled else 10000.0
         
         # Popular day trading stocks to watch
         self.watchlist = [
@@ -77,8 +78,10 @@ class DayTradingScanner:
                 
                 print(f"  Stock {symbol}: ${current_price:.2f} | Vol: {current_volume:,} | Avg: {avg_volume:,}")
                 
-                # Price filters
-                if current_price < self.min_price or current_price > self.max_price:
+                if current_price < self.min_price:
+                    print(f"    X Price filter failed (${current_price:.2f})")
+                    continue
+                if self.price_filter_enabled and current_price > self.max_price:
                     print(f"    X Price filter failed (${current_price:.2f})")
                     continue
                 
@@ -97,20 +100,31 @@ class DayTradingScanner:
                 
                 # Generate signal based on criteria
                 if self.is_buy_signal(price_change_5d, volume_ratio, rsi):
-                    # Calculate confidence for position sizing
-                    base_confidence = min(90, max(30, abs(price_change_5d) * 1000 + random.randint(10, 30)))
+                    momentum_score = min(60.0, abs(price_change_5d) * 1000)
+                    volume_score = min(25.0, volume_ratio * 5)
+                    rsi_score = 10.0 if 30 <= rsi <= 70 else 5.0
+                    base_confidence = min(90, max(30, momentum_score + volume_score + rsi_score))
                     confidence_pct = base_confidence / 100.0
                     
                     # Calculate position sizing based on bankroll and confidence
                     position_info = self.calculate_position_size(current_price, bankroll, confidence_pct)
                     
+                    sim_pop = min(95, max(55, 50 + volume_ratio * 10 + momentum_score * 0.3))
                     signal = {
                         'symbol': symbol,
                         'action': 'BUY',
                         'entry_price': round(current_price, 2),
                         'target_price': round(current_price * 1.05, 2),  # 5% target
-                        'confidence': min(90, max(30, abs(price_change_5d) * 1000 + random.randint(10, 30))),
-                        'pop_from_sim': min(95, max(55, 50 + volume_ratio * 10 + random.randint(5, 20))),
+                        'confidence': base_confidence,
+                        'simulation_pop': sim_pop,
+                        'monte_carlo_sim_score': sim_pop,
+                        'pop_from_sim': sim_pop,
+                        'assumption_based_simulation': True,
+                        'confidence_type': 'heuristic',
+                        'news_recency_score': 0.0,
+                        'source_quality_score': 0.7,
+                        'price_confirmation_score': min(1.0, abs(price_change_5d) * 10),
+                        'volume_confirmation_score': min(1.0, volume_ratio / 3),
                         'volume': int(current_volume),
                         'avg_volume': int(avg_volume),
                         'rsi': round(rsi, 2),

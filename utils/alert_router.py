@@ -2,6 +2,9 @@
 Alert Router - Priority-based alert system with multi-channel delivery
 """
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
 from enum import Enum
 from typing import Dict, List, Optional
 from datetime import datetime

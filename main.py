@@ -38,6 +38,9 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from brain.meta_brain import PhasmaMetaBrain, Signal
 from core.config import PhasmaConfig
 from core.application_context import ApplicationContext
+from core.execution import ExecutionRouter, SignalOutcomeTracker, reconcile_positions_on_startup
+from core.execution.data_gates import audit_api_keys
+from core.execution.execution_modes import normalize_execution_config
 from core.trade_classifier import TradeClassifier, TradeClass
 from core.trade_logger import TradeLogger
 from core.runtime_paths import memory_path, phasma_state_file
@@ -67,6 +70,12 @@ try:
     from utils.market_data_cache import MarketDataCache
 except ImportError:
     MarketDataCache = None
+from utils.company_resolver import get_resolver, is_placeholder, enrich_metadata, resolve_symbol_from_news_item
+from utils.prediction_market_filters import (
+    kalshi_intel_only,
+    should_block_prediction_trade_post,
+    tag_intel_only_fields,
+)
 from engines.human_validator import HumanValidator
 from compliance.audit_trail import ComplianceLogger
 from engines.insider_signal_integrator import InsiderSignalIntegrator
@@ -76,19 +85,11 @@ from engines.social_engine import RedditTrendingTracker
 from engines.silver_price_monitor import SilverPriceMonitor
 from engines.smart_monte_carlo import SmartMonteCarlo
 from engines.advanced_sentiment_engine import AdvancedSentimentEngine
-from engines.risk_guardian_meta_agent import RiskGuardianMetaAgent
+# DEMO-ONLY engines — not wired into production execution path:
+# RiskGuardianMetaAgent, SelfCalibratingProbabilityEngine, ScenarioGraphEngine,
+# Top10OpportunitiesDashboard, CausalCounterfactualEngine
 from engines.volatility_edge_engine import ImpliedRealizedVolatilityEdgeEngine as VolatilityEdgeEngine
-from engines.self_calibrating_probability_engine import SelfCalibratingProbabilityEngine
-from engines.iv_crush_predictor import IVCrushPredictor
-from engines.exit_optimizer import ExitOptimizer
 from engines.auto_exit_manager import AutoExitManager
-from engines.microstructure_engine import MicrostructureEngine
-from engines.spread_builder import SpreadBuilder
-from engines.correlation_tracker import CorrelationTracker
-from engines.scenario_graph_engine import ScenarioGraphEngine
-from engines.cross_venue_radar import CrossVenueMispricingRadar
-from engines.top_10_dashboard import Top10OpportunitiesDashboard
-from engines.causal_counterfactual_engine import CausalCounterfactualEngine
 from engines.calendar_seasonality_engine import CalendarSeasonalityEngine
 from engines.earnings_drift_engine import EarningsDriftEngine
 from engines.macro_calendar_engine import MacroCalendarEngine
@@ -101,7 +102,8 @@ from engines.unusual_whales_engine import UnusualWhalesEngine
 
 # Import utilities
 from utils.price_fetcher import get_price_fetcher
-from utils.robust_price_fetcher import get_robust_price_fetcher
+from utils.robust_price_fetcher import get_robust_price_fetcher, register_cycle_prices, get_cycle_price
+from engines.news_engine_utils import NewsUtils
 from utils.affordable_stock_filter import AffordableStockFilter
 from utils.trade_memory import get_trade_memory
 from utils.trade_recommendation_memory import get_trade_memory as get_recommendation_memory
@@ -124,8 +126,7 @@ from utils.skipped_opportunity_watchlist import SkippedOpportunityWatchlist
 from utils.pe_ratio_analyzer import PERatioAnalyzer
 from utils.thesis_manager import ThesisManager
 from utils.alert_learning_loop import get_alert_learning_loop
-# from utils.why_moving_strip import get_why_moving_strip  # Temporarily disabled
-from engines.real_portfolio_manager import RealPortfolioManager
+from engines.real_portfolio_manager import LocalPortfolioLedger, RealPortfolioManager
 from engines.market_hours_detector import MarketHoursDetector
 from engines.paper_trading_portfolio import PaperTradingPortfolio, get_paper_trading_portfolio
 from engines.alpaca_paper_trader import AlpacaPaperTrader
@@ -156,7 +157,13 @@ class PhasmaTradingSystem:
     def __init__(self, config_path: str = None):
         """Initialize the complete trading system"""
         self.config = PhasmaConfig(config_path)
-        self.options_enabled = getattr(self.config, 'options_enabled', False)
+        self.config.data["execution"] = normalize_execution_config(self.config.data)
+        exec_mode = self.config.get_execution_mode()
+        print(f"🛡️ Execution mode: {exec_mode}")
+        self.max_discovery = self.config.apply_max_discovery_overrides()
+        if self.max_discovery:
+            print("🔍 MAX DISCOVERY MODE ACTIVE")
+        self.options_enabled = bool(self.config.get('options_enabled', False))
         
         # Load trading configuration for symbol management and budget settings
         try:
@@ -167,7 +174,8 @@ class PhasmaTradingSystem:
                 # Update config with trading settings
                 for key, value in trading_config.items():
                     setattr(self.config, key, value)
-                print(f"✅ Loaded trading config - Max price: ${getattr(self.config, 'trading_budget', {}).get('max_price_per_share', 50)}")
+                from utils.price_filter_config import max_price_label
+                print(f"✅ Loaded trading config - Max price: {max_price_label(self.config)}")
         except Exception as e:
             print(f"⚠️ Could not load trading config: {e}")
             # Set default high budget to avoid filtering out major stocks
@@ -258,7 +266,7 @@ class PhasmaTradingSystem:
         # 🚀 Real Portfolio System - Tracks actual trades and P&L
         self.trade_recommendation_memory = get_recommendation_memory()
         self.target_calculator = get_target_calculator()
-        self.real_portfolio = RealPortfolioManager(self.config)  # Real portfolio tracking
+        self.real_portfolio = LocalPortfolioLedger(self.config)
         
         # 📊 Paper Trading Portfolio - Track AI performance without real money
         if self.config.get('paper_trading', {}).get('enabled', False):
@@ -286,10 +294,23 @@ class PhasmaTradingSystem:
             self.paper_portfolio = None
             print("⚠️ Paper Trading Disabled")
             self.alpaca_paper_trader = None
+
+        self.execution_router = ExecutionRouter(self)
+        self.signal_outcome_tracker = SignalOutcomeTracker()
+        self.cooldown_trade_memory = get_trade_memory()
+        disabled_apis = audit_api_keys(self.config.data)
+        if disabled_apis:
+            print(f"⚠️ Disabled APIs (placeholder keys): {', '.join(disabled_apis.keys())}")
+        print(f"✅ Execution router ready (mode={self.execution_router.mode})")
         
-        # Initialize affordable stock filter based on available capital
+        from utils.price_filter_config import resolve_price_filter
         available_capital = self.real_portfolio.state['available_capital']
-        self.affordable_filter = AffordableStockFilter(max_price=available_capital)
+        price_filter_on, price_cap = resolve_price_filter(self.config)
+        filter_cap = price_cap if price_filter_on and price_cap else available_capital
+        self.affordable_filter = AffordableStockFilter(
+            max_price=filter_cap,
+            enabled=price_filter_on,
+        )
         
         self.trade_memory = {}  # Track trade memory for cooldowns
         self.posted_signals = self._load_posted_signals()  # Load persistent posted signals
@@ -351,6 +372,8 @@ class PhasmaTradingSystem:
             self.partnership_engine = PhasmaPartnershipEngine(
                 config_path=os.path.join('config', 'partnership_engine.json')
             )
+            if self.max_discovery:
+                self.partnership_engine.config['enabled'] = True
             print("✅ Partnership Engine Initialized")
         except Exception as e:
             self.partnership_engine = None
@@ -365,10 +388,15 @@ class PhasmaTradingSystem:
         except Exception as e:
             print(f"⚠️ Could not load previous Meta-Brain state: {e}")
         
-        # TEMPORARY FIX: Clear phantom positions
-        if hasattr(self.meta_brain, 'risk_manager') and hasattr(self.meta_brain.risk_manager, 'open_positions'):
-            self.meta_brain.risk_manager.open_positions = {}
-            print("🧹 CLEARED: Phantom positions")
+        # Preserve meta-brain positions; reconcile from broker/paper JSON on startup
+        try:
+            recon = reconcile_positions_on_startup(self)
+            print(f"♻️ Position reconcile: {recon.get('source')} ({recon.get('positions_count', 0)} positions)")
+            if recon.get("errors"):
+                for err in recon["errors"]:
+                    print(f"⚠️ Reconcile warning: {err}")
+        except Exception as e:
+            print(f"⚠️ Position reconcile failed (failing safe): {e}")
 
         # Register engines with Meta-Brain
         self.meta_brain.register_engine('news', self.news_engine)
@@ -401,8 +429,13 @@ class PhasmaTradingSystem:
         # Initialize market data cache
         self.market_cache = None
         if MarketDataCache:
-            self.market_cache = MarketDataCache(cache_duration_minutes=10)
-            print("✅ Market Data Cache Initialized")
+            from utils.discovery_limits import discovery_limit
+            cache_minutes = discovery_limit(self.config, "market_cache_minutes", 10)
+            self.market_cache = MarketDataCache(
+                cache_duration_minutes=cache_minutes,
+                config=self.config,
+            )
+            print(f"✅ Market Data Cache Initialized ({cache_minutes}m TTL)")
         else:
             print("⚠️ Market Data Cache not available")
         
@@ -454,14 +487,6 @@ class PhasmaTradingSystem:
         else:
             self.underground_discovery = None
 
-        # Initialize exit strategy manager
-        self.exit_manager = ExitStrategyManager()
-        print("✅ Exit Strategy Manager Initialized")
-        
-        # Initialize simulation exit manager
-        self.sim_exit_manager = SimulationExitManager()
-        print("✅ Simulation Exit Manager Initialized")
-        
         # Initialize profit maximization exit manager
         if self.config.get("profit_maximization", {}).get("enabled", False):
             profit_config = self.config.get("profit_maximization", {})
@@ -584,14 +609,34 @@ class PhasmaTradingSystem:
         except Exception as e:
             print(f"⚠️ Could not save posted signals: {e}")
 
-    def _get_cached_price(self, symbol: str) -> Optional[float]:
+    def _get_cached_price(self, symbol: str, ctx: Optional[ApplicationContext] = None) -> Optional[float]:
         sym = str(symbol or '').upper().strip()
         if not sym:
             return None
         if sym in self._price_cache:
             return self._price_cache[sym]
+        cycle_data = getattr(ctx, 'cycle_data', None) if ctx else None
+        if cycle_data and getattr(cycle_data, 'prices', None):
+            try:
+                cached = float(cycle_data.prices.get(sym) or 0)
+                if cached > 0:
+                    self._price_cache[sym] = cached
+                    return cached
+            except (TypeError, ValueError):
+                pass
+        if ctx and ctx.market_cache:
+            try:
+                batch = ctx.market_cache.fetch_prices([sym])
+                price = batch.get(sym) if batch else None
+                if price is not None:
+                    price_f = float(price)
+                    if price_f > 0:
+                        self._price_cache[sym] = price_f
+                        return price_f
+            except Exception:
+                pass
         try:
-            price = self.price_fetcher.get_real_price(sym)
+            price = self.robust_price_fetcher.get_real_price(sym)
             if price is None:
                 return None
             price_f = float(price)
@@ -631,6 +676,34 @@ class PhasmaTradingSystem:
             out.append(it)
         return out
     
+    def _enrich_signal_metadata(self, signal_dict: Dict, news_item: Optional[Dict] = None) -> Dict:
+        """Fill company name, sector, and related fields from resolver (no UNKNOWN placeholders)."""
+        if not isinstance(signal_dict, dict):
+            return signal_dict
+        title = (news_item or {}).get('title') or signal_dict.get('title')
+        get_resolver().enrich_signal(signal_dict)
+        sym = str(signal_dict.get('symbol') or '').upper()
+        resolved = get_resolver().resolve(sym, title)
+        if is_placeholder(signal_dict.get('sector')):
+            signal_dict['sector'] = resolved['sector']
+        if is_placeholder(signal_dict.get('industry')):
+            signal_dict['industry'] = resolved['industry']
+        if is_placeholder(signal_dict.get('company_name')):
+            signal_dict['company_name'] = resolved['company_name']
+        fc = signal_dict.get('fact_check')
+        if isinstance(fc, dict):
+            signal_dict['fact_check'] = get_resolver().enrich_fact_check(fc, sym, title)
+        return signal_dict
+
+    def _resolve_company_label(self, symbol: Any, title: Optional[str] = None, company_info: Optional[Dict] = None) -> str:
+        info = company_info or {}
+        return get_resolver().coalesce(
+            info.get('full_name'),
+            info.get('name'),
+            symbol,
+            title=title,
+        )
+
     def _categorize_symbol(self, symbol: str) -> str:
         """Intelligently categorize a symbol based on its pattern"""
         symbol = symbol.upper()
@@ -663,7 +736,7 @@ class PhasmaTradingSystem:
     
     def _track_symbol(self, symbol: str, source: str = 'news'):
         """Track a symbol and remember it for future analysis"""
-        if not symbol or symbol == 'UNKNOWN':
+        if not symbol:
             return
         
         symbol = symbol.upper()
@@ -692,482 +765,6 @@ class PhasmaTradingSystem:
         # Keep history manageable (last 10 entries per symbol)
         if len(self.ai_analyzed_history[symbol]) > 10:
             self.ai_analyzed_history[symbol] = self.ai_analyzed_history[symbol][-10:]
-        
-        # Only create options engine if enabled
-        if self.options_enabled:
-            from engines.options_engine import PhasmaOptionsEngine
-            self.options_engine = PhasmaOptionsEngine(self.config)
-        else:
-            self.options_engine = None
-            print("✅ Options Engine Disabled (options_enabled=false)")
-
-        # Initialize progressive trading system
-        self.trading_mode = self.config.get('trading_mode', 'stocks_and_kalshi')
-        self.graduation_thresholds = self.config.get('graduation_thresholds', {})
-        
-        # Initialize units system (sports betting style)
-        self.units_config = self.config.get('units_system', {})
-        self.unit_size_percent = self.units_config.get('unit_size_percent', 1)  # 1% per unit
-        self.standard_units = self.units_config.get('standard_units', 5)
-        self.max_units = self.units_config.get('max_units_per_trade', 10)
-        self.min_units = self.units_config.get('min_units_per_trade', 1)
-        
-        # Calculate unit value based on current bankroll
-        bankroll = self.config.get('bankroll', 2000)
-        self.unit_value = bankroll * (self.unit_size_percent / 100)
-        self.standard_trade_size = self.unit_value * self.standard_units
-        
-        print(f"[TRADING MODE] 🎯 {self.trading_mode.upper()} ACTIVE")
-        print(f"[UNITS SYSTEM] 💰 1 Unit = ${self.unit_value:.2f} ({self.unit_size_percent}% of ${bankroll} bankroll)")
-        print(f"[UNITS SYSTEM] 📊 Standard Trade = {self.standard_units} units = ${self.standard_trade_size:.2f}")
-        print(f"[UNITS SYSTEM] 🎯 Range: {self.min_units}-{self.max_units} units per trade")
-        
-        if self.trading_mode == 'stocks_and_kalshi':
-            print(f"[TRADING MODE] 📚 ACTIVE: Stocks + Options + Kalshi")
-            print(f"[TRADING MODE] 🎓 Graduation: {self.graduation_thresholds.get('min_win_rate', 60)}% win rate over {self.graduation_thresholds.get('min_trades', 50)} trades OR {self.graduation_thresholds.get('min_portfolio_growth', 20)}% growth")
-        elif self.trading_mode == 'full_trading':
-            print(f"[TRADING MODE] 🚀 ADVANCED PHASE: All trading unlocked (Options enabled)")
-        else:
-            print(f"[TRADING MODE] 🛡️ CONSERVATIVE PHASE: Stocks only")
-
-        # Initialize utility systems
-        self.alert_router = get_alert_router()
-        self.vol_burst_detector = get_vol_burst_detector()
-        # self.weekly_watchlist = get_weekly_watchlist_generator()  # REMOVED - Duplicate
-        self.winners_gallery = get_winners_gallery()
-        self.insider_monitor = get_insider_analyzer(self.config)
-        self.politician_tracker = PoliticianTracker(self.config.get('politician_tracker', {}))
-        self.trader_call_logger = TraderCallLogger()
-        self.exit_strategy_manager = ExitStrategyManager(self.config)
-        self.simulation_exit_manager = SimulationExitManager(self.config)
-        # self.catalyst_calendar = get_catalyst_calendar()  # TODO: Fix missing import
-        self.strategy_cards = get_strategy_cards()
-        self.alert_learning = get_alert_learning_loop()
-        self.price_fetcher = get_price_fetcher()
-        self.robust_price_fetcher = get_robust_price_fetcher()
-        
-        # 🚀 Real Portfolio System - Tracks actual trades and P&L
-        self.trade_recommendation_memory = get_recommendation_memory()
-        self.target_calculator = get_target_calculator()
-        self.real_portfolio = RealPortfolioManager(self.config)  # Real portfolio tracking
-        
-        # 📊 Paper Trading Portfolio - Track AI performance without real money
-        if self.config.get('paper_trading', {}).get('enabled', False):
-            self.paper_portfolio = get_paper_trading_portfolio(self.config)
-            print("✅ Paper Trading Portfolio Initialized")
-            if hasattr(self, 'paper_portfolio') and self.paper_portfolio:
-                print(f"   Starting Capital: ${self.paper_portfolio.state['starting_capital']:,.2f}")
-        else:
-            self.paper_portfolio = None
-            self.alpaca_paper_trader = None
-            print("⚠️ Paper Trading Disabled")
-            self.alpaca_paper_trader = None
-        
-        # Initialize affordable stock filter based on available capital
-        available_capital = self.real_portfolio.state['available_capital']
-        self.affordable_filter = AffordableStockFilter(max_price=available_capital)
-        
-        self.trade_memory = {}  # Track trade memory for cooldowns
-        self.posted_signals = self._load_posted_signals()  # Load persistent posted signals
-        self.last_gallery_posted_at = None  # Track last gallery post to avoid spamming
-        
-        # Initialize day trading scanner for regular stocks
-        from engines.day_trading_scanner import get_day_trading_scanner
-        self.day_trading_scanner = get_day_trading_scanner(self.config)
-        self.moon_shot_detector = MoonShotDetector(self.config)
-        self.position_sizer = AdaptivePositionSizer(self.config)
-        # self.conviction_watchlist = ConvictionWatchlist(self.config)  # REMOVED - Duplicate
-        self.pump_dump_detector = PumpDumpDetector(self.config)
-        try:
-            self.global_macro_monitor = GlobalMacroMonitor(self.config)
-            print("✅ Global Macro Monitor Initialized")
-        except Exception as e:
-            self.global_macro_monitor = None
-            print(f"⚠️ Could not initialize Global Macro Monitor: {e}")
-        self.insider_signal_integrator = InsiderSignalIntegrator(self.config)
-        
-        # Initialize new enhanced components
-        self.form4_parser = Form4Parser()
-        self.options_filter = OptionsFlowFilter()
-        self.enhanced_options_detector = get_enhanced_options_detector(self.config)
-        self.human_validator = HumanValidator()
-        self.compliance_logger = ComplianceLogger()
-        
-        print("✅ Day Trading Scanner Initialized")
-        print("✅ Moon Shot Detector Initialized")
-        print("✅ Pump/Dump Detector Initialized")
-        print("✅ Global Macro Monitor Initialized")
-        print("✅ Insider Signal Integrator Initialized")
-        print("✅ Form 4 Parser Initialized")
-        print("✅ Options Flow Filter Initialized")
-        print("✅ Human Validator Initialized")
-        print("✅ Compliance Logger Initialized")
-        
-        # Load configuration and partnership engine
-        self.partnership_engine = None
-        
-        # Disable crash profit engine for stock-only mode (options disabled)
-        # Crash profit now integrated in crash_detector_v2
-        
-        # Initialize market intelligence engine for universal contextual analysis
-        try:
-            self.market_intelligence = MarketIntelligenceEngine(self.config)
-            self.market_intelliggence = self.market_intelligence
-            print("✅ Market Intelligence Engine Initialized")
-            print(f"[DEBUG] market_intelligence type: {type(self.market_intelligence)}")
-        except Exception as e:
-            print(f"⚠️ Could not initialize Market Intelligence Engine: {e}")
-            self.market_intelligence = None
-            self.market_intelliggence = None
-            print(f"[DEBUG] market_intelligence set to None: {self.market_intelligence}")
-        try:
-            from engines.partnership_engine.phasma_integration import PhasmaPartnershipEngine
-            self.partnership_engine = PhasmaPartnershipEngine(
-                config_path=os.path.join('config', 'partnership_engine.json')
-            )
-            print("✅ Partnership Engine Initialized")
-        except Exception as e:
-            print(f"⚠️  Could not initialize Partnership Engine: {e}")
-            
-        self.is_running = False
-
-        # Load any previous Meta-Brain state (open positions, performance)
-        try:
-            self.meta_brain.load_state(phasma_state_file())
-            print("♻️ Loaded previous Meta-Brain state (open positions, performance)")
-        except Exception as e:
-            print(f"⚠️  Could not load previous Meta-Brain state: {e}")
-        
-        # TEMPORARY FIX: Clear phantom positions blocking trades
-        if hasattr(self.meta_brain, 'risk_manager') and hasattr(self.meta_brain.risk_manager, 'open_positions'):
-            self.meta_brain.risk_manager.open_positions = {}
-            print("🧹 CLEARED: Phantom positions from risk_manager.open_positions")
-
-        # Register engines with Meta-Brain
-        self.meta_brain.register_engine('news', self.news_engine)
-        
-        # Note: Critical engines will be registered after initialization
-        
-        # Only register options engine if not disabled
-        if self.options_engine is not None:
-            self.meta_brain.register_engine('options', self.options_engine)
-            print("✅ Options Engine Registered")
-        else:
-            print("✅ Options Engine Disabled - Stock trading only")
-        if self.partnership_engine:
-            self.meta_brain.register_engine('partnerships', self.partnership_engine)
-
-        # Setup logging
-        self._setup_logging()
-
-        # Initialize monitoring status
-        self.monitoring_active = False
-        self.monitoring_start_time = None
-        self.monitoring_cycles = 0
-        
-        # Initialize social media monitoring
-        print("[DEBUG] About to initialize social media monitoring...")
-        import sys
-        sys.stdout.flush()
-        try:
-            self.social_engine = RedditTrendingTracker(self.config)
-            print("[OK] Social Media Monitor: ENABLED (Reddit)")
-            print(f"[DEBUG] Social engine object: {type(self.social_engine)}")
-            sys.stdout.flush()
-        except Exception as e:
-            self.social_engine = None
-            print(f"[WARNING] Social Media Monitor: Failed to initialize - {e}")
-            import traceback
-            traceback.print_exc()
-            sys.stdout.flush()
-        
-        # Initialize market crash detector
-        self.crash_detector = None
-        try:
-            from engines.market_crash_detector_v2 import MarketCrashDetectorV2
-            from engines.monte_carlo_engine import PhasmaMonteCarloEngine
-            monte_carlo = PhasmaMonteCarloEngine(self.config)
-            self.crash_detector = MarketCrashDetectorV2(config=self.config, simulation_engine=monte_carlo)
-            self.meta_brain.register_engine('crash_detector', self.crash_detector)
-            print("✅ Market Crash Detector V2 Initialized")
-        except Exception as e:
-            print(f"⚠️  Could not initialize Crash Detector: {e}")
-            
-        # Initialize Kalshi prediction market engine
-        self.kalshi_engine = None
-        print(f"🔍 DEBUG: Config type: {type(self.config)}")
-        print(f"🔍 DEBUG: kalshi_enabled value: {self.config.get('kalshi_enabled', 'NOT_FOUND')}")
-        if self.config.get('kalshi_enabled', False):
-            print(f"🔍 DEBUG: Attempting to initialize Kalshi engine (kalshi_enabled=True)")
-            try:
-                from engines.kalshi_engine import KalshiPredictionEngine
-                print(f"🔍 DEBUG: Imported KalshiPredictionEngine successfully")
-                self.kalshi_engine = KalshiPredictionEngine(self.config)
-                print(f"🔍 DEBUG: KalshiPredictionEngine instantiated")
-                self.meta_brain.register_engine('kalshi', self.kalshi_engine)
-                print("✅ Kalshi Prediction Market Engine Initialized")
-            except Exception as e:
-                print(f"⚠️  Could not initialize Kalshi Engine: {e}")
-                import traceback
-                print(f"🔍 DEBUG: Full traceback: {traceback.format_exc()}")
-                self.kalshi_engine = None
-            
-        # Initialize trade database
-        self.trade_db = None
-        try:
-            from core.trade_database import TradeDatabase
-            self.trade_db = TradeDatabase()
-            print("✅ Trade Database Initialized")
-        except Exception as e:
-            print(f"⚠️  Could not initialize Trade Database: {e}")
-            
-        # Initialize trade classifier and logger
-        self.trade_classifier = TradeClassifier()
-        self.trade_logger = TradeLogger()
-        print("✅ Trade Analysis System Initialized")
-        
-        # Initialize Silver Price Monitor
-        try:
-            self.silver_monitor = SilverPriceMonitor()
-            print("✅ Silver Price Monitor Initialized")
-        except Exception as e:
-            print(f"⚠️ Could not initialize Silver Price Monitor: {e}")
-            self.silver_monitor = None
-        
-        # Initialize Advanced Brain Components
-        self.galton_mindset = GaltonMindset()
-        print("✅ Galton Mindset Initialized - Probabilistic Thinking Enabled")
-        print("🎯 Market viewed through Galton Board lens - Patterns in chaos")
-        
-        # Initialize Advanced Engines
-        self.smart_monte_carlo = SmartMonteCarlo(self.config)
-        print("✅ Smart Monte Carlo 2.0 Initialized - Adaptive Simulations")
-        
-        self.advanced_sentiment = AdvancedSentimentEngine(self.config)
-        print("✅ Advanced Sentiment Engine Initialized - Reads Between the Lines")
-        
-        # CRITICAL: Volatility Edge Engine
-        self.volatility_edge = VolatilityEdgeEngine(self.config)
-        print("📊 Volatility Edge Engine Initialized - OPTIONS EDGE DETECTED")
-        
-        # Options Trading Components
-        self.iv_crush_predictor = IVCrushPredictor()
-        print("💥 IV Crush Predictor Initialized - Volatility Events Detected")
-        
-        self.exit_optimizer = ExitOptimizer(self.config)
-        print("🎯 Exit Optimizer Initialized - Profit Maximization")
-        
-        self.auto_exit_manager = AutoExitManager(self.config)
-        print("🤖 Auto Exit Manager Initialized - Emotion-Free Exits")
-        
-        # Connect AI Exit Manager to Alpaca for auto-selling
-        if hasattr(self, 'alpaca_paper_trader') and self.alpaca_paper_trader:
-            self.auto_exit_manager.broker_api = self.alpaca_paper_trader
-            print("   ✅ AI Exit Manager connected to Alpaca Paper Trading")
-            print("   🔄 AI-driven exits will execute on Alpaca automatically")
-        
-        # Advanced Market Analysis (will be initialized later after scenario_graph)
-        
-        self.spread_builder = SpreadBuilder(self.config)
-        print("📈 Spread Builder Initialized - Risk-Optimized Spreads")
-        
-        self.correlation_tracker = CorrelationTracker(self.config)
-        print("🔗 Correlation Tracker Initialized - Risk Diversification")
-        
-        self.scenario_graph = ScenarioGraphEngine(self.config)
-        print("🌐 Scenario Graph Engine Initialized - What-If Analysis")
-        
-        # CRITICAL: Self-Calibrating Probability Engine (using Market Intelligence Engine)
-        self.probability_engine = self.market_intelligence
-        print("🧠 Self-Calibrating Probability Engine Initialized - AI LEARNING ENABLED")
-        
-        # Advanced Market Analysis (now that scenario_graph exists)
-        self.microstructure = MicrostructureEngine(
-            kalshi_engine=self.kalshi_engine,
-            scenario_graph=self.scenario_graph
-        )
-        print("🔍 Microstructure Engine Initialized - Order Flow Analysis")
-        
-        # Calendar & Event-Based Edges (now that scenario_graph exists)
-        self.calendar_seasonality = CalendarSeasonalityEngine(
-            kalshi_engine=self.kalshi_engine,
-            scenario_graph=self.scenario_graph
-        )
-        print("📅 Calendar Seasonality Engine Initialized - Holiday/Seasonal Patterns")
-        
-        self.earnings_drift = EarningsDriftEngine(
-            kalshi_engine=self.kalshi_engine,
-            scenario_graph=self.scenario_graph
-        )
-        print("📈 Earnings Drift Engine Initialized - Post-Earnings Patterns")
-        
-        self.macro_calendar = MacroCalendarEngine(
-            kalshi_engine=self.kalshi_engine,
-            scenario_graph=self.scenario_graph
-        )
-        print("📊 Macro Calendar Engine Initialized - Economic Event Patterns")
-        
-        self.corporate_actions = CorporateActionsEngine(
-            kalshi_engine=self.kalshi_engine,
-            scenario_graph=self.scenario_graph
-        )
-        print("📰 Corporate Actions Engine Initialized - Splits/Buybacks/Mergers")
-        
-        self.range_barrier = RangeBarrierEngine(
-            kalshi_engine=self.kalshi_engine,
-            scenario_graph=self.scenario_graph
-        )
-        print("🔒 Range Barrier Engine Initialized - Volatility & Range Analysis")
-        
-        self.cross_venue_radar = CrossVenueMispricingRadar(
-            kalshi_engine=self.kalshi_engine,
-            scenario_graph=self.scenario_graph
-        )
-        print("💹 Cross-Venue Radar Initialized - Arbitrage Detection")
-        
-        self.top_10_dashboard = Top10OpportunitiesDashboard(
-            kalshi_engine=self.kalshi_engine,
-            scenario_graph=self.scenario_graph,
-            mispricing_radar=self.cross_venue_radar
-        )
-        print("📊 Top 10 Dashboard Initialized - Market Opportunity Heatmap")
-        
-        # Portfolio Management
-        self.dynamic_portfolio = DynamicPortfolioManager(self.config)
-        print("💰 Dynamic Portfolio Manager Initialized - Optimal Allocation")
-        
-        # Fundamental Analysis Tools
-        self.pe_analyzer = PERatioAnalyzer()
-        print("📊 P/E Ratio Analyzer Initialized - Valuation Analysis")
-        # Initialize thesis manager with cache
-        self.thesis_manager = ThesisManager(cache=self.market_cache)
-        print("✅ Thesis Manager Initialized - Long-term Investment Analysis")
-        
-        self.volatility_lookup = VolatilityLookup()
-        print("📊 Volatility Lookup Initialized - Historical Data")
-        
-        # Calendar & Event-Based Edges (will be initialized later after scenario_graph)
-        
-        # Advanced Analysis
-        self.causal_counterfactual = CausalCounterfactualEngine(self.config)
-        print("🔬 Causal Counterfactual Engine Initialized - 'What If' Analysis")
-
-        # CRITICAL: Risk Guardian Meta Agent (now that all required engines exist)
-        self.risk_guardian = RiskGuardianMetaAgent(
-            kalshi_engine=self.kalshi_engine,
-            scenario_graph=self.scenario_graph,
-            mispricing_radar=self.cross_venue_radar,
-            opportunities_dashboard=self.top_10_dashboard,
-            causal_engine=self.causal_counterfactual
-        )
-        print("🛡️ Risk Guardian Meta Agent Initialized - KILL-SWITCH ACTIVE")
-
-        # NOW register all engines with Meta-Brain (after initialization)
-        # Register CRITICAL safety and optimization engines
-        self.meta_brain.register_engine('risk_guardian', self.risk_guardian)
-        self.meta_brain.register_engine('volatility_edge', self.volatility_edge)
-        self.meta_brain.register_engine('probability_engine', self.probability_engine)
-        self.meta_brain.register_engine('exit_optimizer', self.exit_optimizer)
-        self.meta_brain.register_engine('dynamic_portfolio', self.dynamic_portfolio)
-        
-        # Register Calendar & Event engines
-        self.meta_brain.register_engine('calendar_seasonality', self.calendar_seasonality)
-        self.meta_brain.register_engine('earnings_drift', self.earnings_drift)
-        self.meta_brain.register_engine('macro_calendar', self.macro_calendar)
-        self.meta_brain.register_engine('corporate_actions', self.corporate_actions)
-        
-        # Register Advanced Analysis engines
-        self.meta_brain.register_engine('cross_venue_radar', self.cross_venue_radar)
-        self.meta_brain.register_engine('top_10_dashboard', self.top_10_dashboard)
-        self.meta_brain.register_engine('causal_counterfactual', self.causal_counterfactual)
-        
-        # Register AI-Aware Insider Analysis engines
-        self.meta_brain.register_engine('insider_signal_integrator', self.insider_signal_integrator)
-        self.meta_brain.register_engine('form4_parser', self.form4_parser)
-        self.meta_brain.register_engine('options_filter', self.options_filter)
-        self.meta_brain.register_engine('human_validator', self.human_validator)
-        self.meta_brain.register_engine('compliance_logger', self.compliance_logger)
-        
-        # Initialize unified trading system
-        unified_config = {
-            "insider_monitor": self.config.get("insider_monitor", {}),
-            "watchlist": [],  # Empty - discover from news, not pre-defined
-            "quick_trade_threshold": self.config.get("quick_trade_threshold", 75),
-            "thesis_threshold": self.config.get("thesis_threshold", 85),
-            "enable_market_scan": True  # Enable market scanning to discover stocks
-        }
-        self.unified_system = UnifiedTradingSystem(unified_config)
-        print("✅ Unified Trading System Initialized")
-        
-        # Initialize Confluence Service for unified signal scoring
-        self.confluence_service = ConfluenceService(
-            self.config,
-            self.insider_signal_integrator,
-            self.insider_monitor,
-            self.options_filter
-        )
-        print("✅ Confluence Service Initialized")
-        
-        # Initialize Underground Stock Discovery
-        if self.config.get('underground_discovery', {}).get('enabled', False):
-            self.underground_discovery = UndergroundStockDiscovery(self.config)
-            print("✅ Underground Stock Discovery Initialized")
-        else:
-            self.underground_discovery = None
-
-        # Initialize exit strategy manager
-        self.exit_manager = ExitStrategyManager()
-        print("✅ Exit Strategy Manager Initialized")
-        
-        # Initialize simulation exit manager
-        self.sim_exit_manager = SimulationExitManager()
-        print("✅ Simulation Exit Manager Initialized")
-        
-        # Initialize profit maximization exit manager
-        if self.config.get("profit_maximization", {}).get("enabled", False):
-            profit_config = self.config.get("profit_maximization", {})
-            self.profit_exit_manager = ProfitMaximizationExitManager(profit_config)
-            print("✅ Profit Maximization Exit Manager Initialized")
-        else:
-            self.profit_exit_manager = None
-            print("⚠️  Profit Maximization Disabled")
-
-        # Initialize thematic analysis engine
-        self.thematic_analyzer = ThematicAnalyzer(self.config)
-        print("✅ Thematic Analysis Engine Initialized")
-
-        # Initialize signal convergence engine
-        self.convergence_engine = SignalConvergenceEngine()
-        print("✅ Signal Convergence Engine Initialized")
-
-        # Initialize news impact tracker for historical learning
-        self.news_impact_tracker = NewsImpactTracker()
-        print("✅ News Impact Tracker Initialized")
-
-        # Initialize Telegram bot for alerts
-        try:
-            from telegram_bot import get_telegram_bot
-            self.telegram_bot = get_telegram_bot()
-            print("✅ Telegram Bot Initialized")
-            
-            # Test Telegram connectivity
-            if self.telegram_bot:
-                test_message = "🤖 Phasma AI System Restart - All engines operational"
-                if self.telegram_bot.send_message(test_message):
-                    print("✅ Telegram connectivity test successful")
-                else:
-                    print("⚠️ Telegram connectivity test failed")
-        except Exception as e:
-            print(f"⚠️ Could not initialize Telegram Bot: {e}")
-            self.telegram_bot = None
-
-        print("🚀 Phasma AI Trading System Initialized")
-        print(f"📊 Bankroll: ${self.meta_brain.risk_manager.get_available_bankroll():.2f}")
-        print(f"🎯 POP Threshold: {self.config.get('pop_threshold')}")
-        print(f"🛡️ Risk Per Trade: {self.config.get('risk_per_trade')}")
-        print(f"📈 Max Drawdown: {self.config.get('max_drawdown')}")
-        
-        # Note: Real-time news collection is handled by news_engine.start_news_collection_network()
 
     def _setup_logging(self):
         """Setup enhanced logging"""
@@ -1198,144 +795,131 @@ class PhasmaTradingSystem:
             print(f"⚠️  Error getting trending symbols: {e}")
             return {}
 
-    def _execute_alpaca_trade_from_signal(self, signal_dict: dict):
-        """Execute a paper trade using Alpaca API"""
-        if not hasattr(self, 'alpaca_paper_trader') or not self.alpaca_paper_trader.alpaca:
-            print(f"  📊 Alpaca Trade: Skipping - Alpaca not connected")
-            return
-        
+    def _alpaca_submit_from_signal(self, signal_dict: dict, trader=None) -> dict:
+        """Private helper: submit Alpaca paper order (used only by ExecutionRouter)."""
+        trader = trader or getattr(self, "alpaca_paper_trader", None)
+        if not trader or not trader.alpaca:
+            return {"success": False, "error": "Alpaca not connected"}
+
         try:
-            symbol = signal_dict.get('symbol', '')
-            action = signal_dict.get('action', '')
-            confidence = signal_dict.get('confidence', 0)
-            
-            # Check if confidence meets threshold
-            # Use adaptive threshold if available, otherwise use config
-            if hasattr(self, 'adaptive_threshold'):
+            symbol = signal_dict.get("symbol", "")
+            action = signal_dict.get("action", "")
+            confidence = signal_dict.get("confidence", 0)
+            if confidence > 1:
+                confidence = confidence / 100.0 * 100  # keep as percent for threshold checks
+
+            min_confidence = self.config.get("execution", {}).get(
+                "min_confidence_threshold",
+                self.config.get("paper_trading", {}).get("min_confidence_threshold", 70),
+            )
+            if hasattr(self, "adaptive_threshold") and self.adaptive_threshold:
                 min_confidence = self.adaptive_threshold.get_current_threshold()
-                if self.adaptive_threshold.should_execute_trade(confidence):
-                    print(f"  📊 Alpaca Trade: {symbol} confidence {confidence:.1f}% meets adaptive threshold {min_confidence:.1f}%")
-                else:
-                    print(f"  📊 Alpaca Trade: Skipping {symbol} - confidence {confidence:.1f}% below adaptive threshold {min_confidence:.1f}%")
-                    return
-            else:
-                min_confidence = self.config.get('paper_trading', {}).get('min_confidence_threshold', 70)
-                if confidence < min_confidence:
-                    print(f"  📊 Alpaca Trade: Skipping {symbol} - confidence {confidence:.1f}% below threshold {min_confidence}%")
-                    return
-            
-            # Get position size and calculate with whole stock logic
-            position_size = signal_dict.get('position_size', 0)
-            entry_price = signal_dict.get('entry_price', 0)
-            
-            if position_size <= 0:
-                print(f"  📊 Alpaca Trade: Skipping {symbol} - invalid position size ${position_size}")
-                return
-            
+                if not self.adaptive_threshold.should_execute_trade(confidence):
+                    return {
+                        "success": False,
+                        "error": f"confidence {confidence:.1f}% below adaptive threshold {min_confidence:.1f}%",
+                    }
+            elif confidence < min_confidence:
+                return {
+                    "success": False,
+                    "error": f"confidence {confidence:.1f}% below threshold {min_confidence}%",
+                }
+
+            entry_price = signal_dict.get("entry_price") or signal_dict.get("current_price", 0)
             if entry_price <= 0:
-                print(f"  📊 Alpaca Trade: Skipping {symbol} - invalid price ${entry_price}")
-                return
-            
-            # Use enhanced position sizing logic
-            account = self.alpaca_paper_trader.get_account()
-            available_capital = account.get('buying_power', position_size)
-            
-            position_calc = self.alpaca_paper_trader.calculate_position_size(
+                return {"success": False, "error": f"invalid price ${entry_price}"}
+
+            account = trader.get_account()
+            available_capital = account.get("buying_power", signal_dict.get("position_size", 0))
+            position_calc = trader.calculate_position_size(
                 symbol, entry_price, available_capital, confidence
             )
-            
-            quantity = position_calc['quantity']
+            quantity = position_calc.get("quantity", 0)
             if quantity <= 0:
-                print(f"  📊 Alpaca Trade: Skipping {symbol} - {position_calc['reasoning']}")
-                return
-            
-            print(f"  📊 Position Logic: {position_calc['reasoning']}")
-            
-            # Execute trade via enhanced Alpaca
-            if action.upper() == 'BUY':
-                result = self.alpaca_paper_trader.execute_buy(
-                    symbol, quantity, entry_price, confidence
-                )
-            elif action.upper() == 'SELL':
-                result = self.alpaca_paper_trader.execute_sell(symbol, quantity, entry_price)
+                return {"success": False, "error": position_calc.get("reasoning", "invalid quantity")}
+
+            if action.upper() == "BUY":
+                result = trader.execute_buy(symbol, quantity, entry_price, confidence)
+            elif action.upper() == "SELL":
+                result = trader.execute_sell(symbol, quantity, entry_price)
             else:
-                print(f"  📊 Alpaca Trade: Skipping {symbol} - unknown action {action}")
-                return
-            
-            if result['success']:
-                print(f"  ✅ ALPACA TRADE EXECUTED: {symbol} {action} {quantity} @ ${result['price']}")
-                print(f"     Order ID: {result['order_id']}")
-                print(f"     Platform: Alpaca Paper Trading")
-                
-                # Record trade for daily learning
-                if hasattr(self, 'daily_learning_tracker'):
-                    self.daily_learning_tracker.record_trade({
-                        'symbol': symbol,
-                        'action': action,
-                        'quantity': quantity,
-                        'entry_price': result['price'],
-                        'confidence': confidence,
-                        'source': signal_dict.get('source', 'unknown'),
-                        'sector': signal_dict.get('sector', 'unknown')
-                    })
-            else:
-                print(f"  ❌ ALPACA TRADE FAILED: {symbol} - {result['error']}")
-            
+                return {"success": False, "error": f"unknown action {action}"}
+
+            if result.get("success"):
+                get_trade_memory().record_event(symbol, "submitted", {"mode": "PAPER_ALPACA", "order_id": result.get("order_id")})
             return result
-                
         except Exception as e:
-            print(f"  ❌ ALPACA TRADE ERROR: {e}")
-            return {'success': False, 'error': str(e)}
+            return {"success": False, "error": str(e)}
+
+    def _execute_alpaca_trade_from_signal(self, signal_dict: dict):
+        """Deprecated — use execution_router.submit_signal()."""
+        return self.execution_router.submit_signal(signal_dict)
+
+    def _internal_paper_submit_from_signal(self, signal_dict: dict, portfolio=None) -> dict:
+        """Private helper: internal JSON paper fill (used only by ExecutionRouter)."""
+        portfolio = portfolio or getattr(self, "paper_portfolio", None)
+        if not portfolio:
+            return {"success": False, "error": "internal paper not available"}
+
+        try:
+            symbol = signal_dict.get("symbol", "")
+            action = signal_dict.get("action", "")
+            confidence = signal_dict.get("confidence", 0)
+            if confidence > 1:
+                confidence = confidence / 100.0 * 100
+
+            min_confidence = self.config.get("execution", {}).get(
+                "min_confidence_threshold",
+                self.config.get("paper_trading", {}).get("min_confidence_threshold", 70),
+            )
+            if confidence < min_confidence:
+                return {
+                    "success": False,
+                    "error": f"confidence {confidence:.1f}% below threshold {min_confidence}%",
+                }
+
+            if action.upper() != "BUY":
+                return {"success": False, "error": f"unsupported action {action}"}
+
+            price = signal_dict.get("entry_price") or signal_dict.get("current_price", 0)
+            if price <= 0:
+                return {"success": False, "error": f"invalid price ${price}"}
+
+            max_position = self.config.get("execution", {}).get(
+                "max_position_size",
+                self.config.get("paper_trading", {}).get("max_position_size", 1000),
+            )
+            available_capital = portfolio.state["available_capital"]
+            max_by_capital = (available_capital * 0.1) / price
+            quantity = min(int(max_by_capital), int(max_position))
+            if quantity <= 0:
+                return {"success": False, "error": "insufficient capital"}
+
+            result = portfolio.execute_buy(
+                symbol=symbol,
+                quantity=quantity,
+                price=price,
+                signal_data=signal_dict,
+                confidence=confidence,
+            )
+            if result.get("success"):
+                fill = {
+                    "success": True,
+                    "symbol": symbol,
+                    "quantity": quantity,
+                    "price": price,
+                    "platform": "internal_json",
+                    "paper_trade": True,
+                }
+                get_trade_memory().record_event(symbol, "submitted", {"mode": "PAPER_INTERNAL"})
+                return fill
+            return result
+        except Exception as e:
+            return {"success": False, "error": str(e)}
 
     def _execute_paper_trade_from_signal(self, signal_dict: dict):
-        """Execute a paper trade based on a signal"""
-        try:
-            symbol = signal_dict.get('symbol', '')
-            action = signal_dict.get('action', '')
-            confidence = signal_dict.get('confidence', 0)
-            
-            # Check if confidence meets threshold
-            min_confidence = self.config.get('paper_trading', {}).get('min_confidence_threshold', 70)
-            if confidence < min_confidence:
-                print(f"  📊 Paper Trade: Skipping {symbol} - confidence {confidence:.1f}% below threshold {min_confidence}%")
-                return
-            
-            # Get position size from config or calculate
-            max_position = self.config.get('paper_trading', {}).get('max_position_size', 1000)
-            
-            if action.upper() == 'BUY':
-                # Calculate quantity based on available capital and max position
-                available_capital = self.paper_portfolio.state['available_capital']
-                price = signal_dict.get('entry_price', signal_dict.get('current_price', 0))
-                
-                if price <= 0:
-                    print(f"  📊 Paper Trade: Skipping {symbol} - invalid price ${price}")
-                    return
-                
-                # Use smaller of: max_position size or 10% of available capital
-                max_by_capital = (available_capital * 0.1) / price
-                quantity = min(int(max_by_capital), max_position)
-                
-                if quantity <= 0:
-                    print(f"  📊 Paper Trade: Skipping {symbol} - insufficient capital")
-                    return
-                
-                # Execute buy
-                result = self.paper_portfolio.execute_buy(
-                    symbol=symbol,
-                    quantity=quantity,
-                    price=price,
-                    signal_data=signal_dict,
-                    confidence=confidence
-                )
-                
-                if result['success']:
-                    print(f"  📊 Paper Trade: Bought {quantity} shares of {symbol} at ${price:.2f} (Total: ${result['total_cost']:.2f})")
-                else:
-                    print(f"  📊 Paper Trade: Failed to buy {symbol} - {result['error']}")
-                    
-        except Exception as e:
-            print(f"  📊 Paper Trade Error: {e}")
+        """Deprecated — use execution_router.submit_signal()."""
+        return self.execution_router.submit_signal(signal_dict)
     
     def _execute_paper_exit(self, symbol: str, quantity: int, price: float, reason: str = "Exit signal"):
         """Execute a paper trade exit"""
@@ -1677,7 +1261,9 @@ class PhasmaTradingSystem:
             else:
                 data = {}
 
-            symbol = str(data.get('symbol') or getattr(signal, 'symbol', 'UNKNOWN')).upper()
+            symbol = str(data.get('symbol') or getattr(signal, 'symbol', '') or '').upper()
+            if not symbol:
+                symbol = 'N/A'
             action = str(data.get('action') or getattr(signal, 'action', 'BUY')).upper()
             source = str(data.get('source') or getattr(signal, 'source', 'analysis'))
 
@@ -1739,7 +1325,7 @@ class PhasmaTradingSystem:
 
             return f"{header}\n{meta_line}\n{rationale}"
         except Exception as e:
-            return f"🎯 {getattr(signal, 'symbol', 'UNKNOWN')} | Summary unavailable ({e})"
+            return f"🎯 {getattr(signal, 'symbol', None) or 'N/A'} | Summary unavailable ({e})"
 
     def generate_unified_trade_summaryy(self, signal: Any) -> str:
         return self.generate_unified_trade_summary(signal)
@@ -1891,7 +1477,7 @@ class PhasmaTradingSystem:
         if ctx is None:
             ctx = ApplicationContext.bind(self, {})
         ps = ctx.system
-        ticker = signal.get("symbol", signal.get("ticker", "UNKNOWN"))
+        ticker = signal.get("symbol") or signal.get("ticker") or "N/A"
         action = signal.get("action", "BUY")
         confidence = signal.get("confidence", 0) * 100
 
@@ -2080,7 +1666,7 @@ class PhasmaTradingSystem:
         if ctx is None:
             ctx = ApplicationContext.bind(self, {})
         ps = ctx.system
-        ticker = signal.get('symbol', signal.get('ticker', 'UNKNOWN'))
+        ticker = signal.get('symbol') or signal.get('ticker') or 'N/A'
         action = signal.get('action', 'BUY')
         source = signal.get('source', 'analysis')
         confidence = signal.get('confidence', 0) * 100
@@ -2237,7 +1823,7 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
         # 0.1. Refresh market data cache for this cycle
         if ctx.market_cache and MarketDataCache:
             try:
-                print("\n📊 Refreshing market data cache...")
+                print("\n📊 Refreshing market data cache (single macro batch)...")
                 ctx.market_cache.refresh_cache()
                 print("   ✅ Market data cache refreshed")
             except Exception as e:
@@ -2283,7 +1869,8 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
             except Exception as e:
                 print(f"   ⚠️ Global macro monitoring error: {e}")
 
-        # FRED Economic Filter — adjusts position sizing and confidence thresholds
+        # FRED uses stlouisfed.org series (GDP, unemployment, etc.) — not Finnhub macro quotes.
+        # DXY/VIX/US10Y/SPY are warmed once per cycle in refresh_cache → fetch_macro_data.
         if ctx.fred_filter:
             try:
                 async with ctx.fred_filter as _fred:
@@ -2329,7 +1916,7 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
                 for signal in all_signals:
                     if signal.get("symbol"):
                         symbol = str(signal["symbol"]).upper()
-                        if symbol != "UNKNOWN":
+                        if symbol:
                             ctx.track_symbol(symbol, "signal")
                             tracked_symbols.add(symbol)
 
@@ -2345,7 +1932,7 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
 
                 # Analyze crash risk for tracked symbols by category
                 for sym in sorted(tracked_symbols):
-                    if not sym or sym == "UNKNOWN":
+                    if not sym:
                         continue
 
                     category = ctx.ai_symbol_categories.get(sym, ctx.categorize_symbol(sym))
@@ -2379,7 +1966,7 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
                     symbol = index_crash.get('symbol', 'SPY')
                     score = index_crash.get('crash_score', 0) * 100
                     level = index_crash.get('alert_level', 0)
-                    level_name = index_crash.get('alert_level_name', 'UNKNOWN')
+                    level_name = index_crash.get('alert_level_name') or 'No alert'
 
                     print(f"   📈 Stock Market ({symbol}): score {score:.1f}% | level {level} ({level_name})")
 
@@ -2401,27 +1988,27 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
                     if early:
                         early_score = early.get('score', 0) * 100
                         early_level = early.get('level', 0)
-                        early_name = early.get('level_name', 'UNKNOWN')
+                        early_name = early.get('level_name') or 'No alert'
                         print(f"      ↳ Early warning: {early_score:.1f}% | L{early_level} {early_name}")
 
                 # Show crash risk for AI-tracked stocks
                 if stock_assessments:
                     print(f"   📊 AI-Tracked Stocks ({len(stock_assessments)}):")
                     for sa in stock_assessments[:5]:
-                        sym = sa.get('symbol', 'UNKNOWN')
+                        sym = sa.get('symbol') or 'N/A'
                         score = sa.get('crash_score', 0) * 100
                         level = sa.get('alert_level', 0)
-                        level_name = sa.get('alert_level_name', 'UNKNOWN')
+                        level_name = sa.get('alert_level_name') or 'No alert'
                         print(f"      • {sym}: score {score:.1f}% | level {level} ({level_name})")
 
                 # Show crash risk for AI-tracked crypto
                 if crypto_assessments:
                     print(f"   💥 AI-Tracked Crypto ({len(crypto_assessments)}):")
                     for ca in crypto_assessments[:5]:
-                        sym = ca.get('symbol', 'UNKNOWN')
+                        sym = ca.get('symbol') or 'N/A'
                         score = ca.get('crash_score', 0) * 100
                         level = ca.get('alert_level', 0)
-                        level_name = ca.get('alert_level_name', 'UNKNOWN')
+                        level_name = ca.get('alert_level_name') or 'No alert'
                         early = ca.get('early_warning') or {}
                         ew_score = early.get('score')
                         ew_level = early.get('level')
@@ -2482,7 +2069,7 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
         print("🔗 ALL SYSTEMS INTEGRATED & WORKING TOGETHER")
         print("✓ Universal Intelligence (15 strategies)")
         print("✓ Bull Run Detector (multi-source)")
-        print("✓ News Scanner (hot stocks <$50)")
+        print("✓ News Scanner (news-driven discovery)")
         print("✓ Social Engine (sentiment)")
         print("✓ Partnership Monitor (M&A)")
         print("✓ Underground Discovery (hidden gems)")
@@ -2494,14 +2081,35 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
 
         # Reuse the unified brain instance across cycles to avoid cold-start overhead.
         if not hasattr(s, "_unified_brain") or s._unified_brain is None:
-            s._unified_brain = UnifiedMetaBrain(ctx.config)
+            s._unified_brain = UnifiedMetaBrain(ctx.config, market_cache=ctx.market_cache)
         brain = s._unified_brain
+        if ctx.market_cache and getattr(brain, "market_cache", None) is not ctx.market_cache:
+            brain.market_cache = ctx.market_cache
+            if getattr(brain, "regime_detector", None):
+                brain.regime_detector.market_cache = ctx.market_cache
 
-        results = await brain.run_unified_analysis()
+        from utils.cycle_data_context import CycleDataContext
+        if ctx.cycle_data is None:
+            ctx.cycle_data = await CycleDataContext.ingest(
+                brain.news_sources,
+                config=ctx.config,
+                market_cache=ctx.market_cache,
+            )
+        results = await brain.run_unified_analysis(ctx.cycle_data)
+
+        if getattr(ctx.cycle_data, 'prices', None):
+            register_cycle_prices(ctx.cycle_data.prices)
 
         if results.get('final_signals', 0) == 0:
-            print("\n⚠️ No high-confidence opportunities found - using fallback scan")
-            return await s.news_engine.scan_all_sources()
+            cycle_data = ctx.cycle_data
+            if cycle_data and cycle_data.ingested_news:
+                print(
+                    "\n⚠️ No high-confidence opportunities found - "
+                    f"reusing cycle ingest snapshot ({len(cycle_data.ingested_news)} items)"
+                )
+                return [dict(item) for item in cycle_data.ingested_news]
+            print("\n⚠️ No high-confidence opportunities found - no duplicate news scan")
+            return []
 
         print(f"\n✅ UNIFIED BRAIN FOUND {results['final_signals']} OPPORTUNITIES!")
         news_items: List[Dict] = []
@@ -2510,8 +2118,8 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
                 'symbol': signal['symbol'],
                 'title': f"UNIFIED SIGNAL: {signal['symbol']} - Rank #{signal.get('rank')} | {signal.get('confidence', 0):.1%} confidence",
                 'summary': f"Convergence: {signal.get('convergence_score', 1)} systems | "
-                           f"Strategies: {', '.join(signal.get('strategies', ['Unknown']))} | "
-                           f"Sources: {', '.join(signal.get('sources', ['Unknown'])[:2])}",
+                           f"Strategies: {', '.join(signal.get('strategies') or ['convergence'])} | "
+                           f"Sources: {', '.join((signal.get('sources') or ['UnifiedMetaBrain'])[:2])}",
                 'source': 'UnifiedMetaBrain',
                 'sentiment': 0.8 if signal.get('confidence', 0) > 0.7 else 0.6,
                 'current_price': signal.get('current_price', 0),
@@ -2522,7 +2130,7 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
                 'action': signal.get('action', 'BUY'),
                 'entry_price': signal.get('entry_price', 0),
                 'target_price': signal.get('target_price', 0),
-                'sector': signal.get('sector', 'Unknown'),
+                'sector': get_resolver().sector(signal['symbol'], signal.get('title')),
                 'confluence_score': signal.get('confluence_score', 0),
                 'confluence_breakdown': signal.get('confluence_breakdown', {}),
                 'day_trading_data': {
@@ -2536,13 +2144,43 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
                     'confluence_breakdown': signal.get('confluence_breakdown', {}),
                     'rationale': signal.get('rationale', 'Unified brain convergence signal'),
                     'patterns': signal.get('patterns', []),
-                    'sector': signal.get('sector', 'Unknown')
+                    'sector': get_resolver().sector(signal['symbol'])
                 }
             })
 
         news_items = s._filter_seen_news_items(news_items, ttl_hours=12)
         print(f"\n📊 Total items for analysis: {len(news_items)}")
         return news_items
+
+    async def _collect_unusual_whales_signals(self) -> List[Dict]:
+        """Fetch unusual options / institutional flow and normalize for the unified pipeline."""
+        unusual_whales_signals: List[Dict] = []
+        try:
+            if hasattr(self, 'unusual_whales') and self.unusual_whales.enabled:
+                print("🐋 Scanning unusual options activity...")
+                unusual_signals = await self.unusual_whales.get_signals()
+                print(f"🐋 Found {len(unusual_signals)} unusual activity signals")
+
+                for signal in unusual_signals[:10]:
+                    unusual_whales_signals.append({
+                        'symbol': signal['symbol'],
+                        'action': signal['action'],
+                        'confidence': signal['confidence'],
+                        'position_size': 20,
+                        'rationale': signal['rationale'],
+                        'source': 'unusual_whales',
+                        'current_price': signal.get('entry_price', 0),
+                        'trade_type': 'STOCK',
+                        'signal_type': signal.get('signal_type', 'options_flow'),
+                        'details': signal.get('details', {}),
+                    })
+                if unusual_whales_signals:
+                    print(f"🐋 Added {len(unusual_whales_signals)} unusual-activity signals to pipeline")
+                else:
+                    print("🐋 No unusual-activity signals passed conversion filters")
+        except Exception as e:
+            print(f"⚠️ Unusual Whales scan failed: {e}")
+        return unusual_whales_signals
 
     async def _stage_display_and_secondary_scans(
         self,
@@ -2554,12 +2192,6 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
     ) -> Tuple[List, List[Dict]]:
         """Display results and run secondary scans; returns updated (all_signals, news_items)."""
         s = ctx.system
-        # 4. Display unified results
-        if not regular_trades and not overnight_moonshots:
-            print("No trading opportunities found - this is normal when markets are quiet")
-            print("System only trades when real opportunities exist")
-        else:
-            s._display_unified_results(regular_trades, overnight_moonshots, ctx=ctx)
 
         # 5. SCAN NEWS AND SOCIAL ENGINES (reuse cycle snapshot when available)
         print("\n🔍 Scanning news and social engines for signals...")
@@ -2637,33 +2269,8 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
         except Exception as e:
             print(f"⚠️ Social engine scan failed: {e}")
 
-        # Scan Unusual Whales for unusual options activity
-        unusual_whales_signals = []
-        try:
-            if hasattr(s, 'unusual_whales') and s.unusual_whales.enabled:
-                print("🐋 Scanning unusual options activity...")
-                unusual_signals = await s.unusual_whales.get_signals()
-                print(f"🐋 Found {len(unusual_signals)} unusual activity signals")
-
-                # Convert to expected format
-                for signal in unusual_signals[:10]:  # Limit to prevent overload
-                    unusual_whales_signals.append({
-                        'symbol': signal['symbol'],
-                        'action': signal['action'],
-                        'confidence': signal['confidence'],
-                        'position_size': 20,  # Slightly larger for unusual activity
-                        'rationale': signal['rationale'],
-                        'source': 'unusual_whales',
-                        'current_price': signal.get('entry_price', 0),
-                        'trade_type': 'STOCK',
-                        'details': signal.get('details', {})
-                    })
-                print(f"🐋 Generated {len(unusual_whales_signals)} signals from unusual activity")
-        except Exception as e:
-            print(f"⚠️ Unusual Whales scan failed: {e}")
-
-        # Combine all signals
-        all_signals = all_signals + news_signals + social_signals + unusual_whales_signals
+        # Combine all signals (unusual whales collected in signal generation stage)
+        all_signals = all_signals + news_signals + social_signals
 
         # Scan for geopolitical events
         try:
@@ -2766,6 +2373,18 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
         if underground_signals:
             print(f"\n🔊 Total signals with underground: {len(all_signals)} (+{len(underground_signals)} underground)")
 
+        if not regular_trades and not overnight_moonshots:
+            if not all_signals:
+                print("No trading opportunities found - this is normal when markets are quiet")
+                print("System only trades when real opportunities exist")
+            else:
+                print(
+                    f"📊 {len(all_signals)} signals queued for arbitration "
+                    "(none classified as display trades this cycle)"
+                )
+        else:
+            s._display_unified_results(regular_trades, overnight_moonshots, ctx=ctx)
+
         return all_signals, news_items
 
     def _build_signal_objects_for_arbitration(self, ctx: ApplicationContext, all_signals: List) -> List[Signal]:
@@ -2858,6 +2477,40 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
                     f"P&L: ${pos['unrealized_pnl']:.2f} ({pos['unrealized_pct']:.1f}%)"
                 )
 
+        arb_symbols = [
+            str(getattr(sig, 'symbol', '')).upper()
+            for sig in all_signal_objects
+            if getattr(sig, 'symbol', '')
+        ]
+        if getattr(ctx, 'cycle_data', None) and ctx.cycle_data.prices:
+            register_cycle_prices(ctx.cycle_data.prices)
+            for sym, price in ctx.cycle_data.prices.items():
+                if price and float(price) > 0:
+                    s._price_cache[str(sym).upper()] = float(price)
+        if arb_symbols and ctx.market_cache and MarketDataCache:
+            try:
+                batch_prices = ctx.market_cache.fetch_prices(arb_symbols)
+                for sym, price in (batch_prices or {}).items():
+                    sym_u = str(sym).upper()
+                    if price and float(price) > 0:
+                        s._price_cache[sym_u] = float(price)
+            except Exception as prefetch_err:
+                print(f"   ⚠️ Arbitration price prefetch failed: {prefetch_err}")
+        for sig in all_signal_objects:
+            sym_u = str(getattr(sig, 'symbol', '')).upper()
+            if not sym_u:
+                continue
+            existing = getattr(sig, 'current_price', None)
+            try:
+                if existing is not None and float(existing) > 0:
+                    s._price_cache[sym_u] = float(existing)
+                    continue
+            except (TypeError, ValueError):
+                pass
+            hydrated = s._get_cached_price(sym_u, ctx)
+            if hydrated and hydrated > 0:
+                sig.current_price = hydrated
+
         return approved_signals, real_portfolio, defensive_mode, dynamic_pop_threshold
 
     def _stage_streamlined_signal_filtering(self, ctx: ApplicationContext, approved_signals: List[Signal]) -> List[Signal]:
@@ -2871,7 +2524,7 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
 
         for signal in approved_signals:
             try:
-                symbol = getattr(signal, 'symbol', 'UNKNOWN')
+                symbol = getattr(signal, 'symbol', None) or 'N/A'
                 trade_type = getattr(signal, 'trade_type', '')
                 action = getattr(signal, 'action', '')
                 confidence = getattr(signal, 'confidence', 0)
@@ -2884,12 +2537,17 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
                 print(f"  ✅ {symbol}: Confidence {confidence:.1%} - PASSED 30% threshold")
 
                 signal_source = getattr(signal, 'source', '')
+                from utils.price_filter_config import resolve_price_filter
+                price_filter_on, max_price = resolve_price_filter(ctx.config)
                 if signal_source == 'geopolitical_analysis':
                     max_price = ctx.config.get("trading_budget", {}).get("max_price_per_share_geo", 600)
-                else:
-                    max_price = ctx.config.get("trading_budget", {}).get("max_price_per_share", 50)
 
-                if hasattr(signal, 'current_price') and signal.current_price > max_price:
+                if (
+                    price_filter_on
+                    and max_price is not None
+                    and hasattr(signal, 'current_price')
+                    and signal.current_price > max_price
+                ):
                     print(f"  💰 {symbol}: Price ${signal.current_price:.2f} EXCEEDS ${max_price} budget - SKIPPED")
                     continue
 
@@ -2920,19 +2578,24 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
                         continue
                 elif trade_type == 'STOCK':
                     try:
-                        current_price = self._get_cached_price(symbol)
+                        current_price = self._get_cached_price(symbol, ctx)
                         if current_price is None:
                             print(f"  ⚠️ {symbol}: No price data available")
                             continue
 
+                        from utils.price_filter_config import resolve_price_filter, exceeds_price_cap
+                        price_filter_on, _ = resolve_price_filter(ctx.config)
                         max_price_access = s.real_portfolio.state['available_capital']
                         if current_price < 1.00:
                             print(f"  ❌ {symbol}: Price ${current_price:.2f} below $1.00 minimum - penny stock filtered out")
                             continue
-                        if s.trading_mode == 'stocks_and_kalshi' and current_price > max_price_access:
+                        if price_filter_on and exceeds_price_cap(current_price, ctx.config):
+                            print(f"  ❌ {symbol}: Price ${current_price:.2f} exceeds configured max share price")
+                            continue
+                        if s.trading_mode == 'stocks_and_kalshi' and price_filter_on and current_price > max_price_access:
                             print(f"  ❌ {symbol}: Price ${current_price:.2f} exceeds tier limit ${max_price_access:.2f}")
                             continue
-                        print(f"  ✅ {symbol}: Price ${current_price:.2f} within $1.00-${max_price_access:.2f} range")
+                        print(f"  ✅ {symbol}: Price ${current_price:.2f} OK (min $1.00)")
 
                         try:
                             catalyst_data = {
@@ -2989,6 +2652,8 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
 
         for signal in high_confidence_approved:
             if getattr(signal, 'trade_type', '') == 'KALSHI_PREDICTION':
+                if kalshi_intel_only(ctx.config):
+                    continue
                 kalshi_approved.append(signal)
             elif getattr(signal, 'trade_type', '') == 'STOCK':
                 stocks_approved.append(signal)
@@ -3077,7 +2742,7 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
 
             for signal in high_confidence_approved:
                 try:
-                    symbol = getattr(signal, 'symbol', 'UNKNOWN')
+                    symbol = getattr(signal, 'symbol', None) or 'N/A'
                     signal_type = 'BULLISH' if 'CALL' in str(getattr(signal, 'action', '')).upper() else 'BEARISH'
 
                     if not engine:
@@ -3104,7 +2769,7 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
 
             for signal in high_confidence_approved:
                 try:
-                    symbol = getattr(signal, 'symbol', 'UNKNOWN')
+                    symbol = getattr(signal, 'symbol', None) or 'N/A'
 
                     if getattr(signal, 'trade_type', '') == 'KALSHI_PREDICTION':
                         print(f"[PRO ANALYSIS] ⏭️ Skipping Kalshi signal: {symbol}")
@@ -3206,7 +2871,7 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
             signal.jury_veto_reason = outcome.veto_reason
             signal.jury_reasons = outcome.reasons
 
-            sym = getattr(signal, "symbol", "UNKNOWN")
+            sym = getattr(signal, "symbol", None) or "N/A"
             if outcome.hard_veto or outcome.verdict == "REJECT":
                 print(f"[JURY] REJECT {sym}: {outcome.veto_reason or '; '.join(outcome.reasons[:2])}")
                 continue
@@ -3240,10 +2905,14 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
 
         news_items = await s._stage_unified_brain_news_items(ctx)
         
-        # Run thematic analysis to identify macro trends
-        print("\n🎯 THEMATIC ANALYSIS: Identifying macro trends...")
-        active_themes = s.thematic_analyzer.analyze_news_themes(news_items)
-        thematic_stocks = s.thematic_analyzer.map_themes_to_stocks(active_themes)
+        # Thematic mapping already runs inside UnifiedMetaBrain; skip duplicate pass when ingest ran
+        thematic_stocks = []
+        if getattr(ctx, "cycle_data", None) is None:
+            print("\n🎯 THEMATIC ANALYSIS: Identifying macro trends...")
+            active_themes = s.thematic_analyzer.analyze_news_themes(news_items)
+            thematic_stocks = s.thematic_analyzer.map_themes_to_stocks(active_themes)
+        else:
+            print("\n🎯 THEMATIC ANALYSIS: skipped (already run in Unified Meta Brain)")
         
         # Analyze conviction watchlist for dip buying opportunities
         print("\n🚀 CONVICTION WATCHLIST: DISABLED - discovering stocks from news instead")
@@ -3390,8 +3059,11 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
             print(f"\n📈 Posting {len(day_trading_opportunities)} day trading signals to Telegram...")
             for opp in day_trading_opportunities:
                 try:
-                    # Format using stock signal formatter
+                    if should_block_prediction_trade_post(s.config, opp):
+                        continue
                     signal_data = opp.get('day_trading_data', {})
+                    if should_block_prediction_trade_post(s.config, signal_data):
+                        continue
 
                     sym = str(signal_data.get('symbol', opp.get('symbol', ''))).upper()
                     action = str(signal_data.get('action', 'BUY')).upper()
@@ -3402,7 +3074,7 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
                     # ADD RISK-FIRST VALIDATION
                     is_valid, risk_msg = s.validate_risk_first(signal_data, ctx=ctx)
                     if not is_valid:
-                        print(f"   🛑 Signal {signal_data.get('symbol', 'UNKNOWN')} rejected: {risk_msg}")
+                        print(f"   🛑 Signal {signal_data.get('symbol') or 'N/A'} rejected: {risk_msg}")
                         continue
                     
                     formatted_message = s.telegram_bot.format_stock_signal_message(signal_data)
@@ -3410,9 +3082,9 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
                     if result:
                         s.posted_signals.add(post_key)
                         s._save_posted_signals()  # Persist to disk
-                    print(f"   📱 Posted {signal_data.get('symbol', 'UNKNOWN')} to Telegram: {result}")
+                    print(f"   📱 Posted {signal_data.get('symbol') or 'N/A'} to Telegram: {result}")
                 except Exception as e:
-                    print(f"   ❌ Failed to post {opp.get('symbol', 'UNKNOWN')} to Telegram: {e}")
+                    print(f"   ❌ Failed to post {opp.get('symbol') or 'N/A'} to Telegram: {e}")
         
         if not news_items:
             print("💤 No real trading opportunities found from news sources")
@@ -3428,9 +3100,13 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
             print(f"   🚫 Removed {filtered_count} recently traded symbols")
         print(f"   ✅ {len(news_items)} fresh trading opportunities remain")
         
-        # Filter news items by max price access before analysis
-        max_price_access = s.real_portfolio.state["available_capital"]  # Use actual available capital
-        print(f"\n💰 Filtering news items by max price: ${max_price_access:.2f}")
+        from utils.price_filter_config import resolve_price_filter, exceeds_price_cap
+        price_filter_on, _ = resolve_price_filter(s.config)
+        max_price_access = s.real_portfolio.state["available_capital"]
+        if price_filter_on:
+            print(f"\n💰 Filtering news items by max share price (config)")
+        else:
+            print(f"\n💰 News price cap disabled — keeping items >= $1.00 only")
         
         affordable_news_items = []
         for item in news_items:
@@ -3444,13 +3120,13 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
                 print(f"   ❌ {symbol}: ${current_price:.2f} below $1.00 minimum - penny stock filtered out")
                 continue
 
-            if current_price <= max_price_access:
+            if not price_filter_on or not exceeds_price_cap(current_price, s.config):
                 affordable_news_items.append(item)
             else:
-                print(f"   ❌ {symbol}: ${current_price:.2f} > ${max_price_access:.2f} - filtered out")
+                print(f"   ❌ {symbol}: ${current_price:.2f} exceeds max share price cap")
         
         news_items = affordable_news_items
-        print(f"   ✅ Filtered to {len(news_items)} affordable news items")
+        print(f"   ✅ Filtered to {len(news_items)} news items for analysis")
 
         if news_items:
             print("\n🎯 INDUSTRY SCAN RESULTS:")
@@ -3460,11 +3136,11 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
                 options_data = item.get('options_data', {})
 
                 print(f"   📈 {item.get('symbol')} ({company_info.get('industry', 'Unknown')}): {item.get('title', 'No title')[:50]}...")
-                print(f"      🎯 Recommendation: {item.get('options_recommendation', 'UNKNOWN')}")
+                print(f"      🎯 Recommendation: {item.get('options_recommendation') or 'HOLD'}")
                 print(f"      📊 Options: IV {options_data.get('estimated_iv', 0)}% | Vol {options_data.get('estimated_options_volume', 0):,}")
                 print(f"      ⏰ Optimal Expiry: {item.get('optimal_expiry_days', 0)} days")
                 print(f"      ✅ Valid: {fact_check.get('is_valid', False)} | Real Company: {company_info.get('real_ticker', False)}")
-                print(f"      🏢 Company: {company_info.get('full_name', 'Unknown')}")
+                print(f"      🏢 Company: {s._resolve_company_label(item.get('symbol'), item.get('title'), company_info)}")
                 print()
 
         # 2. Get trending symbols from social media (Reddit, Twitter/X)
@@ -3486,20 +3162,36 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
                         except Exception:
                             trending_price_map = {}
 
-                    price_fetcher = get_price_fetcher()
                     for symbol, count in trending_symbols.items():
+                        sym_u = str(symbol or '').upper().strip()
+                        if sym_u in NewsUtils.BLOCKED_SYMBOLS:
+                            continue
                         # Check if symbol already in news_items
-                        if not any(item.get('symbol') == symbol for item in news_items):
+                        if not any(item.get('symbol') == sym_u for item in news_items):
                             # Get REAL price for social media symbol (cache-first)
-                            real_price = trending_price_map.get(symbol)
-                            if not real_price:
-                                real_price = price_fetcher.get_real_price(symbol)
+                            raw = trending_price_map.get(sym_u) or trending_price_map.get(symbol)
+                            real_price = None
+                            if raw is not None:
+                                try:
+                                    real_price = float(
+                                        raw.get('current') or raw.get('price') or raw
+                                        if isinstance(raw, dict) else raw
+                                    )
+                                except (TypeError, ValueError):
+                                    real_price = None
+                            if not real_price or real_price <= 0:
+                                real_price = s._get_cached_price(sym_u, ctx)
+                            if not real_price or real_price <= 0:
+                                real_price = get_cycle_price(sym_u)
                             
                             if real_price:
+                                real_price = float(real_price)
+                                register_cycle_prices({sym_u: real_price})
+                                s._price_cache[sym_u] = real_price
                                 # Add as social media signal with REAL price and simulation-based targets
                                 news_items.append({
-                                    'symbol': symbol,
-                                    'title': f"Trending on social media: {symbol}",
+                                    'symbol': sym_u,
+                                    'title': f"Trending on social media: {sym_u}",
                                     'source': 'social_media',
                                     'sentiment': 0.5,
                                     'catalyst_score': 0.3,
@@ -3508,9 +3200,9 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
                                     # target_price will be calculated by simulation later
                                     'social_mentions': count
                                 })
-                                print(f"   ✅ Added {symbol} from social media (${real_price:.2f})")
+                                print(f"   ✅ Added {sym_u} from social media (${real_price:.2f})")
                             else:
-                                print(f"   ❌ Skipping {symbol} - cannot fetch real price")
+                                print(f"   ❌ Skipping {sym_u} - cannot fetch real price")
                 else:
                     print("   💤 No trending symbols found on social media")
             except Exception as e:
@@ -3523,17 +3215,16 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
         # 2.6. Scan Kalshi prediction markets with automatic discovery
         kalshi_opportunities = []
         if s.kalshi_engine:
-            print("\n🌤️ Scanning WEATHER prediction markets for trading opportunities...")
+            print("\n📊 Scanning Kalshi prediction markets for trading opportunities...")
             try:
-                # Use automatic market discovery with AI Playbook
                 opportunities = s.kalshi_engine.scan_all_markets(
-                    min_volume=100,  # Lower threshold for playbook (it handles liquidity)
+                    min_volume=100,
                     max_markets=50,
-                    use_playbook=True  # Enable AI Playbook strategy
+                    use_playbook=False,
                 )
                 
                 if opportunities:
-                    print(f"   ✅ Found {len(opportunities)} WEATHER trading opportunities")
+                    print(f"   ✅ Found {len(opportunities)} Kalshi trading opportunities")
                     
                     for opp_data in opportunities:
                         market = opp_data['market']
@@ -3549,10 +3240,11 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
                         bet_amount = bankroll * risk_pct
                         
                         # Create unified opportunity structure
-                        kalshi_opportunity = {
+                        kalshi_opportunity = tag_intel_only_fields({
                             'symbol': analysis.get('ticker', market.get('ticker', '')),
                             'title': f"Kalshi: {market.get('title', '')} - {analysis.get('signal', '')}",
                             'source': 'kalshi_prediction',
+                            'prediction_market': 'kalshi',
                             'sentiment': 0.8 if analysis.get('confidence', 0) > 0.7 else 0.6 if analysis.get('confidence', 0) > 0.5 else 0.4,
                             'catalyst_score': analysis.get('catalyst_score', 0),
                             'sector': 'Prediction Markets',
@@ -3575,7 +3267,7 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
                             'bet_amount': round(bet_amount, 2),
                             'risk_percentage': round(risk_pct * 100, 1),
                             'bankroll_used_pct': round((bet_amount / bankroll) * 100, 1)
-                        }
+                        }, s.config)
                         kalshi_opportunities.append(kalshi_opportunity)
                         
                         edge_info = f" | Edge: {phasma_prediction:.1%} vs {opp_data['implied_probability']:.1%}" if phasma_prediction else ""
@@ -3612,7 +3304,7 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
             symbols_to_analyze = set()
             for item in news_items[:50]:  # Analyze top 50
                 symbol = item.get('symbol', '').upper()
-                if symbol and symbol != 'UNKNOWN':
+                if symbol:
                     symbols_to_analyze.add(symbol)
             
             # Keep the value scan fully news/universe-driven (no fixed symbol seed list).
@@ -3646,7 +3338,8 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
                             if not current_price:
                                 current_price = price_fetcher.get_real_price(symbol)
                             
-                            if current_price and current_price <= 50:  # Under $50 budget
+                            from utils.price_filter_config import within_price_cap
+                            if current_price and within_price_cap(current_price, s.config):
                                 # Calculate target based on fair value
                                 target_price = fair_value.get('midpoint', current_price * 1.2)
                                 expected_gain = ((target_price / current_price) - 1) * 100
@@ -3725,7 +3418,7 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
         existing_syms = {
             str(ni.get("symbol", "")).upper()
             for ni in news_items
-            if isinstance(ni, dict) and ni.get("symbol")
+            if isinstance(ni, dict) and ni.get("symbol") and not is_placeholder(ni.get("symbol"))
         }
         try:
             revisit_news = s.skipped_opportunity_watchlist.get_revisit_news_items(
@@ -3770,14 +3463,14 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
                     # Track all symbols from analysis (even holds)
                     for signal in unified_signals:
                         symbol = str(signal.get('symbol', '')).upper()
-                        if symbol and symbol != 'UNKNOWN':
+                        if symbol:
                             ctx.track_symbol(symbol, "unified_analysis")
                     
                     # Add good opportunities to watchlist priority
                     for signal in unified_signals:
                         if signal.get('action') in ['BUY', 'BUY_CALL', 'BUY_PUT']:
                             symbol = str(signal.get('symbol', '')).upper()
-                            if symbol and symbol != 'UNKNOWN':
+                            if symbol:
                                 # Already tracked above, just ensure it's in watchlist
                                 s.ai_watchlist.add(symbol)
                                 # Keep watchlist manageable (remove old entries if too many)
@@ -3787,9 +3480,13 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
                                     # Keep only the 50 most recent (simple FIFO)
                                     s.ai_watchlist = set(watchlist_list[-50:])
                 except Exception as e:
-                    print(f"⚠️ Unified analysis failed for {news_item.get('symbol', 'UNKNOWN')}: {str(e)}")
+                    print(f"⚠️ Unified analysis failed for {news_item.get('symbol') or 'N/A'}: {str(e)}")
 
             print(f"🎯 Generated {len(all_signals)} unified trading signals")
+
+        unusual_whales_signals = await s._collect_unusual_whales_signals()
+        if unusual_whales_signals:
+            all_signals.extend(unusual_whales_signals)
 
         # 3.5. Signal Convergence Analysis - Combine all sources for high-confidence opportunities
         print("\n🔀 Running Multi-Source Signal Convergence Analysis...")
@@ -3799,15 +3496,15 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
             # Feed all signals to convergence engine
             print("   📊 Feeding signals to convergence engine...")
             
-            # Add unified news signals
+            # Add unified pipeline signals (preserve source, e.g. unusual_whales)
             for signal in all_signals:
                 s.convergence_engine.add_signal({
-                    'source': 'news_analysis',
+                    'source': signal.get('source', 'news_analysis'),
                     'ticker': signal.get('symbol', ''),
                     'confidence': signal.get('confidence', 0.5),
                     'action': signal.get('action', 'BUY'),
                     'position_size': signal.get('position_size', 1000),
-                    'sector': signal.get('sector', 'UNKNOWN'),
+                    'sector': get_resolver().sector(signal.get('symbol', ''), signal.get('title')),
                     'region': signal.get('region', 'GLOBAL'),
                     'timestamp': datetime.now().isoformat(),
                     'details': {
@@ -3868,7 +3565,7 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
                 for opportunity in kalshi_opportunities:
                     signal = {
                         'source': 'kalshi_prediction',
-                        'ticker': opportunity.get('ticker', 'UNKNOWN'),
+                        'ticker': opportunity.get('ticker') or opportunity.get('symbol') or 'N/A',
                         'action': opportunity.get('action', 'BUY'),
                         'confidence': opportunity.get('confidence', 0.5),
                         'position_size': opportunity.get('position_size', 0.02),
@@ -3910,7 +3607,7 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
                     'confidence': inv_opp.get('confidence_in_impact', 0.85),
                     'action': 'BUY',
                     'position_size': 2000,  # Base position for investments
-                    'sector': company.get('sector', 'UNKNOWN'),
+                    'sector': get_resolver().sector(company.get('ticker', '')),
                     'region': inv_opp.get('target_region', 'GLOBAL'),
                     'timestamp': datetime.now().isoformat(),
                     'details': {
@@ -3938,7 +3635,7 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
                             'confidence': insider_signal.get('confidence', 0.7),
                             'action': insider_signal.get('action', 'BUY'),
                             'position_size': insider_signal.get('position_size', 1500),
-                            'sector': insider_signal.get('sector', 'UNKNOWN'),
+                            'sector': get_resolver().sector(insider_signal.get('ticker', '')),
                             'region': insider_signal.get('region', 'GLOBAL'),
                             'timestamp': insider_signal.get('timestamp', datetime.now().isoformat()),
                             'details': {
@@ -3977,7 +3674,7 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
         except Exception as e:
             print(f"   ⚠️ Convergence analysis error: {e}")
 
-        if kalshi_opportunities:
+        if kalshi_opportunities and not kalshi_intel_only(s.config):
             kalshi_signals = []
             for opp in kalshi_opportunities:
                 analysis = (opp.get('kalshi_analysis') or {})
@@ -4097,6 +3794,11 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
             if kalshi_signals:
                 print(f"   🔗 Added {len(kalshi_signals)} Kalshi prediction market signals to unified signal set")
                 all_signals.extend(kalshi_signals)
+        elif kalshi_opportunities and kalshi_intel_only(s.config):
+            print(
+                f"   📊 Kalshi intel-only: {len(kalshi_opportunities)} markets kept for "
+                "research/discovery (not added as trade signals)"
+            )
 
         # 3.5. Run Unified Trading System Analysis (NEW - preserves all existing features)
         print("\n🔄 Running Unified Trading System Analysis...")
@@ -4173,7 +3875,7 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
                 symbol = opp['symbol']
                 change = opp.get('change_pct', 0)
                 volume = opp.get('volume', 0)
-                opp_type = opp.get('type', opp.get('momentum', 'UNKNOWN'))
+                opp_type = opp.get('type') or opp.get('momentum') or 'momentum_scan'
                 print(f"      • {symbol}: {opp_type} ({change:+.1f}%) Vol: {volume:,}")
             
             if len(fresh_opportunities) > 10:
@@ -4199,7 +3901,7 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
                     if options_signals:
                         print(f"   🎯 Generated {len(options_signals)} SUPER ADVANCED options trading signals")
                         for sig in options_signals[:3]:  # Show first 3
-                            action = sig.get('action', 'UNKNOWN')
+                            action = sig.get('action') or 'HOLD'
                             confidence = sig.get('confidence', 0)
                             strike_info = ""
                             if 'strike' in sig:
@@ -4210,7 +3912,16 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
                         all_signals.extend(options_signals)
                         print(f"   🔗 Added {len(options_signals)} options signals to unified analysis pipeline")
                     else:
-                        print("   💤 No attractive options opportunities found")
+                        uw_pending = bool(
+                            getattr(s, 'unusual_whales', None) and s.unusual_whales.enabled
+                        )
+                        if uw_pending:
+                            print(
+                                "   💤 No attractive options from options_engine "
+                                "(unusual flow scanned separately)"
+                            )
+                        else:
+                            print("   💤 No attractive options opportunities found")
                 except Exception as e:
                     print(f"   ⚠️ Options signal generation failed: {e}")
         
@@ -4327,6 +4038,7 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
         if not all_signals:
             print("No signals to classify - no trading opportunities today")
         else:
+            print(f"📊 Classifying {len(all_signals)} signals for trading...")
             for signal in all_signals:
                 # Moonshot criteria: High potential + overnight timing + strong catalysts
                 is_moonshot = (
@@ -4457,6 +4169,43 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
         except Exception as reconcile_err:
             print(f"⚠️  Position reconciliation step failed: {reconcile_err}")
 
+    def _post_kalshi_intel_digest(self, ctx: ApplicationContext, telegram_bot) -> None:
+        """Post a daily intel digest (themes → tickers), not executable trade signals."""
+        if not kalshi_intel_only(ctx.config):
+            return
+        cycle_data = getattr(ctx, "cycle_data", None)
+        if not cycle_data:
+            return
+        matched = [
+            item for item in cycle_data.ingested_news
+            if item.get("prediction_market")
+            and float(item.get("news_match_score") or 0) > 0
+        ]
+        matched.sort(key=lambda row: float(row.get("news_match_score") or 0), reverse=True)
+        matched = matched[:5]
+        if not matched:
+            return
+        digest_key = f"KALSHI_INTEL_DIGEST:{datetime.now().strftime('%Y-%m-%d')}"
+        if digest_key in self.posted_signals:
+            return
+        lines = [
+            "Kalshi intel digest (research only — not trade signals)",
+            "",
+        ]
+        for item in matched:
+            sym = item.get("symbol") or "—"
+            score = item.get("news_match_score", 0)
+            title = (item.get("title") or "")[:72]
+            venue = item.get("prediction_market", "kalshi")
+            lines.append(f"• [{venue}] {sym} (match {score}): {title}")
+        try:
+            if telegram_bot.send_message("\n".join(lines)):
+                self.posted_signals.add(digest_key)
+                self._save_posted_signals()
+                print(f"   Posted Kalshi intel digest ({len(matched)} themes)")
+        except Exception as err:
+            print(f"   Kalshi intel digest post failed: {err}")
+
     async def _stage_telegram_and_execution_tail(
         self,
         ctx: ApplicationContext,
@@ -4476,13 +4225,25 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
         max_price_access = float(ctx.system.real_portfolio.state.get("available_capital", 0) or 0)
 
         # 6. Post approved signals to Telegram (>40% POP - realistic threshold with 2% OTM strikes)
-        if ctx.config.get("telegram_enabled", False):
+        telegram_bot = getattr(self, 'telegram_bot', None)
+        if not telegram_bot and ctx.config.get("telegram_enabled", False):
+            try:
+                from telegram_bot import get_telegram_bot
+                telegram_bot = get_telegram_bot()
+                self.telegram_bot = telegram_bot
+            except Exception as tg_init_err:
+                print(f"   ⚠️ Telegram bot init failed: {tg_init_err}")
+                telegram_bot = None
+
+        if ctx.config.get("telegram_enabled", False) and telegram_bot:
+            try:
+                self._post_kalshi_intel_digest(ctx, telegram_bot)
+            except Exception as digest_err:
+                print(f"   Kalshi intel digest skipped: {digest_err}")
             if not all_signal_objects:
                 print("💤 No signals to post to Telegram - no trading opportunities today")
             else:
                 try:
-                    from telegram_bot import get_telegram_bot
-                    telegram_bot = get_telegram_bot()
                     cooldown_memory = get_cooldown_memory()
                     crypto_risk_by_symbol: Dict[str, Dict] = {}
                     ecosystem_child_to_main_root: Dict[str, str] = {}
@@ -4536,7 +4297,11 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
                         ecosystem_child_to_main_root = {}
                     
                     for signal in high_confidence_approved:
-                        symbol = getattr(signal, 'symbol', 'UNKNOWN')
+                        if should_block_prediction_trade_post(ctx.config, signal):
+                            sym_skip = getattr(signal, 'symbol', None) or 'N/A'
+                            print(f"  ⏭️ {sym_skip}: prediction-market intel only — skip Telegram trade post")
+                            continue
+                        symbol = getattr(signal, 'symbol', None) or 'N/A'
                         # Only post signals that clear dynamic POP & quality gates
                         pop_from_sim = getattr(signal, 'pop_from_sim', 50)
                         # Ensure minimum POP of 40% for stocks (avoid 0% values)
@@ -4764,7 +4529,27 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
                         signal_dict['suggested_strategy'] = strategy_suggestion.value if strategy_suggestion else 'BREAKOUT'
 
                         # 🚀 ADAPTIVE POSITION SIZING: Capital-based smart money management
-                        current_price = stock_data['Close'].iloc[-1] if 'stock_data' in locals() else 0
+                        current_price = 0.0
+                        try:
+                            if 'stock_data' in locals() and stock_data is not None:
+                                current_price = float(stock_data['Close'].iloc[-1])
+                        except Exception:
+                            current_price = 0.0
+                        if current_price <= 0:
+                            try:
+                                current_price = float(
+                                    getattr(signal, 'current_price', None)
+                                    or signal_dict.get('current_price')
+                                    or 0
+                                )
+                            except (TypeError, ValueError):
+                                current_price = 0.0
+                        if current_price <= 0:
+                            hydrated = self._get_cached_price(symbol, ctx)
+                            if hydrated and hydrated > 0:
+                                current_price = hydrated
+                                signal.current_price = hydrated
+                                signal_dict['current_price'] = hydrated
                         portfolio_summary = ctx.system.real_portfolio.get_portfolio_summary()
                         # Use fallback tier config if accessible_universe not available
                         tier_config = portfolio_summary.get('accessible_universe', {}).get('position_limits', {
@@ -4838,7 +4623,7 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
                                     for level in exit_strategy.get('exit_levels', []):
                                         print(f"       Exit Level {level['level']}: {level['description']}")
 
-                            # Record ticker found for daily learning
+                        if telegram_bot:
                             if hasattr(self, 'daily_learning_tracker'):
                                 self.daily_learning_tracker.record_ticker_found(
                                     signal.symbol,
@@ -4846,56 +4631,45 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
                                     signal.confidence
                                 )
                             signal_key = f"{symbol}_{action}_{signal_dict.get('entry_price', 'N/A')}"
-                            
-                            if signal_key in self.posted_signals:
+
+                            if should_block_prediction_trade_post(ctx.config, signal_dict):
+                                print(f"  ⏭️ Skipping Telegram trade post for prediction market: {symbol}")
+                            elif signal_key in self.posted_signals:
                                 print(f"  ⚠️ Signal already posted to Telegram: {signal_key}")
                             else:
-                                print(f"  ATTEMPTING TO POST TO TELEGRAM: {symbol}")
-                                print(f"     Signal details: {action} {symbol} @ {signal_dict.get('entry_price', 'N/A')} (Confidence: {confidence:.1%})")
-                            
-                            # Ensure signal types are properly identified
-                            if symbol.startswith('KX'):
-                                signal_dict['source'] = 'kalshi_prediction'
-                                print(f"  📈 Identified {symbol} as Kalshi prediction market")
-                            elif signal_dict.get('trade_type') == 'STOCK':
-                                signal_dict['source'] = 'stock_signal'
-                                print(f"  📈 Identified {symbol} as stock signal")
-                            try:
-                                # Check if we're in an async context
-                                import asyncio
-                                if asyncio.get_event_loop().is_running():
-                                    print(f"  Event loop already running - posting directly")
-                                    # Use synchronous method when event loop is running
-                                    if signal_dict.get('source') == 'stock_signal':
-                                        formatted_message = telegram_bot.format_stock_signal_message(signal_dict)
+                                if symbol.startswith('KX'):
+                                    signal_dict['source'] = 'kalshi_prediction'
+                                elif signal_dict.get('trade_type') == 'STOCK':
+                                    signal_dict['source'] = 'stock_signal'
+
+                                signal_dict['dedup_key'] = signal_key
+                                signal_dict['trade_type'] = signal_dict.get('trade_type', 'STOCK')
+
+                                # 1) Execute via single router path
+                                exec_result = self.execution_router.submit_signal(
+                                    signal_dict,
+                                    risk_ok=True,
+                                    posted_keys=self.posted_signals,
+                                )
+                                report_dict = self.execution_router.enrich_signal_for_report(signal_dict, exec_result)
+                                print(
+                                    f"  🛡️ Execution: mode={exec_result.mode} "
+                                    f"decision={exec_result.decision} reason={exec_result.reason}"
+                                )
+
+                                # 2) Telegram report-only (never submits orders)
+                                try:
+                                    if report_dict.get('source') == 'stock_signal':
+                                        formatted_message = telegram_bot.format_stock_signal_message(report_dict)
                                     else:
-                                        formatted_message = telegram_bot.format_signal_message(signal_dict)
-                                    result = telegram_bot.send_message(formatted_message)
-                                    print(f"  📱 TELEGRAM POST RESULT: {result} (True=success)")
-                                    
-                                    # Add to posted signals if successful
-                                    if result:
+                                        formatted_message = telegram_bot.format_signal_message(report_dict)
+                                    tg_ok = telegram_bot.send_message(formatted_message)
+                                    print(f"  📱 TELEGRAM REPORT: {tg_ok} (report-only)")
+                                    if tg_ok:
                                         self.posted_signals.add(signal_key)
-                                        self._save_posted_signals()  # Persist to disk
-                                        print(f"  ✅ Signal recorded as posted: {signal_key}")
-                                        
-                                        # Execute Alpaca paper trade FIRST before Telegram
-                                        if hasattr(self, 'alpaca_paper_trader') and self.alpaca_paper_trader.alpaca and signal_dict.get('trade_type') == 'STOCK':
-                                            print(f"  🔄 EXECUTING ALPACA TRADE BEFORE TELEGRAM...")
-                                            self._execute_alpaca_trade_from_signal(signal_dict)
-                                        elif self.paper_portfolio and signal_dict.get('trade_type') == 'STOCK':
-                                            print(f"  🔄 FALLBACK: Using internal paper trading...")
-                                            self._execute_paper_trade_from_signal(signal_dict)
-                                        else:
-                                            print(f"  📊 No paper trading available for {signal_dict.get('symbol', 'UNKNOWN')}")
-                                else:
-                                    print(f"  Creating async task for Telegram posting")
-                                    task = asyncio.create_task(telegram_bot.post_signal(signal_dict))
-                                    print(f"  Telegram task created: {task}")
-                            except Exception as e:
-                                print(f"  TELEGRAM POSTING ERROR: {e}")
-                        else:
-                            print(f"  Telegram bot not configured - skipping posting")
+                                        self._save_posted_signals()
+                                except Exception as tg_err:
+                                    print(f"  TELEGRAM REPORT ERROR: {tg_err}")
                         
                         # RECORD TO TRADE MEMORY
                         if signal.symbol not in self.trade_memory:
@@ -4909,7 +4683,7 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
                             print(f"   📝 Trade Memory: Recorded {signal.symbol} (cooldown: 7 days)")
                     
                 except Exception as e:
-                    print(f"  ❌ Error processing signal {getattr(signal, 'symbol', 'UNKNOWN')}: {str(e)}")
+                    print(f"  ❌ Error processing signal {getattr(signal, 'symbol', None) or 'N/A'}: {str(e)}")
             
             # 🏆 Post Winner's Gallery once per day (UTC) to avoid spamming
             try:
@@ -4943,7 +4717,8 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
             # 🕵️ Insider monitor (capital-aware)
             try:
                 if getattr(self.insider_monitor, "enabled", False):
-                    print(f"    🕵️ Insider Monitor: Capital-Aware Analysis (Max Price: ${max_price_access:.2f})")
+                    from utils.price_filter_config import max_price_label
+                    print(f"    🕵️ Insider Monitor: Capital-Aware Analysis (share cap: {max_price_label(ctx.config)})")
                     print("    ⚠️  Note: SEC Form 4 XML parsing pending - results limited until data source implemented")
                     
                     # Get insider trading opportunities
@@ -4952,7 +4727,7 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
                         for hit in insider_hits[:5]:  # limit chatter
                             ticker = hit.get('ticker', 'N/A')
                             score = hit.get('opportunity_score', 0)
-                            rec = hit.get('recommendation', 'UNKNOWN')
+                            rec = hit.get('recommendation') or 'WATCH'
                             reasoning = hit.get('reasoning', 'No reasoning')
                             current_price = hit.get('current_price', 0)
                             insider_price = hit.get('purchase_price', 0)
@@ -4991,31 +4766,32 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
             except Exception as im_err:
                 print(f"    ⚠️ Insider monitor failed: {im_err}")
 
-            # 🏛️ Politician trading tracker
+            # 🏛️ Politician trading tracker (live API only — no demo Telegram posts)
             try:
                 if self.politician_tracker.enabled:
                     print("    🏛️ Politician Trading Tracker: Congressional/Government Analysis")
                     politician_trades = self.politician_tracker.fetch_recent_trades()
-                    
+
                     if politician_trades:
-                        # Get top trades by value
                         top_trades = self.politician_tracker.get_top_trades(5)
-                        
-                        for trade in top_trades:
-                            # Create unique key for deduplication
-                            politician_key = f"POLITICIAN:{trade.get('ticker', 'N/A')}:{trade.get('representative', 'N/A')}:{trade.get('transaction_date', 'N/A')}"
-                            if politician_key in self.posted_signals:
-                                continue
-                            
-                            msg = self.politician_tracker.format_trade_for_telegram(trade)
-                            result = telegram_bot.send_message(msg)
-                            if result:
-                                self.posted_signals.add(politician_key)
-                                self._save_posted_signals()
-                        
-                        print(f"    🏛️ Posted {len(top_trades)} politician trade alerts to Telegram")
-                        
-                        # Show summary stats
+                        if self.politician_tracker.using_live_data and telegram_bot:
+                            posted = 0
+                            for trade in top_trades:
+                                politician_key = (
+                                    f"POLITICIAN:{trade.get('ticker', 'N/A')}:"
+                                    f"{trade.get('politician', 'N/A')}:{trade.get('date', 'N/A')}"
+                                )
+                                if politician_key in self.posted_signals:
+                                    continue
+                                msg = self.politician_tracker.format_trade_for_telegram(trade)
+                                if telegram_bot.send_message(msg):
+                                    self.posted_signals.add(politician_key)
+                                    self._save_posted_signals()
+                                    posted += 1
+                            print(f"    🏛️ Posted {posted} live politician trade alerts to Telegram")
+                        elif not self.politician_tracker.using_live_data:
+                            print(f"    🏛️ DEMO DATA: {len(top_trades)} sample trades (not posted — enable politician_trades_use_live)")
+
                         stats = self.politician_tracker.get_summary_stats()
                         print(f"    🏛️ Summary: {stats.get('total_trades', 0)} total trades, "
                               f"${stats.get('total_value', 0):,} total value")
@@ -5228,10 +5004,12 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
         """Run complete unified trading cycle with all analysis methods"""
         print("🔄 Starting Unified Phasma Trading Cycle")
         print("=" * 50)
+        self._reset_cycle_caches()
         cycle_stage_timings: Dict[str, float] = {}
         ctx = ApplicationContext.bind(self, cycle_stage_timings)
         _stage_name = "preflight_and_risk"
         _stage_start = time.perf_counter()
+        print("\n--- STAGE: preflight ---")
         await self._stage_startup_services(ctx)
 
         await self._stage_reconcile_open_positions(ctx)
@@ -5251,6 +5029,7 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
         cycle_stage_timings[_stage_name] = time.perf_counter() - _stage_start
         _stage_name = "signal_generation"
         _stage_start = time.perf_counter()
+        print("\n--- STAGE: ingest & signals ---")
         # 1. UNIFIED META BRAIN - All Systems Working Together
         result = await self._stage_signal_generation(ctx, crash_assessment, macro_risk)
         if result is None:
@@ -5269,6 +5048,7 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
         cycle_stage_timings[_stage_name] = time.perf_counter() - _stage_start
         _stage_name = "display_and_secondary_scans"
         _stage_start = time.perf_counter()
+        print("\n--- STAGE: secondary scans ---")
         all_signals, news_items = await self._stage_display_and_secondary_scans(
             ctx,
             regular_trades=regular_trades,
@@ -5280,6 +5060,7 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
         cycle_stage_timings[_stage_name] = time.perf_counter() - _stage_start
         _stage_name = "arbitration_and_execution"
         _stage_start = time.perf_counter()
+        print("\n--- STAGE: filter & execute ---")
         all_signal_objects = self._build_signal_objects_for_arbitration(ctx, all_signals)
 
         approved_signals, real_portfolio, defensive_mode, dynamic_pop_threshold = self._stage_prepare_arbitration_context(
@@ -5342,6 +5123,11 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
         price_map = cycle_price_map if isinstance(cycle_price_map, dict) else {}
         cfg = analysis_config if analysis_config is not None else ctx.config
 
+        news_engine = getattr(ps, "news_engine", None)
+        news_extractor = getattr(news_engine, "_extract_symbol", None)
+        company_db = getattr(news_engine, "company_db", None)
+        skipped_missing_symbol = 0
+
         for news_item in news_items:
             # CRITICAL: Check if news_item is None or not a dictionary
             if news_item is None:
@@ -5353,14 +5139,14 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
                 print(f"      Content: {str(news_item)[:100]}...")
                 continue
 
-            # Check if essential fields exist
-            if not news_item.get('symbol'):
-                print(f"  ⚠️ SKIPPING: News item missing symbol field")
-                print(f"      Available keys: {list(news_item.keys())}")
-                print(f"      Title: {news_item.get('title', 'NO_TITLE')[:50]}...")
+            symbol = resolve_symbol_from_news_item(
+                news_item,
+                news_extractor=news_extractor,
+                company_db=company_db,
+            )
+            if not symbol:
+                skipped_missing_symbol += 1
                 continue
-
-            symbol = news_item.get('symbol', '')
 
             try:
                 # Company Validation: Only process real, valid companies (not just AI)
@@ -5369,23 +5155,27 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
                     fact_check = {'is_valid': False, 'validation_score': 0.0, 'company_info': {}}
                 if 'is_valid' not in fact_check:
                     fact_check['is_valid'] = False
+                fact_check = get_resolver().enrich_fact_check(
+                    fact_check, news_item.get('symbol'), news_item.get('title')
+                )
+                news_item['fact_check'] = fact_check
 
                 # Debug: Check what fact_check returned
                 if fact_check is None:
-                    print(f"  ⚠️ FACT_CHECK RETURNED NONE for {news_item.get('symbol', 'UNKNOWN')}")
+                    print(f"  ⚠️ FACT_CHECK RETURNED NONE for {news_item.get('symbol') or 'N/A'}")
                     continue
 
                 if not isinstance(fact_check, dict):
-                    print(f"  ⚠️ FACT_CHECK NOT DICT for {news_item.get('symbol', 'UNKNOWN')}: {type(fact_check)}")
+                    print(f"  ⚠️ FACT_CHECK NOT DICT for {news_item.get('symbol') or 'N/A'}: {type(fact_check)}")
                     continue
 
                 # Skip companies that aren't valid real companies
                 if not fact_check.get('is_valid', False):
-                    print(f"  ❌ Skipping {news_item.get('symbol', 'UNKNOWN')} - Not a real company (sector: {news_item.get('sector', 'UNKNOWN')})")
+                    print(f"  ❌ Skipping {news_item.get('symbol') or 'N/A'} - Not a real company (sector: {news_item.get('sector') or get_resolver().sector(news_item.get('symbol', ''), news_item.get('title'))})")
                     continue  # Skip early, no expensive analysis needed
 
                 # Check if this is a Kalshi prediction market (not a real company)
-                symbol = news_item.get('symbol', 'UNKNOWN')
+                symbol = news_item.get('symbol') or 'N/A'
                 if symbol.startswith('KX') or '-' in symbol and len(symbol.split('-')) > 1:
                     print(f"  🎯 Prediction Market: {symbol} - Kalshi contract (not a company)")
                     print(f"     📊 Type: Prediction contract | Risk: Bounded")
@@ -5402,21 +5192,25 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
                     avg_volume_display = str(avg_volume)
                 price_range = company_info.get('price_range', 'N/A')
 
-                sector = news_item.get('sector', 'UNKNOWN')
+                sector = get_resolver().coalesce(
+                    news_item.get('sector'),
+                    company_info.get('sector'),
+                    symbol=news_item.get('symbol'),
+                    title=news_item.get('title'),
+                )
                 sector_name = sector if sector != 'AI' else 'Technology'
+                news_item['sector'] = sector_name
 
-                company_name = (
-                    company_info.get('full_name')
-                    or company_info.get('name')
-                    or company_info.get('symbol')
-                    or news_item.get('symbol', 'UNKNOWN')
+                company_name = ps._resolve_company_label(
+                    news_item.get('symbol'), news_item.get('title'), company_info
                 )
 
                 print(
-                    f"  🎯 Real Company: {news_item.get('symbol', 'UNKNOWN')} - "
+                    f"  🎯 Real Company: {news_item.get('symbol')} - "
                     f"{company_name} ({sector_name} sector)"
                 )
-                print(f"     📊 Volume: {avg_volume_display} | Price: {price_range} | Risk: {fact_check.get('risk_level', 'UNKNOWN')}")
+                risk_level = fact_check.get('risk_level') or 'MEDIUM'
+                print(f"     📊 Volume: {avg_volume_display} | Price: {price_range} | Risk: {risk_level}")
 
                 try:
                     _usch = str(news_item.get("symbol", "")).upper()
@@ -5628,16 +5422,34 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
                         else:
                             action = 'BUY'  # Default fallback
 
-                        # Get REAL price - NO DEFAULTS
-                        symbol = news_item['symbol']
-                        price_fetcher = get_price_fetcher()
+                        # Get REAL price - NO DEFAULTS (cycle cache before network)
+                        symbol = str(news_item.get('symbol') or '').upper().strip()
                         real_price = news_item.get('current_price')
-                        
+                        try:
+                            if real_price is not None:
+                                real_price = float(real_price)
+                        except (TypeError, ValueError):
+                            real_price = None
                         if not real_price or real_price <= 0:
-                            real_price = price_map.get(symbol) or price_fetcher.get_real_price(symbol)
-                            if not real_price:
+                            raw = price_map.get(symbol) or price_map.get(symbol.upper())
+                            if raw is not None:
+                                try:
+                                    real_price = float(
+                                        raw.get('current') or raw.get('price') or raw
+                                        if isinstance(raw, dict) else raw
+                                    )
+                                except (TypeError, ValueError):
+                                    real_price = None
+                        if not real_price or real_price <= 0:
+                            real_price = ps._get_cached_price(symbol, ctx)
+                        if not real_price or real_price <= 0:
+                            real_price = get_cycle_price(symbol)
+                        if (not real_price or real_price <= 0) and symbol not in NewsUtils.BLOCKED_SYMBOLS:
+                            real_price = get_price_fetcher().get_real_price(symbol)
+                        if not real_price or real_price <= 0:
+                            if symbol not in NewsUtils.BLOCKED_SYMBOLS:
                                 print(f"   ❌ Skipping {symbol} - cannot fetch real price")
-                                continue  # Skip this trade - NO FAKE DATA
+                            continue  # Skip this trade - NO FAKE DATA
                         
                         # Stock trading - no strike price needed
                         strike = None  # Stocks don't have strike prices
@@ -5811,8 +5623,8 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
                             'sim_win_rate': sim_win_rate,  # For debugging
                             'title': news_item.get('title', ''),  # Add title for moonshot detection
                             'company_validation': fact_check.get('is_valid', False),  # Track company validation
-                            'industry': news_item.get('fact_check', {}).get('company_info', {}).get('industry', 'Unknown'),
-                            'sector': news_item.get('fact_check', {}).get('company_info', {}).get('sector', 'Unknown'),
+                            'industry': get_resolver().resolve(symbol, news_item.get('title'))['industry'],
+                            'sector': get_resolver().resolve(symbol, news_item.get('title'))['sector'],
                             'days_to_expiry': days_to_expiry,  # DYNAMIC timeframe
                             'timeframe_type': timeframe_type,  # e.g., QUICK_CATALYST, SWING, LONG_TERM
                             'timeframe_reasoning': timeframe_info['reasoning'],  # Why this timeframe
@@ -5820,6 +5632,7 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
                             'latent_news_context': latent_context
                         }
 
+                        ps._enrich_signal_metadata(signal, news_item)
                         signals.append(signal)
 
             except Exception as e:
@@ -5893,7 +5706,7 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
                 # Convert units to dollar amount
                 position_size = units * ps.unit_value
                 
-                symbol = s.get("symbol", "UNKNOWN") if isinstance(s, dict) else getattr(s, "symbol", "UNKNOWN")
+                symbol = (s.get("symbol") or "N/A") if isinstance(s, dict) else (getattr(s, "symbol", None) or "N/A")
                 print(f"[UNITS] 🎯 {symbol}: {units} units = ${position_size:.2f} (confidence {conf:.0f}%)")
 
                 # Also scale by POP / simulated chance of profit
@@ -5960,6 +5773,16 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
                 s['units'] = units
 
                 print(f"[UNITS] ✅ FINAL: {symbol}: {units} units = ${position_size:.2f} assigned to signal")
+
+        if skipped_missing_symbol:
+            logging.debug(
+                "Skipped %d news items with no symbol after title enrichment",
+                skipped_missing_symbol,
+            )
+            print(
+                f"  ⚠️ Skipped {skipped_missing_symbol} news items "
+                "(no symbol after title enrichment)"
+            )
 
         return signals
 
@@ -6085,14 +5908,14 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
                     main_sig["potential_upside"] = pu * (1.0 + boost * 0.5)
 
                 main_sig["ecosystem_boost"] = {
-                    "ecosystem": eco.get("name", "UNKNOWN"),
+                    "ecosystem": eco.get("name") or "market_ecosystem",
                     "child_signal_count": len(bullish_children),
                     "avg_child_confidence": avg_child_conf,
                     "boost_applied": after - before,
                 }
 
                 print(
-                    f"   🔗 Ecosystem boost: {eco.get('name', 'UNKNOWN')} main {main_sig.get('symbol')} "
+                    f"   🔗 Ecosystem boost: {eco.get('name') or 'market_ecosystem'} main {main_sig.get('symbol')} "
                     f"confidence {before:.1%} → {after:.1%} based on {len(bullish_children)} strong ecosystem signals"
                 )
 
@@ -6111,7 +5934,9 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
             for signal in overnight_moonshots[:3]:  # Show top 3 moonshots
                 fact_check = signal.get('fact_check', {})
                 company_info = fact_check.get('company_info', {})
-                full_company_name = company_info.get('full_name', signal['symbol'])
+                full_company_name = ps._resolve_company_label(
+                    signal.get('symbol'), signal.get('title'), company_info
+                )
 
                 initial_conf = signal.get('initial_confidence', 0) * 100
                 final_conf = signal.get('confidence', 0) * 100
@@ -6127,8 +5952,8 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
                     avg_volume_display = str(avg_volume)
                 price_range = company_info.get('price_range', 'N/A')
 
-                symbol = signal.get('symbol', 'UNKNOWN')
-                action = signal.get('action', 'UNKNOWN')
+                symbol = signal.get('symbol') or 'N/A'
+                action = signal.get('action') or 'HOLD'
                 
                 # Convert options terminology to appropriate format
                 if symbol.startswith('KX'):
@@ -6177,7 +6002,7 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
                 print(f"   📈 Patterns: {', '.join(signal.get('patterns', []))}")
                 print(f"   ⏰ Action: {signal['entry_timing'].get('recommended_action', 'BUY')} → Exit Day {optimal_days}")
                 print(f"   💰 Position: ${signal['position_size']:.0f} | Stop: {signal['exit_timing'].get('stop_loss', 0.3):.1%}")
-                print(f"   ✅ Valid Company: {fact_check.get('is_valid', False)} | Risk: {fact_check.get('risk_level', 'UNKNOWN')}")
+                print(f"   ✅ Valid Company: {fact_check.get('is_valid', False)} | Risk: {fact_check.get('risk_level') or 'MEDIUM'}")
                 print(f"   📊 Company Info: {avg_volume_display} avg volume | Price: {display_price}")
                 print(f"   🎯 Company Status: {'✅ VALIDATED' if signal.get('company_validation', False) else '⚠️ UNVALIDATED'}")
                 print(f"   ⚡ Confidence Floor: {'✅ ABOVE 15%' if final_conf >= 15 else '❌ BELOW 15%'}")
@@ -6194,7 +6019,9 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
             for signal in regular_trades[:5]:  # Show top 5 regular trades
                 fact_check = signal.get('fact_check', {})
                 company_info = fact_check.get('company_info', {})
-                full_company_name = company_info.get('full_name', signal['symbol'])
+                full_company_name = ps._resolve_company_label(
+                    signal.get('symbol'), signal.get('title'), company_info
+                )
 
                 initial_conf = signal.get('initial_confidence', 0) * 100
                 final_conf = signal.get('confidence', 0) * 100
@@ -6210,8 +6037,8 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
                     avg_volume_display = str(avg_volume)
                 price_range = company_info.get('price_range', 'N/A')
 
-                symbol = signal.get('symbol', 'UNKNOWN')
-                action = signal.get('action', 'UNKNOWN')
+                symbol = signal.get('symbol') or 'N/A'
+                action = signal.get('action') or 'HOLD'
                 
                 # Convert options terminology to appropriate format
                 if symbol.startswith('KX'):
@@ -6262,7 +6089,7 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
                 print(f"   📈 Patterns: {', '.join(signal.get('patterns', []))}")
                 print(f"   ⏰ Action: {signal['entry_timing'].get('recommended_action', 'BUY')} → Exit Day {optimal_days}")
                 print(f"   💰 Position: ${signal['position_size']:.0f}")
-                print(f"   ✅ Valid Company: {fact_check.get('is_valid', False)} | Risk: {fact_check.get('risk_level', 'UNKNOWN')}")
+                print(f"   ✅ Valid Company: {fact_check.get('is_valid', False)} | Risk: {fact_check.get('risk_level') or 'MEDIUM'}")
                 print(f"   📊 Company Info: {avg_volume_display} avg volume | Price: {display_price}")
                 print(f"   🎯 Company Status: {'✅ VALIDATED' if signal.get('company_validation', False) else '⚠️ UNVALIDATED'}")
                 print(f"   ⚡ Confidence Floor: {'✅ ABOVE 15%' if final_conf >= 15 else '❌ BELOW 15%'}")
@@ -6289,7 +6116,7 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
             print("\n📂 ACTIVE TRADES (Open Positions):")
             for sym, pos in open_positions.items():
                 sig = (pos or {}).get('signal', {}) or {}
-                action = sig.get('action', 'UNKNOWN')
+                action = sig.get('action') or 'HOLD'
                 try:
                     size = float(sig.get('position_size', 0.0))
                 except Exception:
@@ -6418,6 +6245,8 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
             # Calculate position size based on risk parameters
             risk_per_trade = cfg.get('risk_per_trade', 0.01)  # 1% risk per trade
             stop_pct = trade_params.get('stop_pct', 0.05)  # Default 5% stop
+            if stop_pct <= 0:
+                stop_pct = 0.05
             position_size = (cfg.get('bankroll', 10000) * risk_per_trade) / stop_pct
             
             # Calculate target and stop prices
@@ -6464,63 +6293,44 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
                 logging.warning(f"[WARN] Trade logging failed: {log_err}")
                 trade_file = "trade_log_unavailable.json"
             
-            # Execute the trade (placeholder - implement actual execution)
-            if s.trade_db:
-                try:
-                    trade_id = s.trade_db.save_trade(
-                        symbol=symbol,
-                        strategy=getattr(signal, 'strategy', 'unknown'),
-                        action=action,
-                        entry_price=current_price,
-                        quantity=position_size / current_price,  # Convert to number of shares/coins
-                        metadata={
-                            'target_price': target_price,
-                            'stop_price': stop_price,
-                            'trade_class': trade_params.get('trade_class'),
-                            'trade_file': trade_file
-                        }
-                    )
-                    logging.info(f"[OK] Trade {trade_id} executed and logged")
-                except Exception as db_err:
-                    logging.warning(f"[WARN] Failed to persist trade to DB: {db_err}")
-            
-            # Execute paper trade if enabled
-            paper_buy_failed = False
-            if s.paper_portfolio and 'BUY' in action:
-                paper_result = s.paper_portfolio.execute_buy(
-                    symbol=symbol,
-                    quantity=int(position_size / current_price),
-                    price=current_price,
-                    signal_data={
-                        'strategy': getattr(signal, 'strategy', 'unknown'),
-                        'confidence': confidence,
-                        'target_price': target_price,
-                        'stop_price': stop_price,
-                        'trade_class': trade_params.get('trade_class'),
-                        'rsi': getattr(signal, 'rsi', 50),
-                        'macd': getattr(signal, 'macd', 'neutral')
-                    },
-                    confidence=confidence * 100
-                )
-                
-                if paper_result['success']:
-                    logging.info(f"[PAPER] Bought {paper_result['quantity']} shares of {symbol} at ${current_price:.2f}")
-                else:
-                    paper_buy_failed = True
-                    logging.warning(f"[PAPER] Failed to buy {symbol}: {paper_result['error']}")
-                    try:
-                        s.skipped_opportunity_watchlist.record_execution_skip(
-                            symbol,
-                            action,
-                            confidence,
-                            float(current_price),
-                            reason=f"paper_buy:{paper_result.get('error', 'unknown')}",
-                            source="execute_classified_trade",
-                        )
-                    except Exception:
-                        pass
+            # Single execution path via ExecutionRouter (no duplicate paper submit)
+            signal_dict = {
+                "symbol": symbol,
+                "action": action,
+                "confidence": confidence,
+                "current_price": current_price,
+                "entry_price": current_price,
+                "position_size": int(position_size / current_price) if current_price > 0 else 0,
+                "trade_type": "STOCK",
+                "source": getattr(signal, "source", "classified"),
+                "strategy": getattr(signal, "strategy", "unknown"),
+                "dedup_key": f"{symbol}:{action}:{current_price}",
+            }
+            exec_result = s.execution_router.submit_signal(signal_dict, risk_ok=True)
+            logging.info(
+                "execution_mode=%s execution_decision=%s execution_reason=%s",
+                exec_result.mode,
+                exec_result.decision,
+                exec_result.reason,
+            )
 
-            if not paper_buy_failed:
+            if exec_result.decision in ("rejected", "skipped"):
+                try:
+                    s.skipped_opportunity_watchlist.record_execution_skip(
+                        symbol,
+                        action,
+                        confidence,
+                        float(current_price),
+                        reason=exec_result.reason,
+                        source="execute_classified_trade",
+                    )
+                except Exception:
+                    pass
+                if exec_result.decision == "skipped" and exec_result.mode in ("OFF", "ALERT_ONLY"):
+                    pass  # expected for alert-only modes
+                elif not exec_result.success:
+                    return None
+            else:
                 try:
                     s.skipped_opportunity_watchlist.mark_cleared(symbol)
                 except Exception:
@@ -6534,7 +6344,10 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
                 'stop_price': stop_price,
                 'position_size': position_size,
                 'trade_class': trade_params.get('trade_class'),
-                'trade_file': trade_file
+                'trade_file': trade_file,
+                'execution_mode': exec_result.mode,
+                'execution_decision': exec_result.decision,
+                'execution_reason': exec_result.reason,
             }
             
         except Exception as e:
@@ -6757,12 +6570,12 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
                                     log_msg = (
                                         f"✅ EXECUTED: {trade_result['symbol']} {trade_result['action']} "
                                         f"@ ${trade_result['entry_price']:.2f} "
-                                        f"(Class: {trade_result.get('trade_class', 'UNKNOWN')})"
+                                        f"(Class: {trade_result.get('trade_class') or 'standard'})"
                                     )
                                 else:
                                     log_msg = (
-                                        f"⚠️  SKIPPED: {getattr(signal, 'symbol', 'UNKNOWN')} "
-                                        f"{getattr(signal, 'action', 'UNKNOWN')} - "
+                                        f"⚠️  SKIPPED: {getattr(signal, 'symbol', None) or 'N/A'} "
+                                        f"{getattr(signal, 'action', None) or 'HOLD'} - "
                                         f"Failed to execute"
                                     )
                                     try:
@@ -6798,8 +6611,8 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
                                         bot = get_telegram_bot()
                                         
                                         # Create unique key for deduplication
-                                        symbol = getattr(signal, 'symbol', 'UNKNOWN')
-                                        action = getattr(signal, 'action', 'UNKNOWN')
+                                        symbol = getattr(signal, 'symbol', None) or 'N/A'
+                                        action = getattr(signal, 'action', None) or 'HOLD'
                                         entry_price = getattr(signal, 'entry_price', 0)
                                         monitor_key = f"MONITOR:{symbol}:{action}:{int(entry_price)}"
                                         

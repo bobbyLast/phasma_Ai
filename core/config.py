@@ -6,6 +6,8 @@ Centralized configuration system for all Phasma AI components
 import json
 import os
 
+from core.execution.execution_modes import normalize_execution_config
+
 class PhasmaConfig:
     """Enhanced configuration management for Phasma AI"""
 
@@ -13,6 +15,7 @@ class PhasmaConfig:
         """Initialize configuration system"""
         self.config_path = config_path or "config.json"
         self.data = self._load_config()
+        self.data["execution"] = normalize_execution_config(self.data)
 
     def _load_config(self):
         """Load configuration from file or create default"""
@@ -134,6 +137,17 @@ class PhasmaConfig:
                 "log_trades": True,
                 "benchmark_symbol": "SPY",
                 "tracking_enabled": True
+            },
+
+            # Execution (safe defaults — no live trading)
+            "execution": {
+                "mode": "ALERT_ONLY",
+                "allow_live_trading": False,
+                "kalshi_execution_enabled": False,
+                "require_price": True,
+                "require_valid_symbol": True,
+                "require_fresh_data": True,
+                "max_data_age_seconds": 900,
             },
 
             # Assets Configuration - REAL MARKET SECTORS ONLY
@@ -271,6 +285,28 @@ class PhasmaConfig:
         """Check if component is enabled"""
         return self.get(f"{component}_enabled", False)
 
+    @property
+    def max_discovery(self) -> bool:
+        return bool(self.get("max_discovery", False))
+
+    def apply_max_discovery_overrides(self) -> bool:
+        """When max_discovery is on, enable discovery subsystems in-memory."""
+        if not self.max_discovery:
+            return False
+
+        self.data["options_enabled"] = True
+        underground = self.data.setdefault("underground_discovery", {})
+        if isinstance(underground, dict):
+            underground["enabled"] = True
+
+        profit = self.data.setdefault("profit_maximization", {})
+        if isinstance(profit, dict):
+            profit["enabled"] = True
+        else:
+            self.data["profit_maximization"] = {"enabled": True}
+
+        return True
+
     def get_watchlist(self):
         """Get asset watchlist"""
         return self.get("assets.watchlist", [])
@@ -278,6 +314,14 @@ class PhasmaConfig:
     def get_risk_params(self):
         """Get risk management parameters"""
         return self.get("risk", {})
+
+    def get_execution_config(self):
+        """Get normalized execution configuration."""
+        self.data["execution"] = normalize_execution_config(self.data)
+        return self.data["execution"]
+
+    def get_execution_mode(self):
+        return self.get_execution_config().get("mode", "ALERT_ONLY")
 
     def get_trading_params(self):
         """Get trading parameters"""
