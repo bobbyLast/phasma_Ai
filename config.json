@@ -1,4 +1,8 @@
 {
+  "price_filter_enabled": false,
+  "max_stock_price": null,
+  "telegram_enabled": true,
+  "max_discovery": true,
   "bankroll": 100,
   "apis": {
     "alpha_vantage": {
@@ -36,8 +40,17 @@
     "min_confidence": 60,
     "max_signals_per_cycle": 10
   },
+  "execution": {
+    "mode": "ALERT_ONLY",
+    "allow_live_trading": false,
+    "kalshi_execution_enabled": false,
+    "require_price": true,
+    "require_valid_symbol": true,
+    "require_fresh_data": true,
+    "max_data_age_seconds": 900
+  },
   "paper_trading": {
-    "enabled": true,
+    "enabled": false,
     "starting_capital": 10000,
     "track_ai_performance": true,
     "auto_trade_signals": true,
@@ -47,6 +60,8 @@
   },
   "trading_mode": "stocks_and_kalshi",
   "kalshi_enabled": true,
+  "kalshi_intel_only": true,
+  "post_prediction_trades": false,
   "kalshi_weather_only": false,
   "kalshi_ai_playbook": {
     "enabled": true,
@@ -63,6 +78,12 @@
     }
   },
   "options_enabled": false,
+  "profit_maximization": {
+    "enabled": false,
+    "trailing_stop_pct": 0.2,
+    "min_hold_days": 7,
+    "max_hold_days": 90
+  },
   "bankroll_allocation": {
     "stock_trading": 50,
     "kalshi_trading": 50,
@@ -97,17 +118,23 @@
     "max_positions": 10,
     "min_edge_threshold": 0.08,
     "max_bet_size": 5,
-    "weather_only": true
+    "weather_only": false
   },
   "kalshi_restrictions": {
-    "allowed_markets": ["weather"],
-    "blocked_markets": ["elections", "sports", "politics", "economics", "fed", "volatility"],
-    "note": "Kalshi restricted to weather markets only per user requirement"
+    "allowed_markets": ["weather", "economics", "fed", "politics", "crypto"],
+    "blocked_markets": ["sports"],
+    "note": "News-aligned Kalshi: econ/politics/crypto enabled; sports deprioritized"
   },
   "insider_monitor": {
     "enabled": true,
     "lookback_days": 7,
     "min_amount": 1000000
+  },
+  "politician_tracker": {
+    "enabled": true,
+    "politician_trades_use_live": false,
+    "lookback_days": 30,
+    "min_value": 1000
   },
   "insider_integrator": {
     "confluence_threshold": 0.5,
@@ -123,7 +150,7 @@
     "active_strategy": "penny_moonshot",
     "penny_moonshot": {
       "strategy_name": "penny_moonshot",
-      "max_price": 50.0,
+      "max_price": 10000.0,
       "min_market_cap": 10000000,
       "max_market_cap": 300000000,
       "min_ADV_shares": 20000,
@@ -171,7 +198,7 @@
   "trading_budget": {
     "total": 100,
     "max_per_trade": 10,
-    "max_price_per_share": 50
+    "max_price_per_share": 10000
   },
   "underground_discovery": {
     "enabled": true,
@@ -187,6 +214,7 @@
   "pump_dump": {
     "volume_surge_threshold": 3.0
   },
+  "news_source_priority": ["social", "apis", "rss", "sec", "market", "sentiment", "prediction", "github"],
   "jury_system": {
     "enabled": true,
     "weights": {

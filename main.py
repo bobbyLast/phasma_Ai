@@ -38,7 +38,7 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from brain.meta_brain import PhasmaMetaBrain, Signal
 from core.config import PhasmaConfig
 from core.application_context import ApplicationContext
-from core.execution import ExecutionRouter, SignalOutcomeTracker, reconcile_positions_on_startup
+from core.execution import ExecutionRouter, OutcomeGrader, SignalOutcomeTracker, reconcile_positions_on_startup
 from core.execution.data_gates import audit_api_keys
 from core.execution.execution_modes import normalize_execution_config
 from core.trade_classifier import TradeClassifier, TradeClass
@@ -158,8 +158,7 @@ class PhasmaTradingSystem:
         """Initialize the complete trading system"""
         self.config = PhasmaConfig(config_path)
         self.config.data["execution"] = normalize_execution_config(self.config.data)
-        exec_mode = self.config.get_execution_mode()
-        print(f"🛡️ Execution mode: {exec_mode}")
+        print(f"🛡️ {self.config.get_execution_startup_message()}")
         self.max_discovery = self.config.apply_max_discovery_overrides()
         if self.max_discovery:
             print("🔍 MAX DISCOVERY MODE ACTIVE")
@@ -297,6 +296,7 @@ class PhasmaTradingSystem:
 
         self.execution_router = ExecutionRouter(self)
         self.signal_outcome_tracker = SignalOutcomeTracker()
+        self.outcome_grader = OutcomeGrader(tracker=self.signal_outcome_tracker)
         self.cooldown_trade_memory = get_trade_memory()
         disabled_apis = audit_api_keys(self.config.data)
         if disabled_apis:
@@ -4657,6 +4657,18 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
                                     f"decision={exec_result.decision} reason={exec_result.reason}"
                                 )
 
+                                try:
+                                    self.outcome_grader.record_signal(
+                                        report_dict,
+                                        execution_mode=exec_result.mode,
+                                        execution_decision=exec_result.decision,
+                                        alerted_only=exec_result.decision in ("skipped",)
+                                        and exec_result.mode in ("ALERT_ONLY", "OFF"),
+                                        paper_traded=exec_result.decision in ("filled", "submitted"),
+                                    )
+                                except Exception as grade_err:
+                                    print(f"  ⚠️ Outcome grader record failed: {grade_err}")
+
                                 # 2) Telegram report-only (never submits orders)
                                 try:
                                     if report_dict.get('source') == 'stock_signal':
@@ -5091,6 +5103,18 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
         )
 
         cycle_stage_timings[_stage_name] = time.perf_counter() - _stage_start
+
+        try:
+            grade_stats = self.outcome_grader.grade_pending()
+            if grade_stats.get("graded_horizons"):
+                print(
+                    f"📊 Outcome grader: {grade_stats['graded_horizons']} horizon grades "
+                    f"across {grade_stats['records_touched']} signals"
+                )
+            if os.getenv("PHASMA_OUTCOME_SUMMARY", "").lower() in ("1", "true", "yes"):
+                self.outcome_grader.print_console_summary()
+        except Exception as grade_err:
+            print(f"⚠️ Outcome grader cycle failed: {grade_err}")
 
         # Trading configuration
         self.bankroll = 2000

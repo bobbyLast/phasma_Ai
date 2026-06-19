@@ -6,7 +6,10 @@ Centralized configuration system for all Phasma AI components
 import json
 import os
 
-from core.execution.execution_modes import normalize_execution_config
+from core.execution.execution_modes import (
+    format_execution_startup_message,
+    normalize_execution_config,
+)
 
 class PhasmaConfig:
     """Enhanced configuration management for Phasma AI"""
@@ -16,6 +19,7 @@ class PhasmaConfig:
         self.config_path = config_path or "config.json"
         self.data = self._load_config()
         self.data["execution"] = normalize_execution_config(self.data)
+        self._execution_startup_message = format_execution_startup_message(self.data)
 
     def _load_config(self):
         """Load configuration from file or create default"""
@@ -322,6 +326,12 @@ class PhasmaConfig:
 
     def get_execution_mode(self):
         return self.get_execution_config().get("mode", "ALERT_ONLY")
+
+    def get_execution_startup_message(self) -> str:
+        """Log-friendly summary of execution.mode vs legacy paper_trading.enabled."""
+        self.data["execution"] = normalize_execution_config(self.data)
+        self._execution_startup_message = format_execution_startup_message(self.data)
+        return self._execution_startup_message
 
     def get_trading_params(self):
         """Get trading parameters"""
