@@ -9,6 +9,12 @@ from core.execution.execution_modes import (
 )
 from core.execution.data_gates import DataQualityGates, GateResult, validate_execution_gates, audit_api_keys, is_placeholder_api_key
 from core.execution.outcome_grader import OutcomeGrader
+from core.execution.paper_readiness_guard import (
+    PaperReadinessGuard,
+    ReadinessResult,
+    normalize_paper_trading_safety,
+    run_readiness_check,
+)
 from core.execution.position_reconcile import reconcile_positions_on_startup
 from core.execution.signal_outcome_tracker import SignalOutcomeTracker
 
@@ -28,4 +34,8 @@ __all__ = [
     "reconcile_positions_on_startup",
     "SignalOutcomeTracker",
     "OutcomeGrader",
+    "PaperReadinessGuard",
+    "ReadinessResult",
+    "normalize_paper_trading_safety",
+    "run_readiness_check",
 ]

@@ -19,7 +19,39 @@ from core.execution.execution_modes import ExecutionMode, normalize_execution_co
 from core.execution.execution_router import ExecutionRouter, normalize_monte_carlo_fields
 from core.execution.data_gates import DataQualityGates, audit_api_keys, validate_execution_gates
 from core.execution.position_reconcile import reconcile_positions_on_startup
+from core.execution.paper_readiness_guard import PAPER_ALPACA_URL, normalize_paper_trading_safety
 from utils.trade_memory import TradeMemory
+
+
+def _paper_alpaca_cfg(**overrides):
+    cfg = {
+        "execution": {
+            "mode": "PAPER_ALPACA",
+            "allow_live_trading": False,
+            "kalshi_execution_enabled": False,
+            "require_price": True,
+            "require_fresh_data": True,
+            "max_data_age_seconds": 900,
+        },
+        "paper_trading_safety": {
+            "enabled": True,
+            "max_orders_per_cycle": 3,
+            "max_orders_per_day": 10,
+            "max_notional_per_order": 1000,
+            "max_total_daily_notional": 5000,
+            "cooldown_minutes_per_symbol": 120,
+            "stock_only": True,
+            "block_low_confidence_below": 65,
+            "require_outcome_tracking": True,
+            "require_fresh_price": True,
+            "kill_switch": False,
+        },
+        "paper_trading": {"min_confidence_threshold": 50},
+    }
+    cfg.update(overrides)
+    normalize_execution_config(cfg)
+    normalize_paper_trading_safety(cfg)
+    return cfg
 
 
 def _base_signal(**overrides):
@@ -34,6 +66,55 @@ def _base_signal(**overrides):
         "source": "test",
     }
     sig.update(overrides)
+    return sig
+
+
+def _paper_alpaca_config(**overrides):
+    cfg = {
+        "execution": {
+            "mode": "PAPER_ALPACA",
+            "allow_live_trading": False,
+            "kalshi_execution_enabled": False,
+            "require_price": True,
+            "require_fresh_data": True,
+            "max_data_age_seconds": 900,
+        },
+        "paper_trading": {"min_confidence_threshold": 50},
+        "paper_trading_safety": {
+            "enabled": True,
+            "max_orders_per_cycle": 3,
+            "max_orders_per_day": 10,
+            "max_notional_per_order": 1000,
+            "max_total_daily_notional": 5000,
+            "cooldown_minutes_per_symbol": 120,
+            "stock_only": True,
+            "block_low_confidence_below": 50,
+            "require_outcome_tracking": True,
+            "require_fresh_price": True,
+            "kill_switch": False,
+        },
+    }
+    cfg.update(overrides)
+    normalize_execution_config(cfg)
+    return cfg
+
+
+def _attach_paper_trader(system):
+    trader = MagicMock()
+    trader.api_key = "test-key"
+    trader.api_secret = "test-secret"
+    trader.base_url = "https://paper-api.alpaca.markets"
+    trader.alpaca = MagicMock()
+    system.alpaca_paper_trader = trader
+    return trader
+
+
+def _fresh_signal(**overrides):
+    sig = _base_signal(
+        price_timestamp=datetime.now(timezone.utc).isoformat(),
+        confidence=80,
+        **overrides,
+    )
     return sig
 
 
@@ -69,18 +150,20 @@ class TestExecutionModes(unittest.TestCase):
         self.assertIn("ALERT", result.alert_label.upper())
 
     def test_paper_alpaca_submits_once(self):
-        cfg = {"execution": {"mode": "PAPER_ALPACA"}, "paper_trading": {"min_confidence_threshold": 50}}
-        normalize_execution_config(cfg)
+        cfg = _paper_alpaca_config()
         system = _mock_system(cfg)
-        trader = MagicMock()
-        trader.alpaca = MagicMock()
-        system.alpaca_paper_trader = trader
+        _attach_paper_trader(system)
         system._alpaca_submit_from_signal = MagicMock(
             return_value={"success": True, "order_id": "oid1", "price": 150.0, "quantity": 1, "symbol": "AAPL"}
         )
         router = ExecutionRouter(system)
-        r1 = router.submit_signal(_base_signal(), skip_gates=True)
-        r2 = router.submit_signal(_base_signal(), skip_gates=True)
+        with tempfile.TemporaryDirectory() as tmp:
+            router.trade_memory = TradeMemory(memory_file=os.path.join(tmp, "trade_memory.json"), cooldown_days=7)
+            router.outcome_tracker.storage_file = os.path.join(tmp, "outcomes", "signals.json")
+            router.paper_guard.trade_memory = router.trade_memory
+            router.paper_guard.outcome_tracker = router.outcome_tracker
+            r1 = router.submit_signal(_fresh_signal(), skip_gates=True)
+            r2 = router.submit_signal(_fresh_signal(), skip_gates=True)
         self.assertEqual(r1.decision, "filled")
         self.assertEqual(system._alpaca_submit_from_signal.call_count, 1)
         self.assertEqual(r2.decision, "skipped")
@@ -219,20 +302,21 @@ class TestExecutionModes(unittest.TestCase):
         self.assertGreaterEqual(summary["positions_count"], 1)
 
     def test_duplicate_signal_no_double_buy(self):
-        cfg = {"execution": {"mode": "PAPER_ALPACA"}}
-        normalize_execution_config(cfg)
+        cfg = _paper_alpaca_config()
         system = _mock_system(cfg)
-        trader = MagicMock()
-        trader.alpaca = MagicMock()
-        system.alpaca_paper_trader = trader
+        _attach_paper_trader(system)
         system._alpaca_submit_from_signal = MagicMock(
             return_value={"success": True, "order_id": "x", "price": 1, "quantity": 1}
         )
         router = ExecutionRouter(system)
-        router.trade_memory = TradeMemory(cooldown_days=7)
-        sig = _base_signal(dedup_key="dup:1")
-        router.submit_signal(sig, skip_gates=True)
-        router.submit_signal(sig, skip_gates=True)
+        with tempfile.TemporaryDirectory() as tmp:
+            router.trade_memory = TradeMemory(memory_file=os.path.join(tmp, "trade_memory.json"), cooldown_days=7)
+            router.outcome_tracker.storage_file = os.path.join(tmp, "outcomes", "signals.json")
+            router.paper_guard.trade_memory = router.trade_memory
+            router.paper_guard.outcome_tracker = router.outcome_tracker
+            sig = _fresh_signal(dedup_key="dup:1")
+            router.submit_signal(sig, skip_gates=True)
+            router.submit_signal(sig, skip_gates=True)
         self.assertEqual(system._alpaca_submit_from_signal.call_count, 1)
 
     def test_internal_paper_honest_fill(self):

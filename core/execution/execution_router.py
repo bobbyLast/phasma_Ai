@@ -13,7 +13,9 @@ from typing import Any, Dict, Optional, Set
 
 from core.execution.data_gates import DataQualityGates, GateResult
 from core.execution.execution_modes import ExecutionDecision, ExecutionMode, normalize_execution_config
+from core.execution.paper_readiness_guard import PaperReadinessGuard, normalize_paper_trading_safety
 from core.execution.signal_outcome_tracker import SignalOutcomeTracker
+from core.execution.outcome_grader import OutcomeGrader
 from utils.trade_memory import get_trade_memory
 
 logger = logging.getLogger(__name__)
@@ -86,10 +88,20 @@ class ExecutionRouter:
         self.config = system.config.data if hasattr(system.config, "data") else system.config
         self.exec_cfg = normalize_execution_config(self.config)
         self.config["execution"] = self.exec_cfg
+        self.config["paper_trading_safety"] = normalize_paper_trading_safety(self.config)
         self.trade_memory = get_trade_memory()
         self.gates = DataQualityGates(self.config, self.trade_memory)
         self.outcome_tracker = SignalOutcomeTracker()
+        self.outcome_grader = OutcomeGrader(tracker=self.outcome_tracker)
+        self.paper_guard = PaperReadinessGuard(
+            trade_memory=self.trade_memory,
+            outcome_tracker=self.outcome_tracker,
+            outcome_grader=self.outcome_grader,
+        )
         self._submitted_keys: Set[str] = set()
+        self._paper_cycle_orders = 0
+        self._paper_daily_orders = 0
+        self._paper_daily_notional = 0.0
 
     @property
     def mode(self) -> str:
@@ -163,12 +175,71 @@ class ExecutionRouter:
             return self._execute_alpaca(signal_dict, live=True)
 
         if mode == ExecutionMode.PAPER_ALPACA:
+            guard_ok, guard_failures = self.paper_guard.can_submit_paper_order(
+                self.config,
+                signal_dict,
+                context=self._paper_guard_context(posted_keys=posted_keys),
+            )
+            if not guard_ok:
+                reason = "; ".join(guard_failures)
+                alert = f"PAPER TRADE BLOCKED — readiness guard failed: {reason}"
+                self._log(ExecutionDecision.REJECTED, reason, symbol)
+                self._record_outcome(
+                    signal_dict,
+                    mode,
+                    ExecutionDecision.REJECTED,
+                    alerted_only=True,
+                )
+                return ExecutionResult(
+                    decision=ExecutionDecision.REJECTED,
+                    reason=reason,
+                    mode=mode,
+                    symbol=symbol,
+                    alert_label=alert,
+                    metadata={"readiness_guard_failures": guard_failures},
+                )
             return self._execute_alpaca(signal_dict, live=False)
 
         if mode == ExecutionMode.PAPER_INTERNAL:
             return self._execute_internal_paper(signal_dict)
 
         return self._skip(f"unknown mode {mode}", symbol)
+
+    def _paper_guard_context(self, *, posted_keys: Optional[Set[str]] = None) -> Dict[str, Any]:
+        trader = getattr(self.system, "alpaca_paper_trader", None)
+        return {
+            "alpaca_client": trader,
+            "trade_memory": self.trade_memory,
+            "outcome_tracker": self.outcome_tracker,
+            "outcome_grader": self.outcome_grader,
+            "submitted_keys": self._submitted_keys,
+            "posted_keys": posted_keys or set(),
+            "daily_stats": {
+                "cycle_order_count": self._paper_cycle_orders,
+                "daily_order_count": self._paper_daily_orders,
+                "daily_notional": self._paper_daily_notional,
+            },
+        }
+
+    def reset_paper_cycle_stats(self) -> None:
+        """Reset per-cycle paper order counters."""
+        self._paper_cycle_orders = 0
+
+    def _record_paper_order_stats(self, signal_dict: Dict[str, Any], fill: Dict[str, Any]) -> None:
+        price = fill.get("price") or signal_dict.get("current_price") or signal_dict.get("entry_price")
+        quantity = fill.get("quantity") or signal_dict.get("quantity") or signal_dict.get("position_size") or 1
+        try:
+            notional = abs(float(price) * float(quantity))
+        except (TypeError, ValueError):
+            notional = 0.0
+        if signal_dict.get("position_cost") is not None:
+            try:
+                notional = float(signal_dict["position_cost"])
+            except (TypeError, ValueError):
+                pass
+        self._paper_cycle_orders += 1
+        self._paper_daily_orders += 1
+        self._paper_daily_notional += notional
 
     def _skip(self, reason: str, symbol: str, alert_label: str = "") -> ExecutionResult:
         return ExecutionResult(
@@ -261,6 +332,7 @@ class ExecutionRouter:
 
         if result and result.get("success"):
             self._submitted_keys.add(dedup_key)
+            self._record_paper_order_stats(signal_dict, result)
             decision = ExecutionDecision.FILLED if result.get("price") else ExecutionDecision.SUBMITTED
             self._log(decision, "alpaca order placed", symbol)
             self._on_fill(signal_dict, result)

@@ -10,6 +10,7 @@ from core.execution.execution_modes import (
     format_execution_startup_message,
     normalize_execution_config,
 )
+from core.execution.paper_readiness_guard import normalize_paper_trading_safety
 
 class PhasmaConfig:
     """Enhanced configuration management for Phasma AI"""
@@ -19,6 +20,7 @@ class PhasmaConfig:
         self.config_path = config_path or "config.json"
         self.data = self._load_config()
         self.data["execution"] = normalize_execution_config(self.data)
+        self.data["paper_trading_safety"] = normalize_paper_trading_safety(self.data)
         self._execution_startup_message = format_execution_startup_message(self.data)
 
     def _load_config(self):
@@ -152,6 +154,34 @@ class PhasmaConfig:
                 "require_valid_symbol": True,
                 "require_fresh_data": True,
                 "max_data_age_seconds": 900,
+            },
+
+            "paper_trading_safety": {
+                "enabled": True,
+                "max_orders_per_cycle": 3,
+                "max_orders_per_day": 10,
+                "max_notional_per_order": 100,
+                "max_total_daily_notional": 500,
+                "cooldown_minutes_per_symbol": 120,
+                "stock_only": True,
+                "block_low_confidence_below": 65,
+                "require_outcome_tracking": True,
+                "require_fresh_price": True,
+                "kill_switch": False,
+            },
+
+            "paper_trading_safety": {
+                "enabled": True,
+                "max_orders_per_cycle": 3,
+                "max_orders_per_day": 10,
+                "max_notional_per_order": 100,
+                "max_total_daily_notional": 500,
+                "cooldown_minutes_per_symbol": 120,
+                "stock_only": True,
+                "block_low_confidence_below": 65,
+                "require_outcome_tracking": True,
+                "require_fresh_price": True,
+                "kill_switch": False,
             },
 
             # Assets Configuration - REAL MARKET SECTORS ONLY
@@ -323,6 +353,16 @@ class PhasmaConfig:
         """Get normalized execution configuration."""
         self.data["execution"] = normalize_execution_config(self.data)
         return self.data["execution"]
+
+    def get_paper_trading_safety(self):
+        """Get normalized paper trading safety configuration."""
+        self.data["paper_trading_safety"] = normalize_paper_trading_safety(self.data)
+        return self.data["paper_trading_safety"]
+
+    def get_paper_trading_safety(self):
+        """Get normalized paper trading safety configuration."""
+        self.data["paper_trading_safety"] = normalize_paper_trading_safety(self.data)
+        return self.data["paper_trading_safety"]
 
     def get_execution_mode(self):
         return self.get_execution_config().get("mode", "ALERT_ONLY")

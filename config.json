@@ -49,6 +49,19 @@
     "require_fresh_data": true,
     "max_data_age_seconds": 900
   },
+  "paper_trading_safety": {
+    "enabled": true,
+    "max_orders_per_cycle": 3,
+    "max_orders_per_day": 10,
+    "max_notional_per_order": 100,
+    "max_total_daily_notional": 500,
+    "cooldown_minutes_per_symbol": 120,
+    "stock_only": true,
+    "block_low_confidence_below": 65,
+    "require_outcome_tracking": true,
+    "require_fresh_price": true,
+    "kill_switch": false
+  },
   "paper_trading": {
     "enabled": false,
     "starting_capital": 10000,
