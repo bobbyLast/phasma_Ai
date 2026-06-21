@@ -1,0 +1,114 @@
+# Runtime Call Tree
+
+- Unified Meta Brain
+  - Phase 1 Ingest
+    - CycleDataContext
+    - NewsIngestWorker
+  - Phase 2 Analyze
+    - Universal Trading Intelligence
+    - Bull Run Detector
+    - News Scanner
+    - Social Engine
+    - Partnership Monitor
+    - Underground Discovery
+  - Phase 3 Synthesize
+    - Thematic Analysis
+    - Sector Intelligence
+    - Expansion Engine
+    - Bias Breaker
+    - Convergence Engine
+  - Phase 4 Final Selection
+    - Data Gates
+    - Strategy Router
+    - Confluence
+    - Jury
+    - Execution Router
+- GroupCoordinator
+  - IngestGroup
+    - print("\n📊 NEWS INTELLIGENCE SYSTEM STATUS:")
+    - one_line = f"🎯 {ticker}: {verdict} | Insider: {signals['Insider']} | News: {signals['News']} | Technicals: {signals['Tec
+    - async def _stage_unified_brain_news_items(self, ctx: ApplicationContext) -> List[Dict]:
+    - """Run unified meta brain and return normalized news items for this cycle."""
+    - print("✓ News Scanner (news-driven discovery)")
+    - or getattr(signal, 'source', '') in ('news_engine', 'unified_analysis', 'news')
+    - """News pipeline through unified analysis, convergence, Kalshi hooks, and moonshot split."""
+    - news_items = await s._stage_unified_brain_news_items(ctx)
+    - # Thematic mapping already runs inside UnifiedMetaBrain; skip duplicate pass when ingest ran
+    - active_themes = s.thematic_analyzer.analyze_news_themes(news_items)
+  - MarketGroup
+    - from brain.market_intelligence_engine import MarketIntelligenceEngine
+    - from engines.market_hours_detector import MarketHoursDetector
+    - self.market_hours = MarketHoursDetector()
+    - # Initialize Kalshi prediction market engine
+    - cache_minutes = discovery_limit(self.config, "market_cache_minutes", 10)
+    - # Initialize market crash detector
+    - from engines.market_crash_detector_v2 import MarketCrashDetectorV2
+    - self.crash_detector = MarketCrashDetectorV2(config=crash_cfg, market_cache=self.market_cache, simulation_engine=monte_ca
+    - print("✅ Market Crash Detector V2 Initialized")
+    - async def _stage_macro_and_fred(self, ctx: ApplicationContext) -> Tuple[bool, str]:
+  - RiskGroup
+    - RiskParameters, TradeDecision
+    - # RiskGuardianMetaAgent, SelfCalibratingProbabilityEngine, ScenarioGraphEngine,
+    - # Crash profit functionality now integrated in crash_detector_v2
+    - self.crash_detector = None
+    - self.meta_brain.register_engine('crash_detector', self.crash_detector)
+    - print(f"⚠️ Could not initialize Crash Detector: {e}")
+    - starting_balance = float(self.meta_brain.risk_manager.get_available_bankroll())
+    - print(f"📊 Bankroll: ${self.meta_brain.risk_manager.get_available_bankroll():.2f}")
+    - 'title': 'Rare Earth Supply Chain Risk',
+    - def validate_risk_first(
+  - DiscoveryGroup
+    - from brain.signal_convergence_engine import SignalConvergenceEngine
+    - from brain.thematic_analysis_engine import ThematicAnalyzer
+    - from engines.pump_dump_detector import PumpDumpDetector
+    - kalshi_intel_only,
+    - from engines.insider_signal_integrator import InsiderSignalIntegrator
+    - from utils.insider_opportunity_analyzer import get_insider_analyzer
+    - from utils.politician_tracker import PoliticianTracker
+    - from engines.underground_stock_discovery import UndergroundStockDiscovery
+    - from engines.geopolitical_analyzer import GeopoliticalImpactAnalyzer
+    - self.max_discovery = self.config.apply_max_discovery_overrides()
+  - DecisionGroup
+    - def _stage_jury_final_review(
+    - jury_cfg = ctx.config.get("jury_system")
+    - if isinstance(jury_cfg, dict) and jury_cfg.get("enabled") is False:
+    - from engines.trade_jury_system import TradeJurySystem
+    - jury = TradeJurySystem(jury_cfg if isinstance(jury_cfg, dict) else {})
+    - jury_runtime_ctx = {
+    - print(f"[JURY] REJECT {sym}: {outcome.veto_reason or '; '.join(outcome.reasons[:2])}")
+    - TradeJurySystem.apply_conditional_sizing(
+    - float(jury.conditional_size_multiplier),
+    - print(f"[JURY] CONDITIONAL {sym}: composite={outcome.composite:.1f} — not final approval")
+  - ExecutionGroup
+    - # Initialize Auto Exit Manager with Alpaca connection
+    - print('Auto Exit Manager - Connected to Alpaca')
+    - async def _stage_telegram_and_execution_tail(
+    - _stage_name = "arbitration_and_execution"
+    - await self._stage_telegram_and_execution_tail(
+    - def __init__(self, trade_db=None, broker_api=None, telegram_bot=None, config=None):
+    - """Analyze AI decision performance"""
+    - 'total_analyzed_trades': len(confidence_returns)
+    - from utils.prediction_market_filters import kalshi_intel_only
+    - if symbol.startswith("KX") and kalshi_intel_only(config):
+  - ReportingGroup
+    - # Initialize Telegram bot for alerts
+    - from telegram_bot import get_telegram_bot
+    - self.telegram_bot = get_telegram_bot()
+    - print("✅ Telegram Bot Initialized")
+    - if self.telegram_bot:
+    - if self.telegram_bot.send_message(test_message):
+    - print("✅ Telegram connectivity test successful")
+    - print("⚠️ Telegram connectivity test failed")
+    - print(f"⚠️ Could not initialize Telegram Bot: {e}")
+    - self.telegram_bot = None
+  - LearningGroup
+    - # Initialize profit maximization exit manager
+    - print("✅ Profit Maximization Exit Manager Initialized")
+    - position = self.exit_strategy_manager.analyze_position(ticker)
+    - AutoExitManager
+    - Automated Exit Manager - Smart Position Exits
+    - """Initialize auto exit manager"""
+    - def analyze_portfolio_counterfactual(self, portfolio: Dict[str, Any],
+    - """Analyze how a counterfactual scenario would affect a portfolio."""
+    - portfolio_analysis = engine.analyze_portfolio_counterfactual(sample_portfolio, intervention)
+    - DailyLearningTracker
