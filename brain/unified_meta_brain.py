@@ -6,20 +6,36 @@ Brings together all systems: Bull Run Detector, Universal Intelligence, News Sou
 import asyncio
 import sys
 import os
+import time
 
 _root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 if _root not in sys.path:
     sys.path.insert(0, _root)
 
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+if hasattr(sys.stderr, "reconfigure"):
+    sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+
 from datetime import datetime, timedelta
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 import json
+
+from utils.cycle_data_context import CycleDataContext
+from utils.confidence_utils import normalize_confidence_to_pct
+from utils.discovery_limits import (
+    discovery_limit,
+    intelligence_timeout,
+    is_max_discovery,
+)
 
 class UnifiedMetaBrain:
     """The complete brain that orchestrates all trading intelligence"""
     
-    def __init__(self, config):
+    def __init__(self, config, market_cache=None, trading_system=None):
         self.config = config
+        self.market_cache = market_cache
+        self.trading_system = trading_system
         print("🧠 INITIALIZING UNIFIED META BRAIN...")
         print("=" * 60)
         
@@ -55,7 +71,7 @@ class UnifiedMetaBrain:
         
         # Market Regime Detector
         from engines.market_regime import PhasmaMarketRegimeDetector
-        self.regime_detector = PhasmaMarketRegimeDetector(self.config)
+        self.regime_detector = PhasmaMarketRegimeDetector(self.config, market_cache=self.market_cache)
         print("   ✅ Regime Detector - Market conditions analysis")
     
     def _initialize_intelligence_systems(self):
@@ -75,7 +91,7 @@ class UnifiedMetaBrain:
         # News-Driven Scanner
         from brain.news_driven_scanner import NewsDrivenScanner
         self.news_scanner = NewsDrivenScanner(self.config)
-        print("   ✅ News Scanner - Hot stocks under $50")
+        print("   ✅ News Scanner - News-driven stock discovery")
         
         # Integrated News Sources (20 sources)
         from engines.news_engine_integrated import IntegratedNewsSources
@@ -143,104 +159,245 @@ class UnifiedMetaBrain:
             'success_rate': 0.0
         }
         print("   ✅ Performance Tracker - Metrics & analytics")
+        self._cycle_context: Optional[CycleDataContext] = None
+
+    # region agent log
+    def _debug_log(self, run_id: str, hypothesis_id: str, location: str, message: str, data: Dict[str, Any]):
+        """Temporary debug instrumentation for session 28cc99."""
+        try:
+            payload = {
+                "sessionId": "28cc99",
+                "runId": run_id,
+                "hypothesisId": hypothesis_id,
+                "location": location,
+                "message": message,
+                "data": data,
+                "pid": os.getpid(),
+                "timestamp": int(datetime.now().timestamp() * 1000),
+            }
+            with open("debug-28cc99.log", "a", encoding="utf-8") as f:
+                f.write(json.dumps(payload, default=str) + "\n")
+        except Exception:
+            pass
+    # endregion
     
-    async def run_unified_analysis(self) -> Dict[str, Any]:
-        """Run complete unified analysis using ALL systems"""
-        
+    async def run_unified_analysis(
+        self,
+        cycle_context: Optional[CycleDataContext] = None,
+        *,
+        run_deep_discovery: bool = True,
+    ) -> Dict[str, Any]:
+        """Run unified analysis. Deep branches (universal/partnership/underground/thematic) are hourly."""
+        from core.runtime.context_snapshots import ContextSnapshotStore
+
+        snapshot_store = ContextSnapshotStore()
+
         print("\n🚀 RUNNING UNIFIED META BRAIN ANALYSIS")
         print("=" * 80)
-        print("All systems working together to find the best opportunities...")
+        if run_deep_discovery:
+            print("📋 FLOOR WORKFLOW: Phase 1 Ingest → Phase 2 Analyze → Phase 3 Synthesize")
+        else:
+            print("📋 FAST MODE: Phase 1 Ingest → fast analyze only (deep snapshot reused when fresh)")
         print("=" * 80)
+
+        if not run_deep_discovery:
+            cached = snapshot_store.get_payload("candidates")
+            if cached and snapshot_store.is_fresh("candidates"):
+                print("\n⏭️ DiscoveryGroup DEEP: reusing cached snapshot (hourly cadence)")
+                return dict(cached)
         
-        # Phase 1: Market Environment Analysis
-        print("\n🌍 PHASE 1: MARKET ENVIRONMENT")
+        # Phase 1 — INGEST (single fetch, universe, price enrich) — always first
+        print("\n📥 PHASE 1 — INGEST (once per cycle)")
         print("-" * 40)
-        
-        # Check market regime
+        if cycle_context is None:
+            try:
+                cycle_context = await CycleDataContext.ingest(
+                    self.news_sources,
+                    config=self.config,
+                    market_cache=self.market_cache,
+                )
+            except Exception as exc:
+                print(f"   ⚠️ Cycle ingest failed: {exc}")
+                cycle_context = CycleDataContext()
+                self._debug_log(
+                    "floor-workflow",
+                    "FLOOR",
+                    "brain/unified_meta_brain.py:run_unified_analysis:ingest_error",
+                    "cycle ingest failed",
+                    {"exception_type": type(exc).__name__, "exception_message": str(exc)[:300]},
+                )
+        else:
+            print("   Using pre-built cycle context from caller")
+            cycle_context._log_phase("phase1_ingest_reused", {
+                "items": len(cycle_context.ingested_news),
+                "symbols": len(cycle_context.symbol_universe),
+                "enriched_prices": len(cycle_context.prices),
+            })
+        self._cycle_context = cycle_context
+        prefetched_news = cycle_context.ingested_news
+        self._debug_log(
+            "floor-workflow",
+            "FLOOR",
+            "brain/unified_meta_brain.py:run_unified_analysis:phase1_done",
+            "phase 1 ingest complete",
+            {
+                "total_items": len(prefetched_news),
+                "symbol_universe": len(cycle_context.symbol_universe),
+                "prices": len(cycle_context.prices),
+            },
+        )
+
+        # Market environment (read-only macro/regime — uses ingest snapshot, no re-fetch)
+        print("\n🌍 MARKET ENVIRONMENT (preflight)")
+        print("-" * 40)
+
         market_regime = await self._analyze_market_regime()
-        
-        # Check crash risk
         crash_risk = await self._check_crash_risk()
-        
-        # Analyze macro conditions
         macro_analysis = await self._analyze_macro_conditions()
         
-        # Phase 2: Intelligence Gathering
-        print("\n🧠 PHASE 2: INTELLIGENCE GATHERING")
+        # Phase 2 — ANALYZE (read-only shared context, no re-fetch)
+        print("\n🧠 PHASE 2 — ANALYZE (read-only CycleDataContext)")
         print("-" * 40)
-        
-        # Run all intelligence systems in parallel
-        tasks = [
-            self.universal_intel.analyze_all_opportunities(),
-            self.bull_run_detector.detect_bull_runs(),
-            self.news_scanner.scan_news_for_hot_stocks(),
-            self._scan_social_sentiment(),
-            self._monitor_partnerships(),
-            self._discover_underground_stocks()
+        fast_tasks = [
+            ("bull_runs", self.bull_run_detector.detect_bull_runs(cycle_context), intelligence_timeout(self.config, "bull_runs")),
+            ("hot_stocks", self.news_scanner.scan_news_for_hot_stocks(cycle_context), intelligence_timeout(self.config, "hot_stocks")),
+            ("social_signals", self._scan_social_sentiment(), intelligence_timeout(self.config, "social_signals")),
         ]
+        deep_tasks = [
+            ("universal_opportunities", self.universal_intel.analyze_all_opportunities(cycle_context), intelligence_timeout(self.config, "universal_opportunities")),
+            ("partnership_opportunities", self._monitor_partnerships(cycle_context), intelligence_timeout(self.config, "partnership_opportunities")),
+            ("underground_stocks", self._discover_underground_stocks(), intelligence_timeout(self.config, "underground_stocks")),
+        ]
+        task_specs = fast_tasks + (deep_tasks if run_deep_discovery else [])
+        if not run_deep_discovery:
+            print("   ⏭️ Skipped deep: universal intel, partnership EDGAR, underground (hourly/on-demand)")
+        results = await asyncio.gather(
+            *(self._run_intelligence_task(name, coro, timeout) for name, coro, timeout in task_specs),
+            return_exceptions=True,
+        )
         
-        results = await asyncio.gather(*tasks, return_exceptions=True)
+        # region agent log
+        self._debug_log(
+            "pre-fix",
+            "H3",
+            "brain/unified_meta_brain.py:run_unified_analysis:gather_results",
+            "parallel intelligence task results",
+            {
+                "task_results": [
+                    {
+                        "name": name,
+                        "is_exception": isinstance(result, Exception),
+                        "exception_type": type(result).__name__ if isinstance(result, Exception) else None,
+                        "exception_message": str(result)[:300] if isinstance(result, Exception) else None,
+                        "result_type": type(result).__name__,
+                        "result_len": len(result) if hasattr(result, "__len__") and not isinstance(result, Exception) else None,
+                    }
+                    for name, result in zip([name for name, _, _ in task_specs], results)
+                ]
+            },
+        )
+        # endregion
         
         # Parse results
-        universal_opportunities = results[0] if not isinstance(results[0], Exception) else []
-        bull_runs = results[1] if not isinstance(results[1], Exception) else []
-        hot_stocks = results[2] if not isinstance(results[2], Exception) else []
-        social_signals = results[3] if not isinstance(results[3], Exception) else []
-        partnership_opportunities = results[4] if not isinstance(results[4], Exception) else []
-        underground_stocks = results[5] if not isinstance(results[5], Exception) else []
+        name_order = [name for name, _, _ in task_specs]
+        parsed = {}
+        for name, result in zip(name_order, results):
+            parsed[name] = result if not isinstance(result, Exception) else []
+
+        universal_opportunities = parsed.get("universal_opportunities", [])
+        bull_runs = parsed.get("bull_runs", [])
+        hot_stocks = parsed.get("hot_stocks", [])
+        social_signals = parsed.get("social_signals", [])
+        partnership_opportunities = parsed.get("partnership_opportunities", [])
+        underground_stocks = parsed.get("underground_stocks", [])
         
-        # Phase 2.5: Sector Intelligence & Correlation
-        print("\n🏭 PHASE 2.5: SECTOR INTELLIGENCE & CORRELATION")
+        self._debug_log(
+            "floor-workflow",
+            "FLOOR",
+            "brain/unified_meta_brain.py:run_unified_analysis:phase2_done",
+            "phase 2 analyze branches complete",
+            {
+                "universal": len(universal_opportunities),
+                "bull_runs": len(bull_runs),
+                "hot_stocks": len(hot_stocks),
+                "social": len(social_signals),
+                "partnerships": len(partnership_opportunities),
+                "underground": len(underground_stocks),
+            },
+        )
+        
+        # Phase 2 (continued): Sector Intelligence & Correlation — deep only
+        sector_opportunities: List[Dict] = []
+        kalshi_correlations: List[Dict] = []
+        related_stocks: List[Dict] = []
+        active_themes = []
+        thematic_stocks: List[Dict] = []
+
+        if run_deep_discovery:
+            print("\n🏭 SECTOR INTELLIGENCE & CORRELATION")
+            print("-" * 40)
+
+            initial_news = [dict(item) for item in prefetched_news]
+            for opp_list in [universal_opportunities, bull_runs, hot_stocks]:
+                for opp in opp_list:
+                    initial_news.append({
+                        'title': opp.get('title', ''),
+                        'symbol': opp.get('symbol', ''),
+                        'confidence': opp.get('confidence', 0.5),
+                        'summary': opp.get('summary', '')
+                    })
+
+            sector_opportunities = await self.sector_intel.analyze_sector_opportunities(initial_news)
+            kalshi_correlations = await self.sector_intel.check_kalshi_correlations(sector_opportunities)
+            related_stocks = await self.sector_intel.find_related_stocks(initial_news)
+
+            print(f"   Sector opportunities: {len(sector_opportunities)}")
+            print(f"   Kalshi correlations: {len(kalshi_correlations)}")
+            print(f"   Related stocks: {len(related_stocks)}")
+
+            print("\n🎯 THEMATIC ANALYSIS - MACRO TRENDS")
+            print("-" * 40)
+
+            all_news_items = []
+            for item in prefetched_news:
+                if item.get('title') or item.get('summary'):
+                    all_news_items.append({
+                        'title': item.get('title', ''),
+                        'summary': item.get('summary', ''),
+                        'url': item.get('url', ''),
+                        'published': item.get('published') or item.get('timestamp', ''),
+                        'sentiment': item.get('sentiment', 0)
+                    })
+
+            self._debug_log(
+                "pre-fix",
+                "H12",
+                "brain/unified_meta_brain.py:run_unified_analysis:thematic_input",
+                "thematic analysis input count",
+                {"prefetched_news": len(prefetched_news), "thematic_news_items": len(all_news_items)},
+            )
+
+            active_themes = self.thematic_analyzer.analyze_news_themes(all_news_items)
+            thematic_stocks = self.thematic_analyzer.map_themes_to_stocks(active_themes)
+
+            print(f"   Active themes: {len(active_themes)}")
+            for theme in active_themes[:3]:
+                conf_pct = normalize_confidence_to_pct(theme.confidence_score)
+                print(f"   • {theme.name}: {conf_pct:.1f}% confidence, {len(theme.news_mentions)} mentions")
+            print(f"   Thematic stocks: {len(thematic_stocks)}")
+        else:
+            print("\n⏭️ Sector/thematic analysis skipped (hourly deep cadence)")
+        
+        # Phase 3 — SYNTHESIZE
+        print("\n🔗 PHASE 3 — SYNTHESIZE")
         print("-" * 40)
-        
-        # Combine initial opportunities for sector analysis
-        initial_news = []
-        for opp_list in [universal_opportunities, bull_runs, hot_stocks]:
-            for opp in opp_list:
-                initial_news.append({
-                    'title': opp.get('title', ''),
-                    'symbol': opp.get('symbol', ''),
-                    'confidence': opp.get('confidence', 0.5),
-                    'summary': opp.get('summary', '')
-                })
-        
-        # Run sector intelligence
-        sector_opportunities = await self.sector_intel.analyze_sector_opportunities(initial_news)
-        kalshi_correlations = await self.sector_intel.check_kalshi_correlations(sector_opportunities)
-        related_stocks = await self.sector_intel.find_related_stocks(initial_news)
-        
-        print(f"   Sector opportunities: {len(sector_opportunities)}")
-        print(f"   Kalshi correlations: {len(kalshi_correlations)}")
-        print(f"   Related stocks: {len(related_stocks)}")
-        
-        # Phase 2.6: Thematic Analysis - Macro Trends
-        print("\n🎯 PHASE 2.6: THEMATIC ANALYSIS - MACRO TRENDS")
-        print("-" * 40)
-        
-        # Get news items from all sources for thematic analysis
-        all_news_items = []
-        for opp in universal_opportunities + bull_runs + hot_stocks:
-            if opp.get('title') or opp.get('summary'):
-                all_news_items.append({
-                    'title': opp.get('title', ''),
-                    'summary': opp.get('summary', ''),
-                    'url': opp.get('url', ''),
-                    'published': opp.get('published', ''),
-                    'sentiment': opp.get('sentiment', 0)
-                })
-        
-        # Run thematic analysis
-        active_themes = self.thematic_analyzer.analyze_news_themes(all_news_items)
-        thematic_stocks = self.thematic_analyzer.map_themes_to_stocks(active_themes)
-        
-        print(f"   Active themes: {len(active_themes)}")
-        for theme in active_themes[:3]:  # Show top 3
-            print(f"   • {theme.name}: {theme.confidence_score:.1%} confidence, {len(theme.news_mentions)} mentions")
-        print(f"   Thematic stocks: {len(thematic_stocks)}")
-        
-        # Phase 3: Convergence & Synthesis
-        print("\n🔗 PHASE 3: CONVERGENCE & SYNTHESIS")
-        print("-" * 40)
+        self._debug_log(
+            "floor-workflow",
+            "FLOOR",
+            "brain/unified_meta_brain.py:run_unified_analysis:phase3_start",
+            "phase 3 synthesize starting",
+            {"sector_ops": len(sector_opportunities), "themes": len(active_themes)},
+        )
         
         # Combine all opportunities
         all_opportunities = self._combine_all_opportunities(
@@ -256,19 +413,18 @@ class UnifiedMetaBrain:
             thematic_stocks
         )
         
-        # Phase 3.5: FORCED EXPANSION - Find NEW Stocks
-        print("\n🌍 PHASE 3.5: FORCED EXPANSION - Breaking Free from Known Stocks")
-        print("-" * 40)
-        
-        # Run expansion engine to find NEW opportunities
-        expansion_opportunities = await self.expansion_engine.expand_universe(all_opportunities)
-        
-        # Add expansion opportunities to the mix
-        all_opportunities.extend(expansion_opportunities)
-        
-        print(f"   Original opportunities: {len(all_opportunities) - len(expansion_opportunities)}")
-        print(f"   NEW discoveries: {len(expansion_opportunities)}")
-        print(f"   Total expanded universe: {len(all_opportunities)}")
+        # Phase 3.5: FORCED EXPANSION — deep only
+        expansion_opportunities: List[Dict] = []
+        if run_deep_discovery:
+            print("\n🌍 PHASE 3.5: FORCED EXPANSION - Breaking Free from Known Stocks")
+            print("-" * 40)
+            expansion_opportunities = await self.expansion_engine.expand_universe(all_opportunities)
+            all_opportunities.extend(expansion_opportunities)
+            print(f"   Original opportunities: {len(all_opportunities) - len(expansion_opportunities)}")
+            print(f"   NEW discoveries: {len(expansion_opportunities)}")
+            print(f"   Total expanded universe: {len(all_opportunities)}")
+        else:
+            print("\n⏭️ Expansion engine skipped (hourly deep cadence)")
         
         # Phase 3.7: BIAS BREAKER - Prevent Top-3 Obsession
         print("\n🚫 PHASE 3.7: BIAS BREAKER - Preventing Top-3 Mentality")
@@ -297,7 +453,7 @@ class UnifiedMetaBrain:
         
         # Score all opportunities
         context = {
-            'macro_regime': market_regime.get('recommendation', 'UNKNOWN'),
+            'macro_regime': market_regime.get('recommendation', 'PROCEED_WITH_CAUTION'),
             'vix': crash_risk.get('level', 'LOW')
         }
         
@@ -313,7 +469,7 @@ class UnifiedMetaBrain:
             print(f"   Top 3 by confluence:")
             for opp in high_conviction[:3]:
                 breakdown = opp.get('confluence_breakdown', {})
-                print(f"      • {opp.get('symbol', 'UNKNOWN')}: {opp.get('confluence_score', 0):.0f}/100")
+                print(f"      • {opp.get('symbol', 'N/A')}: {opp.get('confluence_score', 0):.0f}/100")
                 print(f"        Macro: {breakdown.get('macro_alignment', 0):.0%} | Value: {breakdown.get('value_alignment', 0):.0%} | Technical: {breakdown.get('technical_confirmation', 0):.0%} | News: {breakdown.get('news_catalyst', 0):.0%}")
         
         # Apply risk filters to high conviction only
@@ -341,41 +497,229 @@ class UnifiedMetaBrain:
             'top_opportunities': final_signals[:10],
             'performance': self._update_performance_metrics(final_signals)
         }
+
+        # region agent log
+        self._debug_log(
+            "pre-fix",
+            "H5",
+            "brain/unified_meta_brain.py:run_unified_analysis:summary",
+            "final unified summary quality check",
+            {
+                "market_trend": market_regime.get("trend"),
+                "vix_price": market_regime.get("vix_price"),
+                "total_opportunities": summary["total_opportunities"],
+                "high_conviction": summary["high_conviction"],
+                "converged_signals": summary["converged_signals"],
+                "final_signals": summary["final_signals"],
+                "top_opportunities_len": len(summary["top_opportunities"]),
+                "has_unknown": "UNKNOWN" in json.dumps(summary, default=str),
+                "has_null": "null" in json.dumps(summary, default=str),
+            },
+        )
+        # endregion
         
+        # Persist deep discovery snapshot for fast-loop reuse
+        if run_deep_discovery:
+            snapshot_store.save(
+                "candidates",
+                summary,
+                source_group="DiscoveryGroup",
+                ttl_seconds=3600,
+                item_count=summary.get("final_signals", 0),
+            )
+
         # Display summary
         self._display_results_summary(summary)
         
-        # Save results
+        # Persist only when explicitly enabled for diagnostics/feedback.
         await self._save_unified_results(summary)
         
         return summary
+
+    async def _run_intelligence_task(self, name: str, coro, timeout_seconds: int):
+        """Run one intelligence branch with runtime logging and a hard timeout."""
+        started = time.perf_counter()
+        # region agent log
+        self._debug_log(
+            "pre-fix",
+            "H9",
+            "brain/unified_meta_brain.py:_run_intelligence_task:start",
+            "intelligence task started",
+            {"name": name, "timeout_seconds": timeout_seconds},
+        )
+        # endregion
+
+        try:
+            result = await asyncio.wait_for(coro, timeout=timeout_seconds)
+            elapsed = round(time.perf_counter() - started, 3)
+            # region agent log
+            self._debug_log(
+                "pre-fix",
+                "H9",
+                "brain/unified_meta_brain.py:_run_intelligence_task:end",
+                "intelligence task completed",
+                {
+                    "name": name,
+                    "elapsed_seconds": elapsed,
+                    "result_type": type(result).__name__,
+                    "result_len": len(result) if hasattr(result, "__len__") else None,
+                },
+            )
+            # endregion
+            return result
+        except asyncio.TimeoutError as exc:
+            elapsed = round(time.perf_counter() - started, 3)
+            print(f"   ⚠️ Intelligence task timed out: {name} after {timeout_seconds}s")
+            # region agent log
+            self._debug_log(
+                "pre-fix",
+                "H9",
+                "brain/unified_meta_brain.py:_run_intelligence_task:timeout",
+                "intelligence task timed out",
+                {"name": name, "elapsed_seconds": elapsed, "timeout_seconds": timeout_seconds},
+            )
+            # endregion
+            return exc
+        except Exception as exc:
+            elapsed = round(time.perf_counter() - started, 3)
+            # region agent log
+            self._debug_log(
+                "pre-fix",
+                "H9",
+                "brain/unified_meta_brain.py:_run_intelligence_task:error",
+                "intelligence task failed",
+                {
+                    "name": name,
+                    "elapsed_seconds": elapsed,
+                    "exception_type": type(exc).__name__,
+                    "exception_message": str(exc)[:300],
+                },
+            )
+            # endregion
+            return exc
     
     async def _analyze_market_regime(self) -> Dict:
         """Analyze current market regime"""
         print("   📈 Analyzing market regime...")
         
-        # Get market data
-        spy_price = self.price_fetcher.get_real_price('SPY')
-        vix_price = self.price_fetcher.get_real_price('VIX')
+        market_index_symbol = 'SPY'
+        spy_price = None
+        if self.market_cache:
+            macro = self.market_cache.fetch_macro_data()
+            spy_cached = macro.get('spy', {}).get('current')
+            if spy_cached and spy_cached > 0:
+                spy_price = float(spy_cached)
+        if spy_price is None:
+            spy_price = self._get_market_index_price(market_index_symbol)
+        if spy_price is None:
+            for fallback_symbol in ('QQQ', 'IWM', '^GSPC'):
+                fallback_price = self._get_market_index_price(fallback_symbol)
+                if fallback_price is not None:
+                    market_index_symbol = fallback_symbol
+                    spy_price = fallback_price
+                    break
+        vix_price = self.regime_detector._get_current_vix()
+        market_trend = self.regime_detector._get_market_trend()
+        regime_name = self.regime_detector.detect_current_regime()
+
+        if market_trend > 0.02:
+            trend = 'BULLISH'
+        elif market_trend < -0.02:
+            trend = 'BEARISH'
+        else:
+            trend = 'SIDEWAYS'
         
         regime = {
-            'trend': 'UNKNOWN',
+            'trend': trend,
+            'regime': regime_name,
             'volatility': 'NORMAL',
+            'market_index_symbol': market_index_symbol,
             'spy_price': spy_price,
             'vix_price': vix_price,
+            'market_trend_1mo': market_trend,
             'recommendation': 'PROCEED_WITH_CAUTION'
         }
         
-        if spy_price and vix_price:
+        if vix_price is not None:
             if float(vix_price) > 30:
                 regime['volatility'] = 'HIGH'
                 regime['recommendation'] = 'REDUCE_POSITION_SIZE'
             elif float(vix_price) < 15:
                 regime['volatility'] = 'LOW'
                 regime['recommendation'] = 'INCREASE_POSITION_SIZE'
+
+        # region agent log
+        self._debug_log(
+            "pre-fix",
+            "H1,H2",
+            "brain/unified_meta_brain.py:_analyze_market_regime",
+            "market regime raw price inputs and derived fields",
+            {
+                "market_index_symbol": market_index_symbol,
+                "spy_price": spy_price,
+                "vix_price": vix_price,
+                "market_trend": market_trend,
+                "regime_name": regime_name,
+                "trend": regime["trend"],
+                "volatility": regime["volatility"],
+                "recommendation": regime["recommendation"],
+                "vix_missing": vix_price is None,
+                "trend_unknown": regime["trend"] == "UNKNOWN",
+            },
+        )
+        # endregion
         
         print(f"   ✅ Regime: {regime['trend']} | Volatility: {regime['volatility']}")
         return regime
+
+    def _get_market_index_price(self, symbol: str):
+        """Fetch a real market index/ETF price from available live sources."""
+        price = None
+        if not symbol.startswith('^'):
+            price = self.price_fetcher.get_real_price(symbol)
+        if price is None:
+            try:
+                import yfinance as yf
+                history = yf.Ticker(symbol).history(period='5d')
+                closes = history['Close'].dropna()
+                if len(closes) > 0:
+                    price = float(closes.iloc[-1])
+            except Exception:
+                price = None
+        if price is None:
+            try:
+                import requests
+                encoded_symbol = symbol.replace("^", "%5E")
+                response = requests.get(
+                    f"https://query1.finance.yahoo.com/v8/finance/chart/{encoded_symbol}",
+                    params={"range": "5d", "interval": "1d"},
+                    headers={"User-Agent": "Mozilla/5.0"},
+                    timeout=10,
+                )
+                data = response.json()
+                result = (data.get("chart", {}).get("result") or [None])[0]
+                closes = ((result or {}).get("indicators", {}).get("quote") or [{}])[0].get("close") or []
+                closes = [float(close) for close in closes if close is not None]
+                if closes:
+                    price = closes[-1]
+            except Exception:
+                price = None
+        if price is None and not symbol.startswith("^"):
+            try:
+                import csv
+                import io
+                import requests
+                response = requests.get(
+                    f"https://stooq.com/q/l/?s={symbol.lower()}.us&f=sd2t2ohlcv&h&e=csv",
+                    headers={"User-Agent": "Mozilla/5.0"},
+                    timeout=10,
+                )
+                rows = list(csv.DictReader(io.StringIO(response.text)))
+                if rows and rows[0].get("Close") not in (None, "N/D"):
+                    price = float(rows[0]["Close"])
+            except Exception:
+                price = None
+        return price
     
     async def _check_crash_risk(self) -> Dict:
         """Check for crash risk"""
@@ -407,23 +751,162 @@ class UnifiedMetaBrain:
     async def _scan_social_sentiment(self) -> List[Dict]:
         """Scan social media for sentiment"""
         print("   📱 Scanning social sentiment...")
+
+        signals = []
+        try:
+            social_limit = discovery_limit(self.config, "social_reddit_limit", 10)
+            trending = await asyncio.wait_for(
+                asyncio.to_thread(self._fetch_public_reddit_trends, social_limit),
+                timeout=60 if is_max_discovery(self.config) else 30,
+            )
+            for symbol, mentions in trending.items():
+                signals.append({
+                    'symbol': symbol,
+                    'source': 'social_sentiment',
+                    'trade_type': 'sentiment_shift',
+                    'confidence': min(0.45 + (mentions * 0.03), 0.75),
+                    'summary': f'Reddit/social momentum: {mentions} mentions',
+                    'mentions': mentions,
+                })
+        except asyncio.TimeoutError:
+            print("   ⚠️ Social sentiment scan timed out - using partial results")
+        except Exception as e:
+            print(f"   ⚠️ Social sentiment scan error: {e}")
+
+        # region agent log
+        self._debug_log(
+            "pre-fix",
+            "H4",
+            "brain/unified_meta_brain.py:_scan_social_sentiment",
+            "social sentiment branch execution result",
+            {"branch": "social_sentiment", "returns_placeholder_empty": False, "signals": len(signals)},
+        )
+        # endregion
         
-        # Simplified - would integrate with social_engine
-        return []
+        return signals
+
+    def _fetch_public_reddit_trends(self, limit: int = 10) -> Dict[str, int]:
+        """Fetch public Reddit trend data without opening a persistent async client."""
+        import requests
+        from collections import Counter
+        from engines.social_engine.reddit_client import RedditTrendingTracker
+
+        tracker = RedditTrendingTracker(self.config)
+        counts = Counter()
+        headers = {'User-Agent': 'PhasmaAITrading/1.0'}
+        subreddits = ['pennystocks', 'wallstreetbets', 'stocks', 'StockMarket', 'investing', 'CryptoCurrency']
+
+        for subreddit in subreddits:
+            try:
+                response = requests.get(
+                    f"https://www.reddit.com/r/{subreddit}/hot.json",
+                    params={'limit': 10},
+                    headers=headers,
+                    timeout=10,
+                )
+                if response.status_code != 200:
+                    continue
+                for child in response.json().get('data', {}).get('children', []):
+                    post = child.get('data', {})
+                    text = f"{post.get('title', '')} {post.get('selftext', '')}"
+                    counts.update(tracker.extract_symbols(text))
+            except Exception:
+                continue
+
+        return dict(counts.most_common(limit))
     
-    async def _monitor_partnerships(self) -> List[Dict]:
+    async def _monitor_partnerships(self, cycle_context: Optional[CycleDataContext] = None) -> List[Dict]:
         """Monitor M&A and partnerships"""
         print("   🤝 Monitoring partnerships...")
+
+        opportunities = []
+        try:
+            symbols = []
+            if cycle_context is not None:
+                symbols = list(cycle_context.symbol_universe[
+                    :discovery_limit(self.config, "partnership_symbol_scan", 3)
+                ])
+            else:
+                news_items = await self.news_sources.fetch_all_integrated_sources()
+                for item in news_items:
+                    symbol = str(item.get('symbol') or '').upper().strip()
+                    if symbol and symbol not in symbols and len(symbol) <= 5 and symbol.isalpha():
+                        symbols.append(symbol)
+                    if len(symbols) >= discovery_limit(self.config, "partnership_symbol_scan", 3):
+                        break
+
+            for symbol in symbols:
+                events = await self.partnership_engine.scan_ticker(symbol)
+                for event in events[:5]:
+                    opportunities.append({
+                        'symbol': symbol,
+                        'source': 'partnership_engine',
+                        'trade_type': 'catalyst_event',
+                        'confidence': min(float(getattr(event, 'impact_score', 0) or 0) / 10, 0.9),
+                        'summary': getattr(event, 'description', ''),
+                    })
+        except Exception as e:
+            print(f"   ⚠️ Partnership monitor error: {e}")
+
+        # region agent log
+        self._debug_log(
+            "pre-fix",
+            "H4",
+            "brain/unified_meta_brain.py:_monitor_partnerships",
+            "partnership branch execution result",
+            {"branch": "partnerships", "returns_placeholder_empty": False, "opportunities": len(opportunities)},
+        )
+        # endregion
         
-        # Simplified - would integrate with partnership_engine
-        return []
+        return opportunities
     
     async def _discover_underground_stocks(self) -> List[Dict]:
         """Discover underground/hidden stocks"""
         print("   🔍 Discovering underground stocks...")
+
+        discoveries = []
+        try:
+            underground_cfg = {}
+            if hasattr(self.config, "get"):
+                underground_cfg = self.config.get("underground_discovery", {}) or {}
+            elif isinstance(self.config, dict):
+                underground_cfg = self.config.get("underground_discovery", {}) or {}
+
+            if not underground_cfg.get("enabled", False) and not is_max_discovery(self.config):
+                print("   💤 Underground discovery: DISABLED (not configured)")
+                return discoveries
+
+            from engines.underground_stock_discovery import UndergroundStockDiscovery
+
+            scanner = UndergroundStockDiscovery(
+                self.config.data if hasattr(self.config, "data") else self.config
+            )
+            signals = await asyncio.to_thread(scanner.scan_for_opportunities)
+            signal_cap = discovery_limit(self.config, "underground_signal_cap", 20)
+            for signal in signals[:signal_cap]:
+                discoveries.append({
+                    'symbol': getattr(signal, 'ticker', ''),
+                    'source': 'underground_discovery',
+                    'trade_type': getattr(signal, 'signal_type', 'underground_discovery'),
+                    'confidence': getattr(signal, 'strength', 0),
+                    'summary': getattr(signal, 'evidence', ''),
+                    'liquidity_score': getattr(signal, 'liquidity_score', 0),
+                    'dilution_risk': getattr(signal, 'dilution_risk', ''),
+                })
+        except Exception as e:
+            print(f"   ⚠️ Underground discovery error: {e}")
+
+        # region agent log
+        self._debug_log(
+            "pre-fix",
+            "H4",
+            "brain/unified_meta_brain.py:_discover_underground_stocks",
+            "underground discovery branch execution result",
+            {"branch": "underground_stocks", "returns_placeholder_empty": False, "discoveries": len(discoveries)},
+        )
+        # endregion
         
-        # Simplified - would integrate with underground_discovery
-        return []
+        return discoveries
     
     def _combine_all_opportunities(self, *all_results) -> List[Dict]:
         """Combine opportunities from all systems"""
@@ -471,8 +954,8 @@ class UnifiedMetaBrain:
                 converged.append({
                     'symbol': symbol,
                     'confidence': min(avg_confidence * 1.2, 0.95),  # Boost for convergence
-                    'sources': [opp.get('source', 'Unknown') for opp in group],
-                    'strategies': list(set(opp.get('trade_type', 'Unknown') for opp in group)),
+                    'sources': [opp.get('source') or 'analysis' for opp in group],
+                    'strategies': list(set(opp.get('trade_type') or 'convergence' for opp in group)),
                     'convergence_score': len(group),
                     'evidence': group[:3]  # Top 3 pieces of evidence
                 })
@@ -482,19 +965,22 @@ class UnifiedMetaBrain:
     
     async def _apply_risk_filters(self, signals: List[Dict]) -> List[Dict]:
         """Apply risk management filters"""
+        from utils.price_filter_config import resolve_price_filter, within_price_cap
         print("   ⚖️ Applying risk filters...")
+        price_filter_on, _ = resolve_price_filter(self.config)
         
         filtered = []
         for signal in signals:
-            # Price filter
             symbol = signal.get('symbol', '')
             price = self.price_fetcher.get_real_price(symbol)
-            
-            if price and float(price) <= 50:  # Under $50
+            if not price:
+                continue
+            if not price_filter_on or within_price_cap(price, self.config):
                 signal['current_price'] = float(price)
                 filtered.append(signal)
         
-        print(f"   ✅ Filtered: {len(signals)} → {len(filtered)} affordable stocks")
+        label = "price-capped" if price_filter_on else "passed"
+        print(f"   ✅ Filtered: {len(signals)} → {len(filtered)} ({label})")
         return filtered
     
     async def _generate_final_signals(self, signals: List[Dict]) -> List[Dict]:
@@ -508,9 +994,12 @@ class UnifiedMetaBrain:
         final_signals = signals[:20]
         
         # Add metadata (preserve confluence data)
+        from utils.company_resolver import get_resolver
+        resolver = get_resolver()
         for i, signal in enumerate(final_signals):
             signal['rank'] = i + 1
             signal['timestamp'] = datetime.now().isoformat()
+            resolver.enrich_signal(signal)
             # Ensure confluence data is preserved
             if 'confluence_score' not in signal:
                 signal['confluence_score'] = 70  # Default if not set
@@ -521,7 +1010,7 @@ class UnifiedMetaBrain:
         if final_signals:
             print(f"   📊 Top 3 by confluence:")
             for s in final_signals[:3]:
-                print(f"      • {s.get('symbol', 'UNKNOWN')}: {s.get('confluence_score', 0):.0f}/100")
+                print(f"      • {s.get('symbol', 'N/A')}: {s.get('confluence_score', 0):.0f}/100")
         
         return final_signals
     
@@ -558,7 +1047,7 @@ class UnifiedMetaBrain:
         print("=" * 80)
         
         print(f"\n📊 SUMMARY:")
-        print(f"   Market Regime: {summary['market_regime'].get('trend', 'UNKNOWN')}")
+        print(f"   Market Regime: {summary['market_regime'].get('trend', 'SIDEWAYS')}")
         print(f"   Crash Risk: {summary['crash_risk'].get('level', 'LOW')}")
         print(f"   Total Opportunities: {summary['total_opportunities']}")
         print(f"   Converged Signals: {summary['converged_signals']}")
@@ -568,22 +1057,89 @@ class UnifiedMetaBrain:
         if summary['top_opportunities']:
             print(f"\n🚀 TOP 5 OPPORTUNITIES:")
             for i, opp in enumerate(summary['top_opportunities'][:5], 1):
-                print(f"\n{i}. {opp.get('symbol', 'UNKNOWN')} - {opp.get('confidence', 0):.1%} confidence")
+                conf_pct = normalize_confidence_to_pct(opp.get('confidence_pct', opp.get('confidence', 0)))
+                print(f"\n{i}. {opp.get('symbol', 'N/A')} - {conf_pct:.1f}% confidence")
                 if 'strategies' in opp:
                     print(f"   Strategies: {', '.join(opp['strategies'])}")
                 if 'sources' in opp:
                     print(f"   Sources: {', '.join(opp['sources'][:2])}")
-        
-        print(f"\n✅ SYSTEM STATUS: All operational and synchronized")
+
+        if self.trading_system is not None:
+            from core.system_health import aggregate_system_health, format_system_health_report
+            health = aggregate_system_health(self.trading_system)
+            print(f"\n{format_system_health_report(health)}")
+        else:
+            print(f"\nSYSTEM STATUS: DEGRADED")
+            print("* Underground Discovery: DEGRADED, missing data feeds")
+            print("* Options Flow: DISABLED, vendor not connected")
+            print("* Job Scraper: DISABLED, scraper not connected")
     
+    def _get_config_value(self, key: str, default: Any = None) -> Any:
+        """Read config values from dict-like or object-style config."""
+        missing = object()
+        getter = getattr(self.config, "get", None)
+        if callable(getter):
+            try:
+                value = getter(key, missing)
+            except TypeError:
+                pass
+            else:
+                if value is not missing:
+                    return value
+
+        value = self.config
+        for part in key.split("."):
+            if isinstance(value, dict):
+                if part not in value:
+                    return default
+                value = value[part]
+            elif hasattr(value, part):
+                value = getattr(value, part)
+            else:
+                return default
+
+        return value
+
+    def _as_bool(self, value: Any, default: bool = False) -> bool:
+        """Coerce common config/env truthy and falsy values."""
+        if value is None:
+            return default
+        if isinstance(value, bool):
+            return value
+        if isinstance(value, str):
+            normalized = value.strip().lower()
+            if normalized in {"1", "true", "yes", "on"}:
+                return True
+            if normalized in {"0", "false", "no", "off"}:
+                return False
+            return default
+        return bool(value)
+
+    def _should_save_unified_results(self) -> bool:
+        """Return True when unified-brain feedback snapshots are enabled."""
+        for key in (
+            "diagnostics.save_unified_brain_results",
+            "unified_brain.save_results",
+            "trading.save_unified_brain_results",
+        ):
+            value = self._get_config_value(key)
+            if value is not None:
+                return self._as_bool(value)
+
+        return self._as_bool(os.getenv("PHASMA_SAVE_UNIFIED_BRAIN_RESULTS"), False)
+
     async def _save_unified_results(self, results: Dict):
-        """Save unified results"""
+        """Save unified results only for explicit diagnostics/feedback runs."""
+        if not self._should_save_unified_results():
+            return
+
         from core.runtime_paths import runtime_path
         filename = f"unified_brain_results_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
-        path = runtime_path(filename)
+        path = runtime_path("diagnostics", "unified_brain", filename)
+        os.makedirs(os.path.dirname(path), exist_ok=True)
         
         with open(path, 'w') as f:
-            json.dump(results, f, indent=2)
+            json.dump(results, f, indent=2, default=str)
         
         print(f"\n💾 Results saved to {path}")
 

@@ -1,6 +1,9 @@
 """
 NLP Event Parser
-Analyzes news sentiment, event types, and market impact
+Analyzes news sentiment, event types, and market impact.
+
+EnrichmentGroup — produces EventAnalysis metadata for candidates.
+Does not approve trades; final decisions use DecisionGroup / SignalDecision.
 """
 
 from dataclasses import dataclass

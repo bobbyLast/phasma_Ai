@@ -1,20 +1,9 @@
 """
 Moon Shot Detector - Overnight Catalyst-Driven Opportunity Identifier
 
-Identifies stocks with 2x-5x+ potential through catalyst analysis:
-- Upcoming earnings announcements
-- FDA approvals and clinical trial results
-- Product launches and partnerships
-- M&A announcements and buyouts
-- Clinical trial phase advancements
-- Regulatory approvals and patents
-
-Features:
-- Catalyst-driven scoring system (0-100)
-- Overnight holding potential (multi-day to multi-week)
-- Event-based opportunity detection
-- Integration with catalyst calendar system
-- Time horizon analysis for optimal entry/exit
+Identifies stocks with 2x-5x+ potential through catalyst analysis.
+CANDIDATE/WATCHLIST ONLY — does not approve trades or execute orders.
+All trade approval flows through DecisionGroup / SignalDecision.
 """
 
 import yfinance as yf

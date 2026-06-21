@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
 """
+LEGACY ONLY — DO NOT USE FOR EXECUTION. ExecutionRouter is the only active execution path.
+
 PHASMA AI - Live Trading Run with Realistic Data
-Uses simulated realistic data to demonstrate full system workflow
+Uses simulated realistic data to demonstrate full system workflow.
+Standalone legacy demo — not imported by main.py or WorkerSupervisor.
 """
 
 import asyncio

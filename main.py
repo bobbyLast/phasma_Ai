@@ -41,9 +41,50 @@ from core.application_context import ApplicationContext
 from core.execution import ExecutionRouter, OutcomeGrader, SignalOutcomeTracker, reconcile_positions_on_startup
 from core.execution.data_gates import audit_api_keys
 from core.execution.execution_modes import normalize_execution_config
+from core.supervisor import WorkerSupervisor
 from core.trade_classifier import TradeClassifier, TradeClass
 from core.trade_logger import TradeLogger
-from core.runtime_paths import memory_path, phasma_state_file
+from core.runtime_paths import memory_path, phasma_state_file, logs_dir
+
+# Persistent log file paths (set by configure_main_logging)
+_LOG_PATHS: Dict[str, str] = {}
+
+
+def configure_main_logging(level: str = "INFO") -> Dict[str, str]:
+    """Configure console + session file + latest log under data/runtime/logs/."""
+    global _LOG_PATHS
+    log_dir = logs_dir()
+    ts = datetime.now().strftime("%Y%m%d_%H%M%S")
+    session_path = os.path.join(log_dir, f"phasma_{ts}.log")
+    latest_path = os.path.join(log_dir, "phasma_latest.log")
+
+    fmt = logging.Formatter(
+        "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S",
+    )
+    log_level = getattr(logging, str(level).upper(), logging.INFO)
+
+    root = logging.getLogger()
+    root.handlers.clear()
+    root.setLevel(log_level)
+
+    for handler in (
+        logging.FileHandler(session_path, encoding="utf-8"),
+        logging.FileHandler(latest_path, mode="w", encoding="utf-8"),
+        logging.StreamHandler(),
+    ):
+        handler.setLevel(log_level)
+        handler.setFormatter(fmt)
+        root.addHandler(handler)
+
+    _LOG_PATHS = {"session": session_path, "latest": latest_path}
+    logging.getLogger("phasma.main").info(
+        "Logging initialized | session=%s | latest=%s | level=%s",
+        session_path,
+        latest_path,
+        logging.getLevelName(log_level),
+    )
+    return _LOG_PATHS
 
 # Import Signal Framework
 from trading.signal_framework import (
@@ -71,6 +112,25 @@ try:
 except ImportError:
     MarketDataCache = None
 from utils.company_resolver import get_resolver, is_placeholder, enrich_metadata, resolve_symbol_from_news_item
+from utils.confidence_utils import (
+    apply_sim_validation_adjustment,
+    compare_sim_validation,
+    format_sim_validation_message,
+    normalize_confidence_to_pct,
+)
+from utils.signal_data_quality import (
+    SignalDataQuality,
+    apply_fetched_price,
+    assess_signal_data_quality,
+    is_alert_only_eligible,
+)
+from core.signals.decision_pipeline import DecisionPipeline
+from core.signals.signal_decision import DecisionStatus, DecisionSummary
+from core.signals.strategy_router import StrategyRouter, classify_asset_type, has_option_contract_fields
+from core.runtime.safety_lock import print_startup_safety
+from core.supervisor.group_coordinator import GroupCoordinator
+from core.monitoring.runtime_profiler import get_runtime_profiler
+from utils.portfolio_ledger import summarize_ledger, filter_active_positions
 from utils.prediction_market_filters import (
     kalshi_intel_only,
     should_block_prediction_trade_post,
@@ -302,6 +362,11 @@ class PhasmaTradingSystem:
         if disabled_apis:
             print(f"⚠️ Disabled APIs (placeholder keys): {', '.join(disabled_apis.keys())}")
         print(f"✅ Execution router ready (mode={self.execution_router.mode})")
+        self.worker_supervisor = WorkerSupervisor()
+        print("✅ Worker supervisor ready (circuit breakers enabled)")
+        self.group_coordinator = GroupCoordinator(self.config.data)
+        self.runtime_profiler = get_runtime_profiler()
+        print_startup_safety(self.config.data, execution_mode=self.execution_router.mode)
         
         from utils.price_filter_config import resolve_price_filter
         available_capital = self.real_portfolio.state['available_capital']
@@ -454,7 +519,8 @@ class PhasmaTradingSystem:
             from engines.market_crash_detector_v2 import MarketCrashDetectorV2
             from engines.monte_carlo_engine import PhasmaMonteCarloEngine
             monte_carlo = PhasmaMonteCarloEngine(self.config)
-            self.crash_detector = MarketCrashDetectorV2(config=self.config, market_cache=self.market_cache, simulation_engine=monte_carlo)
+            crash_cfg = self.config.data if hasattr(self.config, "data") else self.config
+            self.crash_detector = MarketCrashDetectorV2(config=crash_cfg, market_cache=self.market_cache, simulation_engine=monte_carlo)
             self.meta_brain.register_engine('crash_detector', self.crash_detector)
             print("✅ Market Crash Detector V2 Initialized")
         except Exception as e:
@@ -767,15 +833,20 @@ class PhasmaTradingSystem:
             self.ai_analyzed_history[symbol] = self.ai_analyzed_history[symbol][-10:]
 
     def _setup_logging(self):
-        """Setup enhanced logging"""
-        logging.basicConfig(
-            level=logging.INFO,
-            format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-            handlers=[
-                logging.FileHandler('phasma.log'),
-                logging.StreamHandler()
-            ]
-        )
+        """Record startup context (handlers configured in __main__)."""
+        logger = logging.getLogger("phasma.main")
+        try:
+            exec_msg = self.config.get_execution_startup_message()
+        except Exception:
+            exec_msg = f"execution.mode={self.config.get('execution', {}).get('mode', 'ALERT_ONLY')}"
+        logger.info("PhasmaTradingSystem initialized | %s", exec_msg)
+        if _LOG_PATHS:
+            logger.info(
+                "Log files | session=%s | latest=%s",
+                _LOG_PATHS.get("session"),
+                _LOG_PATHS.get("latest"),
+            )
+            print(f"📝 Logs: {_LOG_PATHS['latest']}")
 
     async def get_trending_symbols(self, limit: int = 20) -> dict:
         """Get trending symbols from social media
@@ -1349,6 +1420,11 @@ class PhasmaTradingSystem:
     
     async def shutdown(self):
         """Clean shutdown of all components"""
+        logger = logging.getLogger("phasma.main")
+        logger.info(
+            "Shutdown started | monitoring_cycles=%s",
+            getattr(self, "monitoring_cycles", 0),
+        )
         # Shutdown social engine if it exists
         if hasattr(self, 'social_engine') and self.social_engine and hasattr(self.social_engine, 'close'):
             try:
@@ -1362,6 +1438,8 @@ class PhasmaTradingSystem:
                 await self.stop_news_collection()
             except Exception as e:
                 print(f"⚠️ Error stopping news collection: {e}")
+
+        logger.info("Shutdown complete")
 
     async def start_news_collection(self, *, ctx: Optional[ApplicationContext] = None):
         """Start 24/7 news collection network (optional - runs in background)"""
@@ -1898,68 +1976,81 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
             market_safe = False
         index_crash = None
         crypto_assessments = []
+        stock_assessments = []
+        fast_risk_only = getattr(ctx, "fast_risk_only", False)
+        budget = {}
+        try:
+            budget = ctx.config.data.get("runtime_budget") or {}
+        except Exception:
+            pass
+        max_fast = int(budget.get("max_symbols_crash_detector_fast", 3) or 3)
 
         if ctx.crash_detector:
             try:
-                # Index / stock market crash risk (e.g., SPY)
                 index_symbol = ctx.config.get("crash_detector.market_index", "SPY")
                 index_crash = ctx.crash_detector.detect_crash_risk(index_symbol)
 
-                # Only analyze crash risk for assets the AI is currently tracking
-                crypto_assessments = []
-                stock_assessments = []
-
-                # Get symbols from current signals and AI's watchlist
                 tracked_symbols = set()
-
-                # Add symbols from current signals
-                for signal in all_signals:
-                    if signal.get("symbol"):
-                        symbol = str(signal["symbol"]).upper()
-                        if symbol:
-                            ctx.track_symbol(symbol, "signal")
-                            tracked_symbols.add(symbol)
-
-                # Add symbols from the AI's watchlist (built from previous discoveries)
-                tracked_symbols.update(ctx.ai_watchlist)
-
-                try:
-                    for _sym in ctx.system.skipped_opportunity_watchlist.get_priority_symbols(limit=40):
-                        tracked_symbols.add(_sym)
-                        ctx.track_symbol(_sym, "skipped_revisit_priority")
-                except Exception:
-                    pass
-
-                # Analyze crash risk for tracked symbols by category
-                for sym in sorted(tracked_symbols):
-                    if not sym:
-                        continue
-
-                    category = ctx.ai_symbol_categories.get(sym, ctx.categorize_symbol(sym))
-
-                    # Skip options and kalshi - they don't have traditional crash patterns
-                    if category in ["option", "kalshi"]:
-                        continue
-
+                if not fast_risk_only:
+                    for signal in all_signals:
+                        if signal.get("symbol"):
+                            symbol = str(signal["symbol"]).upper()
+                            if symbol:
+                                ctx.track_symbol(symbol, "signal")
+                                tracked_symbols.add(symbol)
+                    tracked_symbols.update(ctx.ai_watchlist)
                     try:
-                        assessment = ctx.crash_detector.detect_crash_risk(sym)
-                        if assessment and not assessment.get('error'):
-                            # Categorize and store
-                            if category == 'crypto':
-                                crypto_assessments.append(assessment)
-                            elif category in ['stock', 'etf']:
-                                stock_assessments.append(assessment)
+                        for _sym in ctx.system.skipped_opportunity_watchlist.get_priority_symbols(limit=40):
+                            tracked_symbols.add(_sym)
+                            ctx.track_symbol(_sym, "skipped_revisit_priority")
+                    except Exception:
+                        pass
+                else:
+                    fast_syms = ["SPY", "QQQ", "VIX"][:max_fast]
+                    for sym in fast_syms:
+                        if sym.upper() == index_symbol.upper():
+                            continue
+                        try:
+                            assessment = ctx.crash_detector.detect_crash_risk(sym)
+                            if assessment and not assessment.get("error"):
+                                if sym.upper() in ("BTC", "BTC-USD", "ETH", "ETH-USD"):
+                                    crypto_assessments.append(assessment)
+                                else:
+                                    stock_assessments.append(assessment)
+                        except Exception as ce:
+                            print(f"   ⚠️ Fast crash check error for {sym}: {ce}")
+                    skipped = len(ctx.ai_watchlist) + len(all_signals)
+                    print(f"   ⏭️ Fast risk mode: index + {len(fast_syms)-1} benchmarks only (skipped {skipped} tracked symbols)")
 
-                            # Update the signal with crash assessment
-                            for signal in all_signals:
-                                if str(signal.get('symbol', '')).upper() == sym:
-                                    signal['asset_crash_assessment'] = assessment
-                                    signal['asset_crash_level'] = assessment.get('alert_level', 0)
-                                    signal['asset_crash_score'] = assessment.get('crash_score', 0.0)
-                                    break
+                if not fast_risk_only:
+                    for sym in sorted(tracked_symbols):
+                        if not sym:
+                            continue
 
-                    except Exception as ce:
-                        print(f"   ⚠️ Crash detection error for {sym}: {ce}")
+                        category = ctx.ai_symbol_categories.get(sym, ctx.categorize_symbol(sym))
+
+                        if category in ["option", "kalshi"]:
+                            continue
+
+                        try:
+                            assessment = ctx.crash_detector.detect_crash_risk(sym)
+                            if assessment and not assessment.get('error'):
+                                if category == 'crypto':
+                                    crypto_assessments.append(assessment)
+                                elif category in ['stock', 'etf']:
+                                    stock_assessments.append(assessment)
+
+                                for signal in all_signals:
+                                    if str(signal.get('symbol', '')).upper() == sym:
+                                        signal['asset_crash_assessment'] = assessment
+                                        signal['asset_crash_level'] = assessment.get('alert_level', 0)
+                                        signal['asset_crash_score'] = assessment.get('crash_score', 0.0)
+                                        break
+
+                        except Exception as ce:
+                            print(f"   ⚠️ Crash detection error for {sym}: {ce}")
+                    if hasattr(self, "group_coordinator"):
+                        self.group_coordinator.cadence.mark_ran("risk_deep")
 
                 # Print crash assessment results
                 if index_crash and not index_crash.get('error'):
@@ -2081,8 +2172,9 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
 
         # Reuse the unified brain instance across cycles to avoid cold-start overhead.
         if not hasattr(s, "_unified_brain") or s._unified_brain is None:
-            s._unified_brain = UnifiedMetaBrain(ctx.config, market_cache=ctx.market_cache)
+            s._unified_brain = UnifiedMetaBrain(ctx.config, market_cache=ctx.market_cache, trading_system=s)
         brain = s._unified_brain
+        brain.trading_system = s
         if ctx.market_cache and getattr(brain, "market_cache", None) is not ctx.market_cache:
             brain.market_cache = ctx.market_cache
             if getattr(brain, "regime_detector", None):
@@ -2095,7 +2187,28 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
                 config=ctx.config,
                 market_cache=ctx.market_cache,
             )
-        results = await brain.run_unified_analysis(ctx.cycle_data)
+        results = await brain.run_unified_analysis(
+            ctx.cycle_data,
+            run_deep_discovery=getattr(ctx, "run_deep_discovery", True),
+        )
+        if getattr(ctx, "run_deep_discovery", True):
+            self.group_coordinator.cadence.mark_ran("discovery_deep")
+            from core.supervisor.group_coordinator import GroupResult
+            self.group_coordinator._results["discovery_deep"] = GroupResult(
+                group_name="DiscoveryGroup",
+                status="OK",
+                children_ran=["universal", "partnership", "underground", "thematic"],
+            )
+        else:
+            from core.runtime.context_snapshots import ContextSnapshotStore
+            from core.supervisor.group_coordinator import GroupResult
+            reused = ContextSnapshotStore().is_fresh("candidates")
+            self.group_coordinator._results["discovery_deep"] = GroupResult(
+                group_name="DiscoveryGroup",
+                status="OK" if reused else "DEGRADED",
+                reused_snapshot=reused,
+                children_skipped=["universal", "partnership", "underground", "thematic"],
+            )
 
         if getattr(ctx.cycle_data, 'prices', None):
             register_cycle_prices(ctx.cycle_data.prices)
@@ -2224,10 +2337,11 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
                         })
                 print(f"📰 Generated {len(news_signals)} signals from news")
 
-                # Check silver price for opportunities
-                if s.silver_monitor:
+                # Check silver price for opportunities (optional module)
+                silver_monitor = getattr(s, "silver_monitor", None)
+                if silver_monitor:
                     print("🥈 Checking silver price movements...")
-                    silver_signal = await s.silver_monitor.check_silver_opportunity()
+                    silver_signal = await silver_monitor.check_silver_opportunity()
                     if silver_signal:
                         news_signals.append({
                             'symbol': silver_signal['symbol'],
@@ -2459,23 +2573,8 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
 
         # Real portfolio snapshot (used later for filtering/execution reporting)
         real_portfolio = s.real_portfolio.get_portfolio_summary()
-
-        print(f"\n💼 REAL PORTFOLIO STATUS:")
-        print(f"   Starting Capital: ${real_portfolio['starting_capital']:.2f}")
-        print(f"   Available Cash: ${real_portfolio['available_capital']:.2f}")
-        print(f"   Realized P&L: ${real_portfolio['realized_pnl']:.2f} (actual closed trades)")
-        print(f"   Unrealized P&L: ${real_portfolio['unrealized_pnl']:.2f} (open positions)")
-        print(f"   Total Portfolio Value: ${real_portfolio['total_portfolio_value']:.2f}")
-        print(f"   Total Return: ${real_portfolio['total_return']:.2f} ({real_portfolio['total_return_pct']:.1f}%)")
-        print(f"   Trades: {real_portfolio['total_trades']} (Win Rate: {real_portfolio['win_rate']:.1f}%)")
-
-        if real_portfolio['open_positions_count'] > 0:
-            print(f"\n   Open Positions ({real_portfolio['open_positions_count']}):")
-            for pos in real_portfolio['open_positions'][:3]:  # Show top 3
-                print(
-                    f"   • {pos['symbol']}: {pos['quantity']} shares @ ${pos['avg_cost']:.2f} | "
-                    f"P&L: ${pos['unrealized_pnl']:.2f} ({pos['unrealized_pct']:.1f}%)"
-                )
+        broker_backed = getattr(s.execution_router, "mode", "ALERT_ONLY") not in ("ALERT_ONLY", "OFF", "PAPER_INTERNAL")
+        print(summarize_ledger(real_portfolio, broker_backed=broker_backed))
 
         arb_symbols = [
             str(getattr(sig, 'symbol', '')).upper()
@@ -2514,133 +2613,81 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
         return approved_signals, real_portfolio, defensive_mode, dynamic_pop_threshold
 
     def _stage_streamlined_signal_filtering(self, ctx: ApplicationContext, approved_signals: List[Signal]) -> List[Signal]:
-        """Run single-pass signal filtering with confluence and price guards."""
+        """Run single-pass signal filtering with honest decision pipeline."""
         if not approved_signals:
             return []
 
         s = ctx.system
-        print(f"🔍 STREAMLINED FILTERING: Processing {len(approved_signals)} signals with dynamic scaling...")
+        exec_mode = getattr(s.execution_router, "mode", "ALERT_ONLY")
+        pipeline = DecisionPipeline(ctx.config.data if hasattr(ctx.config, "data") else {}, execution_mode=exec_mode)
+        router = StrategyRouter()
+        ctx.decision_summary = DecisionSummary()
+        ctx.signal_decisions = []
+
+        print(f"🔍 STREAMLINED FILTERING: Processing {len(approved_signals)} signals with decision pipeline...")
         filtered_signals: List[Signal] = []
 
         for signal in approved_signals:
             try:
                 symbol = getattr(signal, 'symbol', None) or 'N/A'
-                trade_type = getattr(signal, 'trade_type', '')
-                action = getattr(signal, 'action', '')
+                route = router.route(signal)
+                signal.strategy = route["strategy"]
+                asset = classify_asset_type(signal)
+                signal.trade_type = asset if asset in ("KALSHI", "CRYPTO", "OPTION") else getattr(signal, 'trade_type', 'STOCK')
+
                 confidence = getattr(signal, 'confidence', 0)
-                intelligence_strength = getattr(signal, 'intelligence_strength', 50)
+                print(f"  🔍 {symbol}: strategy={route['strategy']} confidence={normalize_confidence_to_pct(confidence):.1f}%")
 
-                print(f"  🔍 {symbol}: Checking confidence {confidence:.1%} against 30% threshold")
-                if confidence < 0.30:
-                    print(f"  ❌ {symbol}: Confidence {confidence:.1%} - BELOW 30% threshold - BLOCKED")
-                    continue
-                print(f"  ✅ {symbol}: Confidence {confidence:.1%} - PASSED 30% threshold")
+                if asset == "STOCK" and s.trading_mode == 'stocks_and_kalshi':
+                    action = getattr(signal, 'action', '')
+                    if has_option_contract_fields(signal):
+                        print(f"  ❌ BLOCKED: {symbol} — option contract fields in stock-only mode")
+                        continue
 
-                signal_source = getattr(signal, 'source', '')
-                from utils.price_filter_config import resolve_price_filter
-                price_filter_on, max_price = resolve_price_filter(ctx.config)
-                if signal_source == 'geopolitical_analysis':
-                    max_price = ctx.config.get("trading_budget", {}).get("max_price_per_share_geo", 600)
-
-                if (
-                    price_filter_on
-                    and max_price is not None
-                    and hasattr(signal, 'current_price')
-                    and signal.current_price > max_price
-                ):
-                    print(f"  💰 {symbol}: Price ${signal.current_price:.2f} EXCEEDS ${max_price} budget - SKIPPED")
-                    continue
-
-                print(f"  🧠 {symbol}: Running confluence analysis...")
                 confluence_result = self.confluence_service.score(symbol)
+                confluence_filtered = confluence_result is None and router.confluence_required(
+                    route["strategy"], ctx.config.data if hasattr(ctx.config, "data") else {}
+                )
                 if confluence_result:
-                    print(f"  ✅ {symbol}: Confluence {confluence_result.score:.1%} ({confluence_result.confidence})")
                     signal.confluence_score = confluence_result.score
                     signal.confluence_confidence = confluence_result.confidence
                     signal.confluence_reasoning = confluence_result.reasoning
-                    if confluence_result.score >= 0.7:
-                        confidence = min(confidence + 0.2, 1.0)
-                        signal.confidence = confidence
-                        print(f"  🚀 {symbol}: Confidence boosted to {confidence:.1%} (high confluence)")
-                else:
-                    print(f"  ⚠️ {symbol}: No confluence data")
-                    signal.confluence_score = 0
-                    signal.confluence_confidence = 'NONE'
-                    signal.confluence_reasoning = 'No confluence data'
+                elif confluence_filtered:
+                    print(f"  ⚠️ {symbol}: Confluence filtered — strategy requirements not met")
 
-                if trade_type == 'KALSHI_PREDICTION':
-                    print(f"  ✅ KALSHI: {symbol} - Bounded risk market")
-                elif s.trading_mode == 'stocks_and_kalshi':
-                    if (trade_type == 'OPTION' or
-                        ('CALL' in action.upper() or 'PUT' in action.upper()) and
-                            (getattr(signal, 'strike_price', None) or getattr(signal, 'expiration_date', None))):
-                        print(f"  ❌ BLOCKED: {symbol} - Options terminology detected in stock-only mode")
-                        continue
-                elif trade_type == 'STOCK':
-                    try:
-                        current_price = self._get_cached_price(symbol, ctx)
-                        if current_price is None:
-                            print(f"  ⚠️ {symbol}: No price data available")
-                            continue
+                if asset == "STOCK":
+                    current_price = getattr(signal, 'current_price', None) or self._get_cached_price(symbol, ctx)
+                    if current_price and float(current_price) > 0:
+                        signal.current_price = float(current_price)
 
-                        from utils.price_filter_config import resolve_price_filter, exceeds_price_cap
-                        price_filter_on, _ = resolve_price_filter(ctx.config)
-                        max_price_access = s.real_portfolio.state['available_capital']
-                        if current_price < 1.00:
-                            print(f"  ❌ {symbol}: Price ${current_price:.2f} below $1.00 minimum - penny stock filtered out")
-                            continue
-                        if price_filter_on and exceeds_price_cap(current_price, ctx.config):
-                            print(f"  ❌ {symbol}: Price ${current_price:.2f} exceeds configured max share price")
-                            continue
-                        if s.trading_mode == 'stocks_and_kalshi' and price_filter_on and current_price > max_price_access:
-                            print(f"  ❌ {symbol}: Price ${current_price:.2f} exceeds tier limit ${max_price_access:.2f}")
-                            continue
-                        print(f"  ✅ {symbol}: Price ${current_price:.2f} OK (min $1.00)")
+                has_catalyst = bool(
+                    getattr(signal, 'rationale', '')
+                    or getattr(signal, 'title', '')
+                    or getattr(signal, 'source', '') in ('news_engine', 'unified_analysis', 'news')
+                )
 
-                        try:
-                            catalyst_data = {
-                                'momentum_score': getattr(signal, 'momentum_score', 0.7),
-                                'volume_spike': getattr(signal, 'volume_spike', 0.7),
-                                'news_intensity': getattr(signal, 'news_intensity', 0.7),
-                                'catalyst_impact': getattr(signal, 'catalyst_impact', 0.7),
-                            }
-                            moon_shot_data = s.moon_shot_detector._analyze_moon_shot_potential(
-                                symbol,
-                                max_price_access,
-                                catalyst_data
-                            )
-                            is_moon_shot = bool(moon_shot_data and moon_shot_data.get('score', 0) >= 70)
-                            if is_moon_shot:
-                                print(f"  🌙 {symbol}: MOON SHOT DETECTED! {moon_shot_data.get('potential_multiple', '1x')} potential (Score: {moon_shot_data.get('score', 0):.0f})")
-                                signal.is_moon_shot = True
-                                signal.moon_shot_score = moon_shot_data.get('score', 0)
-                                signal.moon_shot_potential = moon_shot_data.get('potential_multiple', '1x')
-                            else:
-                                signal.is_moon_shot = False
-                                signal.moon_shot_score = 0
-                                signal.moon_shot_potential = "1x"
-                        except Exception as moon_err:
-                            signal.is_moon_shot = False
-                            signal.moon_shot_score = 0
-                            signal.moon_shot_potential = "1x"
-                            print(f"  ⚠️ {symbol}: Moon shot analysis error: {moon_err}")
-                    except Exception as price_err:
-                        print(f"  ⚠️ {symbol}: Error checking price - {str(price_err)}")
-                        continue
+                decision = pipeline.evaluate(
+                    signal,
+                    confluence_result=confluence_result,
+                    confluence_filtered=confluence_filtered,
+                    intelligence_strength=getattr(signal, 'intelligence_strength', None),
+                    market_intel_available=False,
+                    has_catalyst=has_catalyst,
+                )
+                ctx.signal_decisions.append(decision)
+                ctx.decision_summary.record(decision)
+                print(f"  {decision.summary_line()}")
 
-                if intelligence_strength < 30:
-                    print(f"  ❌ {symbol}: Intelligence {intelligence_strength}/100 - BELOW 30 threshold")
-                    continue
-
-                filtered_signals.append(signal)
-                print(f"  ✅ APPROVED: {symbol} - All filters passed")
-                unified_summary = self.generate_unified_trade_summary(signal, ctx=ctx)
-                print(f"\n{unified_summary}\n")
+                if decision.status in (
+                    DecisionStatus.APPROVED_ALERT_ONLY,
+                    DecisionStatus.APPROVED_PAPER_ELIGIBLE,
+                ):
+                    filtered_signals.append(signal)
             except Exception as e:
                 print(f"  ⚠️ Error processing {symbol}: {e}")
                 continue
 
-        print(f"📊 STREAMLINED RESULT: {len(filtered_signals)} signals approved in single pass")
+        print(f"📊 STREAMLINED RESULT: {len(filtered_signals)} signals passed preliminary gates")
         return filtered_signals
 
     def _stage_apply_platform_limits(self, ctx: ApplicationContext, high_confidence_approved: List[Signal]) -> List[Signal]:
@@ -2651,14 +2698,16 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
         options_approved: List[Signal] = []
 
         for signal in high_confidence_approved:
-            if getattr(signal, 'trade_type', '') == 'KALSHI_PREDICTION':
+            asset = classify_asset_type(signal)
+            if asset == "KALSHI" or getattr(signal, 'trade_type', '') == 'KALSHI_PREDICTION':
                 if kalshi_intel_only(ctx.config):
                     continue
                 kalshi_approved.append(signal)
-            elif getattr(signal, 'trade_type', '') == 'STOCK':
-                stocks_approved.append(signal)
-            else:
+            elif asset == "OPTION" and has_option_contract_fields(signal):
                 options_approved.append(signal)
+            else:
+                signal.trade_type = 'STOCK'
+                stocks_approved.append(signal)
 
         print(f"🎯 PLATFORM SEPARATION: {len(kalshi_approved)} Kalshi | {len(stocks_approved)} Stocks | {len(options_approved)} Options")
 
@@ -2707,7 +2756,11 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
                 print(f"   ⚠️ Limited Options to {remaining_options} trades")
 
         final_approved = kalshi_approved + stocks_approved + options_approved
-        print(f"🔗 FINAL APPROVED: {len(final_approved)} signals ({len(kalshi_approved)} Kalshi, {len(stocks_approved)} Stocks, {len(options_approved)} Options)")
+        print(
+            f"🔗 PLATFORM CLASSIFICATION: {len(final_approved)} candidates "
+            f"({len(kalshi_approved)} Kalshi intel, {len(stocks_approved)} Stocks, "
+            f"{len(options_approved)} Options with contract fields)"
+        )
         return final_approved
 
     def _stage_bankroll_intel_and_pro_options(self, ctx: ApplicationContext, high_confidence_approved: List[Signal]) -> List[Signal]:
@@ -2736,9 +2789,9 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
         if high_confidence_approved:
             engine = getattr(s, "market_intelligence", None) or getattr(s, "market_intelliggence", None)
             if engine:
-                print(f"[MARKET INTEL] 🧠 Analyzing {len(high_confidence_approved)} approved signals with contextual intelligence...")
+                print(f"[MARKET INTEL] 🧠 Analyzing {len(high_confidence_approved)} candidates with contextual intelligence...")
             else:
-                print(f"[MARKET INTEL] 🧠 Using default intelligence (engine unavailable)")
+                print(f"[MARKET INTEL] ⚠️ Engine unavailable — DEGRADED (no default approval boost)")
 
             for signal in high_confidence_approved:
                 try:
@@ -2746,8 +2799,8 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
                     signal_type = 'BULLISH' if 'CALL' in str(getattr(signal, 'action', '')).upper() else 'BEARISH'
 
                     if not engine:
-                        signal.market_intelligence = {'strength': 50, 'source': 'default'}
-                        signal.intelligence_strength = 50
+                        signal.market_intelligence = {'strength': 0, 'source': 'unavailable'}
+                        signal.intelligence_strength = 0
                         continue
 
                     intelligence = engine.analyze_symbol_intelligence(symbol, signal_type)
@@ -2757,17 +2810,23 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
                     print(f"[MARKET INTEL] ✅ {symbol}: {signal_type} | Strength: {signal.intelligence_strength:.0f}/100")
 
                 except Exception:
-                    signal.market_intelligence = {'strength': 50, 'source': 'fallback'}
-                    signal.intelligence_strength = 50
+                    signal.market_intelligence = {'strength': 0, 'source': 'fallback_error'}
+                    signal.intelligence_strength = 0
 
         if s.options_enabled and high_confidence_approved:
-            print("[PRO ANALYSIS] Running professional options analysis on high-confidence signals...")
+            option_signals = [sig for sig in high_confidence_approved if has_option_contract_fields(sig)]
+            if option_signals:
+                print(f"[PRO ANALYSIS] Running professional options analysis on {len(option_signals)} option signals...")
+            else:
+                print("[PRO ANALYSIS] Skipped — no signals with option contract fields")
+                return high_confidence_approved
+
             from utils.pro_options_analyzer import ProOptionsAnalyzer
             pro_analyzer = ProOptionsAnalyzer()
 
             signals_to_remove = []
 
-            for signal in high_confidence_approved:
+            for signal in option_signals:
                 try:
                     symbol = getattr(signal, 'symbol', None) or 'N/A'
 
@@ -2882,14 +2941,67 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
                 float(jury.conditional_size_multiplier),
             )
             if outcome.verdict == "CONDITIONAL":
-                print(f"[JURY] CONDITIONAL {sym}: composite={outcome.composite:.1f}")
-            else:
-                print(f"[JURY] APPROVE {sym}: composite={outcome.composite:.1f}")
+                print(f"[JURY] CONDITIONAL {sym}: composite={outcome.composite:.1f} — not final approval")
+                continue
+            print(f"[JURY] APPROVE {sym}: composite={outcome.composite:.1f}")
             kept.append(signal)
 
         if len(kept) != len(high_confidence_approved):
             print(f"[JURY] {len(high_confidence_approved)} -> {len(kept)} after jury review")
         return kept
+
+    def _stage_finalize_decisions(
+        self,
+        ctx: ApplicationContext,
+        candidates: List[Signal],
+    ) -> List[Signal]:
+        """Final honest decision pass after jury and market intel."""
+        if not candidates:
+            print("\nDecision summary:\n* Raw candidates: 0")
+            return []
+
+        s = ctx.system
+        exec_mode = getattr(s.execution_router, "mode", "ALERT_ONLY")
+        pipeline = DecisionPipeline(ctx.config.data if hasattr(ctx.config, "data") else {}, execution_mode=exec_mode)
+        router = StrategyRouter()
+        summary = DecisionSummary()
+        summary.raw_candidates = len(candidates)
+        alert_approved: List[Signal] = []
+        decisions = []
+
+        cfg = ctx.config.data if hasattr(ctx.config, "data") else {}
+
+        for signal in candidates:
+            route = router.route(signal)
+            intel = getattr(signal, 'market_intelligence', None) or {}
+            intel_src = intel.get('source', '') if isinstance(intel, dict) else ''
+            market_ok = bool(intel) and intel_src not in ('unavailable', 'fallback_error')
+            has_catalyst = bool(getattr(signal, 'rationale', '') or getattr(signal, 'title', ''))
+            conf_result = None
+            if getattr(signal, 'confluence_score', None) is not None:
+                conf_result = signal
+
+            decision = pipeline.evaluate(
+                signal,
+                confluence_filtered=False,
+                confluence_result=conf_result if getattr(signal, 'confluence_score', 0) else None,
+                intelligence_strength=getattr(signal, 'intelligence_strength', 0),
+                market_intel_available=market_ok,
+                jury_verdict=getattr(signal, 'jury_verdict', None),
+                has_catalyst=has_catalyst,
+            )
+            decisions.append(decision)
+            summary.record(decision)
+            if decision.status in (DecisionStatus.APPROVED_ALERT_ONLY, DecisionStatus.APPROVED_PAPER_ELIGIBLE):
+                alert_approved.append(signal)
+
+        pipeline.finalize_execution(decisions)
+        if exec_mode == "ALERT_ONLY":
+            summary.execution_skipped = len(alert_approved)
+
+        print(f"\n{summary.format_report()}")
+        ctx.decision_summary = summary
+        return alert_approved
 
     async def _stage_signal_generation(
         self,
@@ -2902,6 +3014,10 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
         investment_opportunities: List = []
         convergence_opportunities: List = []
         s = ctx.system
+
+        if getattr(ctx, "skip_news_signals", False):
+            print("\n⚠️ Signal generation SKIPPED: news ingest unavailable or snapshot stale")
+            return ([], [], [], [], [], [], [], [])
 
         news_items = await s._stage_unified_brain_news_items(ctx)
         
@@ -4375,7 +4491,8 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
                             divergence_score = 0
 
                         # Build dict once for downstream checks
-                        signal_dict = signal.to_dict()
+                        from utils.signal_adapter import signal_to_dict
+                        signal_dict = signal_to_dict(signal)
 
                         # Numeric quality gates
                         print(f"  🔍 {symbol}: Checking pattern_strength {pattern_strength:.3f} vs 0.15 minimum")
@@ -5012,13 +5129,33 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
                 })
         else:
             print("💤 No high-confidence signals to add to portfolio")
-    async def run_full_cycle(self):
+    async def run_full_cycle(self, *, cycle_attempt: int = 1):
         """Run complete unified trading cycle with all analysis methods"""
-        print("🔄 Starting Unified Phasma Trading Cycle")
+        from core.supervisor import CycleContext
+
+        self.group_coordinator.begin_cycle(cycle_attempt)
+        run_deep = self.group_coordinator.cadence.is_due(
+            "discovery_deep",
+            (self.config.data.get("engine_groups") or {}).get("discovery_deep", {}).get("cadence", "hourly"),
+            cycle_attempt=cycle_attempt,
+        )
+        fast_risk_only = not self.group_coordinator.cadence.is_due(
+            "risk_deep",
+            (self.config.data.get("engine_groups") or {}).get("risk_deep", {}).get("cadence", "hourly"),
+            cycle_attempt=cycle_attempt,
+        )
+        if not run_deep:
+            print("⏭️ DiscoveryGroup DEEP: skipped (hourly cadence) — using cached snapshot if available")
+        if fast_risk_only:
+            print("⏭️ RiskGroup: fast-only mode (SPY/QQQ/VIX) — deep per-symbol checks hourly")
+
+        print(f"🔄 Starting Unified Phasma Trading Cycle (attempt {cycle_attempt})")
         print("=" * 50)
         self._reset_cycle_caches()
         cycle_stage_timings: Dict[str, float] = {}
         ctx = ApplicationContext.bind(self, cycle_stage_timings)
+        ctx.run_deep_discovery = run_deep
+        ctx.fast_risk_only = fast_risk_only
         _stage_name = "preflight_and_risk"
         _stage_start = time.perf_counter()
         print("\n--- STAGE: preflight ---")
@@ -5032,16 +5169,38 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
         # 0.8. Check global macro indicators FIRST (before trading)
         macro_risk, macro_alert = await self._stage_macro_and_fred(ctx)
 
-        crash_assessment, market_safe, index_crash, crypto_assessments = self._stage_crash_preflight(
-            ctx,
-            all_signals,
-            macro_risk,
+        sup_ctx = CycleContext(
+            cycle_attempt=cycle_attempt,
+            completed_cycles=self.worker_supervisor.completed_cycles,
+            system=self,
+            app_ctx=ctx,
+            config=self.config,
+            all_signals=all_signals,
+            metadata={"macro_risk": macro_risk},
         )
+        await self.worker_supervisor.run_worker("MarketDataWorker", sup_ctx)
+        await self.worker_supervisor.run_worker("CrashDetectorWorker", sup_ctx)
+        crash_assessment = sup_ctx.crash_assessment
+        market_safe = sup_ctx.market_safe
+        index_crash = sup_ctx.index_crash
+        crypto_assessments = sup_ctx.crypto_assessments
 
         cycle_stage_timings[_stage_name] = time.perf_counter() - _stage_start
         _stage_name = "signal_generation"
         _stage_start = time.perf_counter()
         print("\n--- STAGE: ingest & signals ---")
+        await self.worker_supervisor.run_worker("NewsIngestWorker", sup_ctx)
+        ctx.cycle_data = sup_ctx.cycle_data
+        ctx.skip_news_signals = sup_ctx.skip_news_signals
+
+        if sup_ctx.skip_news_signals:
+            await self.worker_supervisor.run_worker("SignalGenerationWorker", sup_ctx)
+            self.worker_supervisor.print_health_summary(
+                extra={"Execution": f"{self.execution_router.mode}, OK"},
+            )
+            self.group_coordinator.print_group_health()
+            return []
+
         # 1. UNIFIED META BRAIN - All Systems Working Together
         result = await self._stage_signal_generation(ctx, crash_assessment, macro_risk)
         if result is None:
@@ -5088,6 +5247,7 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
             high_confidence_approved,
             crash_assessment=crash_assessment,
         )
+        high_confidence_approved = self._stage_finalize_decisions(ctx, high_confidence_approved)
 
         await self._stage_telegram_and_execution_tail(
             ctx,
@@ -5105,16 +5265,24 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
         cycle_stage_timings[_stage_name] = time.perf_counter() - _stage_start
 
         try:
-            grade_stats = self.outcome_grader.grade_pending()
-            if grade_stats.get("graded_horizons"):
-                print(
-                    f"📊 Outcome grader: {grade_stats['graded_horizons']} horizon grades "
-                    f"across {grade_stats['records_touched']} signals"
-                )
-            if os.getenv("PHASMA_OUTCOME_SUMMARY", "").lower() in ("1", "true", "yes"):
-                self.outcome_grader.print_console_summary()
+            await self.worker_supervisor.run_post_cycle_workers(sup_ctx)
         except Exception as grade_err:
             print(f"⚠️ Outcome grader cycle failed: {grade_err}")
+
+        self.worker_supervisor.print_health_summary(
+            extra={"Execution": f"{self.execution_router.mode}, OK"},
+        )
+        self.group_coordinator.print_group_health()
+
+        # Save decision snapshot if available
+        if hasattr(ctx, "decision_summary") and ctx.decision_summary:
+            from core.runtime.context_snapshots import ContextSnapshotStore
+            ContextSnapshotStore().save(
+                "decisions",
+                ctx.decision_summary.__dict__,
+                source_group="DecisionGroup",
+                ttl_seconds=900,
+            )
 
         # Trading configuration
         self.bankroll = 2000
@@ -5473,7 +5641,9 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
                         if not real_price or real_price <= 0:
                             if symbol not in NewsUtils.BLOCKED_SYMBOLS:
                                 print(f"   ❌ Skipping {symbol} - cannot fetch real price")
-                            continue  # Skip this trade - NO FAKE DATA
+                            continue
+
+                        apply_fetched_price(news_item, real_price)
                         
                         # Stock trading - no strike price needed
                         strike = None  # Stocks don't have strike prices
@@ -5540,23 +5710,21 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
                         initial_confidence = unified_confidence
                         sim_win_rate = sim_results['win_rate']
 
-                        # Fact-check: AI confidence vs reality (simulation)
-                        if sim_win_rate >= 0.8:  # Sim shows high probability
-                            final_confidence = min(0.95, initial_confidence * 1.1)  # Boost if sim agrees
-                        elif sim_win_rate >= 0.40:  # Sim shows decent probability (lowered from 60%)
-                            final_confidence = initial_confidence  # Keep as is
-                        elif sim_win_rate >= 0.4:  # Sim shows weak probability
-                            final_confidence = max(0.1, initial_confidence * 0.8)  # Slight reduction
-                        else:  # Sim shows poor probability
-                            final_confidence = max(0.1, initial_confidence * 0.5)  # Significant reduction
-
-                        # PRECISE LOGGING: Show actual calculation chain (no hand-waving)
-                        if initial_confidence != final_confidence:
-                            pop_from_sim = sim_results.get('pop_from_sim', 50)
-                            print(f"⚖️ REALITY CHECK: {news_item['symbol']} - AI confidence {initial_confidence:.1%} vs Sim reality {sim_win_rate:.1%}")
-                            print(f"⚖️ REALITY CHECK: {news_item['symbol']} - AI {initial_confidence:.1%} → Reality-adjusted {final_confidence:.1%} (sim: {sim_win_rate:.1%})")
+                        sim_validation = compare_sim_validation(initial_confidence, sim_win_rate)
+                        if sim_validation["status"] == "MATCH":
+                            final_confidence = initial_confidence
                         else:
-                            print(f"✅ SIM VALIDATION: {news_item['symbol']} - AI confidence {initial_confidence:.1%} matches simulation reality {sim_win_rate:.1%}")
+                            final_confidence = apply_sim_validation_adjustment(
+                                initial_confidence, sim_win_rate, sim_validation
+                            )
+
+                        print(format_sim_validation_message(news_item['symbol'], sim_validation))
+                        if sim_validation["status"] != "MATCH":
+                            print(
+                                f"   ⚠️ assumption_based_simulation=True "
+                                f"(adjusted {normalize_confidence_to_pct(initial_confidence):.1f}% "
+                                f"→ {normalize_confidence_to_pct(final_confidence):.1f}%)"
+                            )
 
                         # Scale confidence from simulation win rate (as requested)
                         sim_scaled_confidence = sim_results.get('win_rate', initial_confidence)
@@ -5646,9 +5814,15 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
                             'initial_confidence': initial_confidence,  # For debugging
                             'sim_win_rate': sim_win_rate,  # For debugging
                             'title': news_item.get('title', ''),  # Add title for moonshot detection
-                            'company_validation': fact_check.get('is_valid', False),  # Track company validation
-                            'industry': get_resolver().resolve(symbol, news_item.get('title'))['industry'],
-                            'sector': get_resolver().resolve(symbol, news_item.get('title'))['sector'],
+                            'current_price': real_price,
+                            'entry_price': real_price,
+                            'assumption_based_simulation': sim_validation["status"] != "MATCH",
+                            'sim_validation_status': sim_validation["status"],
+                            'confidence_pct': normalize_confidence_to_pct(final_confidence),
+                            'industry': (fact_check.get('company_info') or {}).get('industry')
+                                or get_resolver().resolve(symbol, news_item.get('title'))['industry'],
+                            'sector': (fact_check.get('company_info') or {}).get('sector')
+                                or get_resolver().resolve(symbol, news_item.get('title'))['sector'],
                             'days_to_expiry': days_to_expiry,  # DYNAMIC timeframe
                             'timeframe_type': timeframe_type,  # e.g., QUICK_CATALYST, SWING, LONG_TERM
                             'timeframe_reasoning': timeframe_info['reasoning'],  # Why this timeframe
@@ -5657,6 +5831,17 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
                         }
 
                         ps._enrich_signal_metadata(signal, news_item)
+                        apply_fetched_price(signal, real_price)
+                        quality = assess_signal_data_quality(signal)
+                        signal['data_quality'] = quality.value
+                        if quality == SignalDataQuality.MISSING_PRICE:
+                            print(f"  ❌ DATA QUALITY: {symbol} - missing price, skipping")
+                            continue
+                        if quality == SignalDataQuality.INVALID_COMPANY:
+                            print(f"  ❌ DATA QUALITY: {symbol} - invalid company, skipping")
+                            continue
+                        if quality == SignalDataQuality.PARTIAL_PRICE_ONLY:
+                            print(f"  ⚠️ DATA QUALITY: {symbol} - PARTIAL (volume N/A), alert-only eligible")
                         signals.append(signal)
 
             except Exception as e:
@@ -5707,9 +5892,12 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
 
             performance_scale *= bankroll / bankroll  # Simplified: use bankroll instead of portfolio value
 
-            max_conf = max((s.get('confidence', 0.0) or 0.0) for s in signals) if signals else 0.0
-            if max_conf <= 0:
-                max_conf = 1.0
+            max_conf_pct = max(
+                (normalize_confidence_to_pct(s.get('confidence', 0.0)) for s in signals),
+                default=0.0,
+            )
+            if max_conf_pct <= 0:
+                max_conf_pct = 100.0
 
             for s in signals:
                 try:
@@ -5720,8 +5908,8 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
                 if raw_size <= 0:
                     continue
 
-                conf = float(s.get('confidence', 0.0) or 0.0)
-                conf_weight = 0.5 + 0.5 * (conf / max_conf)
+                conf_pct = normalize_confidence_to_pct(s.get('confidence', 0.0))
+                conf_weight = 0.5 + 0.5 * (conf_pct / max_conf_pct)
 
         # UNITS-BASED POSITION CALCULATION (Sports Betting Style)
                 # Calculate units based on confidence (1-10 units)
@@ -5731,7 +5919,7 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
                 position_size = units * ps.unit_value
                 
                 symbol = (s.get("symbol") or "N/A") if isinstance(s, dict) else (getattr(s, "symbol", None) or "N/A")
-                print(f"[UNITS] 🎯 {symbol}: {units} units = ${position_size:.2f} (confidence {conf:.0f}%)")
+                print(f"[UNITS] 🎯 {symbol}: {units} units = ${position_size:.2f} (confidence {conf_pct:.0f}%)")
 
                 # Also scale by POP / simulated chance of profit
                 try:
@@ -5799,14 +5987,7 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
                 print(f"[UNITS] ✅ FINAL: {symbol}: {units} units = ${position_size:.2f} assigned to signal")
 
         if skipped_missing_symbol:
-            logging.debug(
-                "Skipped %d news items with no symbol after title enrichment",
-                skipped_missing_symbol,
-            )
-            print(
-                f"  ⚠️ Skipped {skipped_missing_symbol} news items "
-                "(no symbol after title enrichment)"
-            )
+            print(f"  Skipped {skipped_missing_symbol} news items: no symbol after title enrichment")
 
         return signals
 
@@ -6552,12 +6733,21 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
 
     async def run_continuous(self, cycles: int = 5, interval_minutes: int = 10):
         """Run continuous trading cycles"""
+        logger = logging.getLogger("phasma.main")
         self.is_running = True
         self.monitoring_active = True
         self.monitoring_start_time = datetime.now()
-        cycle_count = 0
+        cycle_attempt = 0
+        completed_cycles = 0
         max_cycles = cycles
         ctx = ApplicationContext.bind(self, {})
+
+        logger.info(
+            "Continuous monitoring started | interval_min=%s max_cycles=%s bankroll=%s",
+            interval_minutes,
+            max_cycles if max_cycles is not None else "unlimited",
+            ctx.config.get("bankroll", 0),
+        )
 
         print(f"\n🚀 STARTING 24/7 MONITORING")
         print(f"⏰ Check interval: {interval_minutes} minutes")
@@ -6566,24 +6756,38 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
         print("📰 Fresh news + symbol rotation each cycle; learning trackers update over time.")
         
         try:
-            while self.is_running and (max_cycles is None or cycle_count < max_cycles):
+            while self.is_running and (max_cycles is None or completed_cycles < max_cycles):
+                cycle_attempt += 1
+                self.worker_supervisor.cycle_attempt = cycle_attempt
                 try:
-                    print(f"\n🔄 CYCLE {cycle_count + 1}" + (f" of {max_cycles}" if max_cycles else "") + 
-                          f" @ {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+                    logger.info("Cycle attempt %s started", cycle_attempt)
+                    print(
+                        f"\n🔄 CYCLE ATTEMPT {cycle_attempt}"
+                        + (f" (target {max_cycles} completed)" if max_cycles else "")
+                        + f" @ {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+                    )
+                    print(f"   Completed cycles: {completed_cycles}")
+                    quarantined = self.worker_supervisor.quarantined_worker_names()
+                    if quarantined:
+                        print(f"   Quarantined workers: {', '.join(quarantined)}")
                     print("=" * 60)
                     
                     # Run a full trading cycle
-                    signals = await self.run_full_cycle()
-                    
-                    # Check paper trading exits
+                    signals = await self.run_full_cycle(cycle_attempt=cycle_attempt)
+                    completed_cycles += 1
+                    self.worker_supervisor.completed_cycles = completed_cycles
+                    self.monitoring_cycles = completed_cycles
+
                     self._check_paper_exits()
                     
                     # Process high-confidence signals
+                    high_confidence_count = 0
                     if signals:
                         high_confidence_signals = [
                             s for s in signals 
                             if getattr(s, 'confidence', 0) >= ctx.config.get('monitoring.high_confidence_threshold', 0.40)  # Lowered from 70% to 40%
                         ]
+                        high_confidence_count = len(high_confidence_signals)
                         
                         if high_confidence_signals:
                             logging.info(f"🎯 High-confidence opportunities found: {len(high_confidence_signals)}")
@@ -6591,11 +6795,20 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
                                 # Execute the trade using our new classification system
                                 trade_result = await self.execute_classified_trade(signal, ctx=ctx)
                                 if trade_result:
-                                    log_msg = (
-                                        f"✅ EXECUTED: {trade_result['symbol']} {trade_result['action']} "
-                                        f"@ ${trade_result['entry_price']:.2f} "
-                                        f"(Class: {trade_result.get('trade_class') or 'standard'})"
-                                    )
+                                    exec_decision = trade_result.get("execution_decision", "")
+                                    exec_mode = trade_result.get("execution_mode", "")
+                                    if exec_decision in ("skipped", "rejected") or exec_mode in ("ALERT_ONLY", "OFF"):
+                                        log_msg = (
+                                            f"⏭️ EXECUTION_SKIPPED: mode={exec_mode} "
+                                            f"{trade_result['symbol']} {trade_result['action']} "
+                                            f"— {trade_result.get('execution_reason', 'alert-only')}"
+                                        )
+                                    else:
+                                        log_msg = (
+                                            f"✅ EXECUTION_SUBMITTED: {trade_result['symbol']} {trade_result['action']} "
+                                            f"@ ${trade_result['entry_price']:.2f} "
+                                            f"(Class: {trade_result.get('trade_class') or 'standard'})"
+                                        )
                                 else:
                                     log_msg = (
                                         f"⚠️  SKIPPED: {getattr(signal, 'symbol', None) or 'N/A'} "
@@ -6653,12 +6866,17 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
                                     except Exception as e:
                                         logging.error(f"Failed to send Telegram alert: {e}")
                     
-                    # Update monitoring stats
-                    self.monitoring_cycles = cycle_count + 1
+                    logger.info(
+                        "Cycle attempt %s completed | completed_cycles=%s signals=%s high_conf=%s",
+                        cycle_attempt,
+                        completed_cycles,
+                        len(signals) if signals else 0,
+                        high_confidence_count,
+                    )
                     
-                    # Periodic position review (every 10 cycles or ~50 minutes at 5min intervals)
-                    if cycle_count > 0 and cycle_count % 10 == 0:
-                        print(f"\n🔄 Periodic position review (cycle {cycle_count})")
+                    # Periodic position review (every 10 completed cycles)
+                    if completed_cycles > 0 and completed_cycles % 10 == 0:
+                        print(f"\n🔄 Periodic position review (completed cycle {completed_cycles})")
                         try:
                             self.review_open_positions()
                         except Exception as review_err:
@@ -6669,27 +6887,35 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
                         current_regime = self.options_engine.market_regime.detect_current_regime()
                         print(f"📈 Market Regime: {current_regime}")
                     
-                    # Wait for next cycle (unless this was the last cycle)
-                    if self.is_running and (max_cycles is None or (cycle_count + 1) < max_cycles):
+                    if self.is_running and (max_cycles is None or completed_cycles < max_cycles):
                         print(f"\n⏰ Next scan in {interval_minutes} minutes...")
                         print(f"💤 System will continue monitoring in background")
                         await asyncio.sleep(interval_minutes * 60)
                     
-                    cycle_count += 1
-                    
                 except Exception as e:
-                    print(f"❌ Error in cycle {cycle_count + 1}: {e}")
+                    logger.exception("Cycle attempt %s failed: %s", cycle_attempt, e)
+                    print(f"❌ CYCLE ATTEMPT {cycle_attempt} failed: {e}")
+                    print(f"   Completed cycles: {completed_cycles}")
+                    quarantined = self.worker_supervisor.quarantined_worker_names()
+                    if quarantined:
+                        print(f"   Quarantined workers: {', '.join(quarantined)}")
                     import traceback
                     print(traceback.format_exc())
+                    self.worker_supervisor.print_health_summary(
+                        extra={"Execution": f"{self.execution_router.mode}, OK"},
+                    )
                     print(f"🔄 Continuing monitoring after error...")
-                    await asyncio.sleep(60)  # Short delay after error
+                    await asyncio.sleep(60)
                     
         except KeyboardInterrupt:
+            logger.info("Monitoring stopped by user | completed_cycles=%s", completed_cycles)
             print(f"\n🛑 24/7 MONITORING STOPPED BY USER")
-            print(f"📊 Total cycles completed: {cycle_count}")
-            print(f"⏰ Total monitoring time: {cycle_count * interval_minutes} minutes")
+            print(f"📊 Completed cycles: {completed_cycles}")
+            print(f"📊 Total attempts: {cycle_attempt}")
+            print(f"⏰ Approx monitoring time: {completed_cycles * interval_minutes} minutes")
             
         except Exception as e:
+            logger.exception("Fatal error in continuous monitoring: %s", e)
             print(f"\n❌ FATAL ERROR IN 24/7 MONITORING: {e}")
             print(f"🚨 Emergency shutdown initiated")
             import traceback
@@ -6698,6 +6924,11 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
         finally:
             self.monitoring_active = False
             self.is_running = False
+            logger.info(
+                "Continuous monitoring terminated | completed_cycles=%s attempts=%s",
+                completed_cycles,
+                cycle_attempt,
+            )
             print(f"\n✅ 24/7 monitoring terminated safely")
             
             # Print end-of-day ROI report
@@ -7115,18 +7346,17 @@ if __name__ == "__main__":
     try:
         args = parse_arguments()
         
-        # Configure logging
-        logging.basicConfig(
-            level=getattr(logging, args.log_level),
-            format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-            handlers=[
-                logging.FileHandler('phasma_trading.log'),
-                logging.StreamHandler()
-            ]
-        )
+        log_paths = configure_main_logging(args.log_level)
+        print(f"📝 Logs: {log_paths['latest']} (session: {os.path.basename(log_paths['session'])})")
         
         # Initialize core components
         system = PhasmaTradingSystem("config.json")
+        logging.getLogger("phasma.main").info(
+            "Phasma AI started | mode=%s | interval=%s | max_runtime=%s",
+            getattr(args, "monitor", False) or "continuous",
+            args.interval,
+            args.max_runtime,
+        )
 
         if args.learning_only:
             print("🚀 Starting Phasma AI in learning-only mode (no trades)")
@@ -7227,9 +7457,11 @@ if __name__ == "__main__":
                     print(f"⚠️ Shutdown error: {shutdown_err}")
             
     except KeyboardInterrupt:
+        logging.getLogger("phasma.main").info("Phasma AI stopped by user (Ctrl+C)")
         print("\n🛑 Phasma AI stopped by user (Ctrl+C)")
         sys.exit(0)
     except Exception as e:
+        logging.getLogger("phasma.main").exception("Unhandled error: %s", e)
         print(f"\n❌ Unhandled error: {e}")
         import traceback
         traceback.print_exc()

@@ -23,6 +23,8 @@ from datetime import datetime, timedelta
 import logging
 from typing import Dict, List, Optional, Tuple
 import json
+
+from utils.config_helpers import config_get
 from dataclasses import dataclass
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
@@ -64,7 +66,7 @@ class MarketCrashDetectorV2:
         self.market_cache = market_cache
         self.simulation_engine = simulation_engine
         self.logger = logging.getLogger(__name__)
-        self.shadow_mode = config.get('crash_detector.shadow_mode', False)
+        self.shadow_mode = config_get(config, 'crash_detector.shadow_mode', False)
         # Track prediction quality over time for confidence re-weighting.
         self.prediction_history: List[Dict] = []
         self.max_history = 500
@@ -1065,25 +1067,65 @@ class MarketCrashDetectorV2:
         
         return reasoning
     
+    @staticmethod
+    def _as_bool(value, default: bool = False) -> bool:
+        if value is None:
+            return default
+        if isinstance(value, bool):
+            return value
+        if isinstance(value, str):
+            normalized = value.strip().lower()
+            if normalized in {"1", "true", "yes", "on"}:
+                return True
+            if normalized in {"0", "false", "no", "off"}:
+                return False
+            return default
+        return bool(value)
+
+    def _config_value(self, key: str, default=None):
+        """Read config value from dict-like or PhasmaConfig object."""
+        if self.config is None:
+            return default
+        if hasattr(self.config, "get"):
+            val = self.config.get(key, default)
+            return default if val is None else val
+        if isinstance(self.config, dict):
+            return self.config.get(key, default)
+        return default
+
+    def _should_save_prediction_files(self) -> bool:
+        """Per-prediction JSON snapshots are opt-in (in-memory history always kept)."""
+        for key in (
+            "diagnostics.save_crash_detector_predictions",
+            "crash_detector.save_predictions",
+        ):
+            val = self._config_value(key)
+            if val is not None:
+                return self._as_bool(val)
+        return self._as_bool(os.getenv("PHASMA_SAVE_CRASH_DETECTOR_PREDICTIONS"), False)
+
     def _log_prediction(self, assessment: Dict):
         """Log prediction for later review"""
         try:
-            timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-            filename = f"{self.memory_path}/prediction_{timestamp}.json"
-            
-            with open(filename, 'w') as f:
-                json.dump(assessment, f, indent=2)
-            
-            # Add to history
             self.prediction_history.append({
                 'timestamp': assessment['timestamp'],
                 'crash_score': assessment['crash_score'],
                 'alert_level': assessment['alert_level']
             })
-            
-            # Keep only last N predictions
+
             if len(self.prediction_history) > self.max_history:
                 self.prediction_history = self.prediction_history[-self.max_history:]
+
+            if not self._should_save_prediction_files():
+                return
+
+            from core.runtime_paths import runtime_path
+            timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+            path = runtime_path("diagnostics", "crash_detector", f"prediction_{timestamp}.json")
+            os.makedirs(os.path.dirname(path), exist_ok=True)
+
+            with open(path, 'w') as f:
+                json.dump(assessment, f, indent=2)
                 
         except Exception as e:
             self.logger.error(f"Error logging prediction: {e}")
