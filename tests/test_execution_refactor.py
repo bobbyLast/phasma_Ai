@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import os
+import subprocess
 import sys
 import tempfile
 import unittest
@@ -61,9 +62,15 @@ def _base_signal(**overrides):
         "confidence": 0.75,
         "current_price": 150.0,
         "entry_price": 150.0,
+        "avg_volume": 1_000_000,
         "trade_type": "STOCK",
         "position_size": 1,
         "source": "test",
+        "fact_check": {
+            "is_valid": True,
+            "company_info": {"name": "Apple Inc.", "avg_volume": 1_000_000},
+        },
+        "data_quality": "COMPLETE",
     }
     sig.update(overrides)
     return sig
@@ -182,58 +189,74 @@ class TestExecutionModes(unittest.TestCase):
 
     def test_execute_classified_no_duplicate_path(self):
         """execute_classified_trade uses router only — no direct portfolio.execute_buy."""
-        cfg = {"execution": {"mode": "ALERT_ONLY"}, "bankroll": 1000, "risk_per_trade": 0.01}
-        normalize_execution_config(cfg)
-        system = _mock_system(cfg)
-        system.paper_portfolio = MagicMock()
-        system.paper_portfolio.execute_buy = MagicMock()
-        system.execution_router = ExecutionRouter(system)
-        system.skipped_opportunity_watchlist = MagicMock()
-        system.classify_trade = MagicMock(return_value={"stop_pct": 0.05, "trade_class": "SWING_30D"})
-        system.log_final_trade_decision = MagicMock(return_value="log.json")
-        system.trade_db = None
+        script = """
+import asyncio, os, sys
+from unittest.mock import MagicMock, patch
 
-        from main import PhasmaTradingSystem
+ROOT = os.environ["PHASMA_TEST_ROOT"]
+sys.path.insert(0, ROOT)
+"""
+        script += """
+from core.execution.execution_modes import normalize_execution_config
+from core.execution.execution_router import ExecutionRouter
+from core.application_context import ApplicationContext
 
-        class SignalStub:
-            symbol = "AAPL"
-            action = "BUY"
-            confidence = 0.8
-            current_price = 100.0
-            source = "test"
+cfg = {"execution": {"mode": "ALERT_ONLY"}, "bankroll": 1000, "risk_per_trade": 0.01}
+normalize_execution_config(cfg)
 
-        with patch.object(PhasmaTradingSystem, "__init__", lambda self, *a, **k: None):
-            pts = PhasmaTradingSystem.__new__(PhasmaTradingSystem)
-            cfg_obj = MagicMock()
-            cfg_obj.data = cfg
-            cfg_obj.get = lambda key, default=None: cfg.get(key, default) if isinstance(key, str) and "." not in key else default
-            pts.config = cfg_obj
-            pts.ai_watchlist = set()
-            pts.ai_symbol_categories = {}
-            pts.execution_router = system.execution_router
-            pts.skipped_opportunity_watchlist = system.skipped_opportunity_watchlist
-            pts.classify_trade = system.classify_trade
-            pts.log_final_trade_decision = system.log_final_trade_decision
-            pts.trade_db = None
-            pts.paper_portfolio = system.paper_portfolio
-            pts.config = MagicMock()
-            pts.config.get = lambda k, d=None: cfg.get(k, d)
-            pts.config.data = cfg
+system = MagicMock()
+system.config = MagicMock()
+system.config.data = cfg
+system.config.get = lambda key, default=None: cfg.get(key, default) if isinstance(key, str) and "." not in key else default
+system.paper_portfolio = MagicMock()
+system.execution_router = ExecutionRouter(system)
+system.skipped_opportunity_watchlist = MagicMock()
+system.classify_trade = MagicMock(return_value={"stop_pct": 0.05, "trade_class": "SWING_30D"})
+system.log_final_trade_decision = MagicMock(return_value="log.json")
+system.trade_db = None
 
-        import asyncio
-        from core.application_context import ApplicationContext
+from main import PhasmaTradingSystem
 
-        pts.ai_watchlist = set()
-        pts.ai_analyzed_history = {}
-        pts.ai_symbol_categories = {}
-        pts.ai_symbol_last_seen = {}
-        ctx = ApplicationContext.bind(pts, {"config": cfg})
-        ctx.system = pts
-        ctx.config = cfg
-        out = asyncio.run(pts.execute_classified_trade(SignalStub(), ctx=ctx))
-        system.paper_portfolio.execute_buy.assert_not_called()
-        self.assertIsNotNone(out)
-        self.assertEqual(out.get("execution_mode"), "ALERT_ONLY")
+class SignalStub:
+    symbol = "AAPL"
+    action = "BUY"
+    confidence = 0.8
+    current_price = 100.0
+    source = "test"
+
+with patch.object(PhasmaTradingSystem, "__init__", lambda self, *a, **k: None):
+    pts = PhasmaTradingSystem.__new__(PhasmaTradingSystem)
+    pts.config = system.config
+    pts.ai_watchlist = set()
+    pts.ai_symbol_categories = {}
+    pts.ai_analyzed_history = {}
+    pts.ai_symbol_last_seen = {}
+    pts.execution_router = system.execution_router
+    pts.skipped_opportunity_watchlist = system.skipped_opportunity_watchlist
+    pts.classify_trade = system.classify_trade
+    pts.log_final_trade_decision = system.log_final_trade_decision
+    pts.trade_db = None
+    pts.paper_portfolio = system.paper_portfolio
+    ctx = ApplicationContext.bind(pts, {"config": cfg})
+    ctx.system = pts
+    ctx.config = cfg
+    out = asyncio.run(pts.execute_classified_trade(SignalStub(), ctx=ctx))
+
+assert system.paper_portfolio.execute_buy.call_count == 0
+assert out is not None
+assert out.get("execution_mode") == "ALERT_ONLY"
+"""
+        env = os.environ.copy()
+        env["PHASMA_TEST_ROOT"] = ROOT
+        proc = subprocess.run(
+            [sys.executable, "-c", script],
+            cwd=ROOT,
+            capture_output=True,
+            text=True,
+            timeout=120,
+            env=env,
+        )
+        self.assertEqual(proc.returncode, 0, proc.stderr or proc.stdout)
 
     def test_missing_price_blocks_execution(self):
         cfg = {"execution": {"mode": "PAPER_ALPACA", "require_price": True}}
