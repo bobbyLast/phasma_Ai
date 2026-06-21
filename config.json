@@ -40,6 +40,43 @@
     "min_confidence": 60,
     "max_signals_per_cycle": 10
   },
+  "debug": {
+    "kalshi_expiry_debug": false
+  },
+  "demo_data": {
+    "allow_in_live_pipeline": false
+  },
+  "kalshi_scan": {
+    "max_event_series_per_cycle": 50,
+    "max_priority_series_per_cycle": 20,
+    "series_cache_ttl_seconds": 300
+  },
+  "engine_groups": {
+    "ingest": {"cadence": "every_cycle", "max_seconds": 45},
+    "market": {"cadence": "every_cycle", "max_seconds": 30},
+    "risk_fast": {"cadence": "every_cycle", "max_seconds": 20},
+    "risk_deep": {"cadence": "hourly", "max_seconds": 90},
+    "discovery_fast": {"cadence": "15min", "max_seconds": 60},
+    "discovery_deep": {"cadence": "hourly", "max_seconds": 180},
+    "partnership": {"cadence": "4h", "max_seconds": 180},
+    "underground": {"cadence": "daily", "max_seconds": 180},
+    "politician": {"cadence": "daily", "max_seconds": 120},
+    "insider": {"cadence": "daily", "max_seconds": 120},
+    "decision": {"cadence": "every_cycle", "max_seconds": 45},
+    "execution": {"cadence": "every_cycle", "max_seconds": 15},
+    "reporting": {"cadence": "every_cycle", "max_seconds": 30},
+    "learning": {"cadence": "every_cycle_if_due", "max_seconds": 30}
+  },
+  "runtime_budget": {
+    "max_cycle_seconds": 240,
+    "max_engine_seconds": 60,
+    "max_network_calls_per_cycle": 100,
+    "max_symbols_crash_detector_fast": 3,
+    "max_symbols_partnership_fast": 0,
+    "max_candidates_deep_analysis": 10,
+    "max_candidates_monte_carlo": 5,
+    "skip_low_value_engines_when_over_budget": true
+  },
   "execution": {
     "mode": "ALERT_ONLY",
     "allow_live_trading": false,
