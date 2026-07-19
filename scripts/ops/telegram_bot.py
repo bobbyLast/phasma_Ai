@@ -8,6 +8,7 @@ from core.config import PhasmaConfig
 from utils.why_moving_strip import get_why_moving_strip
 from utils.strategy_cue_cards import get_strategy_cards
 from utils.price_fetcher import get_price_fetcher
+from utils.signal_data_quality import resolve_pop_pct
 
 # Load environment variables
 load_dotenv()
@@ -17,18 +18,39 @@ class TelegramBot:
         self.token = token
         self.chat_id = chat_id
         self.base_url = f"https://api.telegram.org/bot{token}"
+        self.request_timeout = 10
 
     def send_message(self, text):
-        """Send a message to the Telegram chat."""
+        """Send a message to the Telegram chat (hard network timeout)."""
         url = f"https://api.telegram.org/bot{self.token}/sendMessage"
         payload = {
             "chat_id": self.chat_id,
             "text": text
         }
-        response = requests.post(url, json=payload)
-        print(f"🔍 TELEGRAM API DEBUG: Status {response.status_code}")
-        print(f"🔍 TELEGRAM API RESPONSE: {response.text}")
+        try:
+            response = requests.post(url, json=payload, timeout=self.request_timeout)
+        except requests.Timeout:
+            print(f"[TELEGRAM] API timeout after {self.request_timeout}s")
+            return False
+        except requests.RequestException as exc:
+            print(f"[TELEGRAM] API request failed: {exc}")
+            return False
+        print(f"[TELEGRAM] API status {response.status_code}")
+        if response.status_code != 200:
+            print(f"[TELEGRAM] API response: {response.text[:200]}")
         return response.status_code == 200
+
+    async def send_message_async(self, text):
+        """Non-blocking send — keeps the asyncio event loop free."""
+        return await asyncio.to_thread(self.send_message, text)
+
+    def send_alert(self, signal):
+        """Send a high-confidence signal alert during monitoring mode."""
+        message = self.format_signal_message(signal)
+        return self.send_message(message)
+
+    async def send_alert_async(self, signal):
+        return await asyncio.to_thread(self.send_alert, signal)
 
     def format_signal_message(self, signal):
         # Check if this is a Kalshi prediction market signal
@@ -51,7 +73,9 @@ class TelegramBot:
         action = signal.get('action', 'BUY_CALL')
         confidence = signal.get('sim_scaled_confidence', signal.get('confidence', 0) * 100)
         position_size = signal.get('position_size', 0)
-        pop_from_sim = signal.get('pop_from_sim', 50)
+        pop_from_sim = resolve_pop_pct(signal)
+        if pop_from_sim is None:
+            raise ValueError(f"Cannot post {symbol} — no real POP from simulation")
 
         # Get simulation results
         sim_results = signal.get('simulation_results', {})
@@ -212,7 +236,9 @@ Confidence: {confidence:.1f}% | POP: {pop_from_sim:.1f}%
         take_profit = signal.get('take_profit', 0)
         stop_loss = signal.get('stop_loss', 0)
         confidence = signal.get('confidence', 0) * 100
-        pop = signal.get('pop', 0) * 100
+        pop = resolve_pop_pct(signal)
+        if pop is None:
+            raise ValueError(f"Cannot post options alert for {underlying} — no real POP")
         
         # Get company name from fact_check if available
         company_info = signal.get('fact_check', {}).get('company_info', {})
@@ -304,7 +330,7 @@ Probability of Profit: {pop:.0f}%"""
         # ADD CONFLUENCE SCORE if available
         confluence_score = signal.get('confluence_score', confidence_pct)
         
-        pop_from_sim = signal.get('pop_from_sim', 50)
+        pop_from_sim = resolve_pop_pct(signal)
         entry_price = signal.get('entry_price', 'N/A')
         target_price = signal.get('target_price', 'N/A')
         
@@ -411,7 +437,9 @@ Probability of Profit: {pop:.0f}%"""
             except Exception:
                 why_lines.append(f"Target: ${signal.get('target_price', 'N/A')}")
             
-            why_lines.append(f"Confidence: {confidence_pct:.0f}% | Success Rate: {pop_from_sim:.0f}%")
+            why_lines.append(f"Confidence: {confidence_pct:.0f}%")
+            if pop_from_sim is not None:
+                why_lines.append(f"Success Rate: {pop_from_sim:.0f}%")
         
         why_text = "\n".join(why_lines)
         
@@ -438,6 +466,8 @@ Exit: {exit_text}
 
 Entry: ${entry_price} | Target: ${target_price}"""
 
+        message += self._execution_status_block(signal)
+
         # Add combined FUNDAMENTALS & CONFLUENCE section for value stocks
         if is_fundamental:
             pe_ratio = signal.get('pe_ratio', 0)
@@ -455,6 +485,45 @@ Score: {signal.get('valuation_score', 0)}/10 | Confluence: {confluence_score:.0f
         
         return message
     
+    def _execution_status_block(self, signal: Dict[str, Any]) -> str:
+        """Honest execution/reporting footer — report only, never implies live brokerage."""
+        mode = signal.get("execution_mode", "ALERT_ONLY")
+        decision = signal.get("execution_decision", "skipped")
+        reason = signal.get("execution_reason") or signal.get("skip_reason") or ""
+        label = signal.get("execution_alert_label") or ""
+        if decision in ("skipped", "rejected") and not label:
+            label = "NO TRADE"
+        elif decision in ("filled", "submitted") and "PAPER" not in str(label).upper():
+            label = "PAPER TRADE" if mode.startswith("PAPER") else label
+
+        conf_type = signal.get("confidence_type", "heuristic")
+        data_age = signal.get("data_age_seconds")
+        data_age_str = f"{int(data_age)}s" if data_age is not None else "unknown"
+        price_source = signal.get("price_source", "signal")
+        kalshi_intel = signal.get("kalshi_intel_only", False)
+        mem_recent = signal.get("memory_recently_traded", False)
+        risk_gate = signal.get("risk_gate", "n/a")
+        sim_pop = signal.get("simulation_pop") or signal.get("monte_carlo_sim_score") or signal.get("pop_from_sim")
+
+        lines = [
+            "",
+            "━━━━━━━━━━━━━━━━━━━━━━",
+            "🛡️ EXECUTION STATUS (report-only)",
+            "━━━━━━━━━━━━━━━━━━━━━━",
+            f"Mode: {mode}",
+            f"Execution: {decision}",
+            f"Label: {label or 'N/A'}",
+            f"Data age: {data_age_str} | Price source: {price_source}",
+            f"Confidence type: {conf_type}",
+            f"Simulation score (assumption-based): {sim_pop if sim_pop is not None else 'n/a'}",
+            f"Kalshi intel-only: {'yes' if kalshi_intel else 'no'}",
+            f"Memory recently traded: {'yes' if mem_recent else 'no'}",
+            f"Risk gate: {risk_gate}",
+        ]
+        if reason:
+            lines.append(f"Skip/block reason: {reason}")
+        return "\n".join(lines)
+
     def format_kalshi_signal_message(self, signal):
         """Format Kalshi prediction market signals with direct trade links."""
         
@@ -462,7 +531,9 @@ Score: {signal.get('valuation_score', 0)}/10 | Confluence: {confluence_score:.0f
         kalshi_signal = signal.get('kalshi_signal', 'BUY_YES')
         kalshi_action = signal.get('kalshi_action', 'BUY_CALL')
         confidence = signal.get('sim_scaled_confidence', signal.get('confidence', 0) * 100)
-        pop_from_sim = signal.get('pop_from_sim', 50)
+        pop_from_sim = resolve_pop_pct(signal)
+        if pop_from_sim is None:
+            raise ValueError(f"Cannot post {symbol} — no real POP from simulation")
         
         # Get Kalshi-specific data
         kalshi_analysis = signal.get('kalshi_analysis', {})
@@ -504,14 +575,37 @@ https://kalshi.com/markets/{symbol}"""
         
         return message
 
+    def format_heavy_mover_watchlist(self, movers, max_items=10):
+        """One ranked watch digest for new-circulation / heavy-mover candidates."""
+        if not movers:
+            return None
+
+        lines = [
+            "NEW CIRCULATION — Potential heavy movers",
+            "Pay attention to these stocks:",
+            "",
+        ]
+        for i, mover in enumerate(movers[:max_items], 1):
+            symbol = str(mover.get("symbol", "UNKNOWN")).upper()
+            change = float(mover.get("change_pct", 0) or 0)
+            vol_ratio = float(mover.get("volume_ratio", 0) or 0)
+            price = mover.get("price")
+            reason = str(mover.get("reason") or "Elevated volume + move").strip()
+            if len(reason) > 90:
+                reason = reason[:87] + "..."
+            price_bit = f" ${price:.2f}" if isinstance(price, (int, float)) else ""
+            lines.append(
+                f"{i}. {symbol}{price_bit}  {change:+.1f}%  vol {vol_ratio:.1f}x — {reason}"
+            )
+
+        lines.append("")
+        lines.append(f"Watch list: {min(len(movers), max_items)} of {len(movers)} qualified")
+        lines.append("Watch only — not a trade signal.")
+        return "\n".join(lines)
+
     async def post_signal(self, signal):
         message = self.format_signal_message(signal)
-        return self.send_message(message)
-
-    def send_alert(self, signal):
-        """Send a high-confidence signal alert during monitoring mode."""
-        message = self.format_signal_message(signal)
-        return self.send_message(message)
+        return await self.send_message_async(message)
 
 def get_telegram_bot():
     token = os.getenv('TELEGRAM_BOT_TOKEN')

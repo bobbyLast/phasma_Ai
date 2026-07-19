@@ -51,8 +51,14 @@
     "max_priority_series_per_cycle": 20,
     "series_cache_ttl_seconds": 300
   },
+  "news_pipeline": {
+    "single_ingest_per_cycle": true,
+    "deep_investigate_enabled": true,
+    "deep_investigate_max_items": 3,
+    "deep_investigate_min_score": 0.55
+  },
   "engine_groups": {
-    "ingest": {"cadence": "every_cycle", "max_seconds": 45},
+    "ingest": {"cadence": "every_cycle", "max_seconds": 90},
     "market": {"cadence": "every_cycle", "max_seconds": 30},
     "risk_fast": {"cadence": "every_cycle", "max_seconds": 20},
     "risk_deep": {"cadence": "hourly", "max_seconds": 90},

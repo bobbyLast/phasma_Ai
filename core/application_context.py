@@ -31,6 +31,9 @@ class ApplicationContext:
     cycle_stage_timings: Dict[str, float]
     fred_regime: str = "NEUTRAL"
     fred_adjustments: Dict[str, Any] = field(default_factory=dict)
+    cycle_data: Optional[Any] = None
+    symbol_coalition: Optional[Any] = None
+    run_deep_discovery: bool = True
 
     @classmethod
     def bind(cls, system: Any, cycle_stage_timings: Optional[Dict[str, float]] = None) -> ApplicationContext:

@@ -4,9 +4,15 @@ import yfinance as yf
 import pandas as pd
 import numpy as np
 from datetime import datetime, timedelta
+from typing import Dict, List, Optional, Set, Any
 
 class DayTradingScanner:
     """Scanner for regular day trading stocks with momentum and volume analysis"""
+
+    # New circulation / heavy-mover thresholds
+    HEAVY_MIN_VOLUME_RATIO = 1.8
+    HEAVY_MIN_DAY_CHANGE_PCT = 2.5
+    HEAVY_NEWS_SCORE_BOOST = 1.25
     
     def __init__(self, config=None):
         self.config = config or {}
@@ -24,50 +30,194 @@ class DayTradingScanner:
             'BB', 'NOK', 'SNDL', 'BNGO', 'MVIS', 'SPCE', 'RIVN',
             'LCID', 'CHPT', 'BLNK', 'FSR', 'LCID', 'RIVN'
         ]
-    
-    def scan_momentum_stocks(self, limit=10, additional_symbols=None, bankroll=50.0):
-        """Scan for stocks with strong momentum and volume"""
-        signals = []
-        
-        # Use dynamic scanner to get fresh opportunities
+
+    def _normalize_symbol(self, symbol: str) -> str:
+        return str(symbol or "").strip().upper()
+
+    def _resolve_symbols_to_scan(
+        self,
+        additional_symbols: Optional[List[str]] = None,
+        dynamic_limit: int = 20,
+    ) -> List[str]:
+        """News-linked symbols first, then dynamic fresh names, then watchlist."""
+        symbols_to_scan: List[str] = []
+        seen: Set[str] = set()
+
+        def _add(sym: str) -> None:
+            normalized = self._normalize_symbol(sym)
+            if not normalized or normalized.startswith("KX") or normalized in seen:
+                return
+            seen.add(normalized)
+            symbols_to_scan.append(normalized)
+
+        for symbol in additional_symbols or []:
+            _add(symbol)
+
         try:
             from engines.dynamic_market_scanner import DynamicMarketScanner
-            dynamic_scanner = DynamicMarketScanner()
-            fresh_opps = dynamic_scanner.get_fresh_opportunities(total_limit=20)
-            
-            # Extract symbols from fresh opportunities
-            symbols_to_scan = [opp['symbol'] for opp in fresh_opps]
-            
-            # Add any additional symbols from news
-            if additional_symbols:
-                for symbol in additional_symbols:
-                    if symbol not in symbols_to_scan:
-                        symbols_to_scan.append(symbol)
-                        
-            print(f"   🎯 Using {len(symbols_to_scan)} FRESH symbols from dynamic scanner")
-            
-        except Exception as e:
-            # Fallback to watchlist if dynamic scanner fails
-            symbols_to_scan = self.watchlist.copy()
-            if additional_symbols:
-                for symbol in additional_symbols:
-                    if symbol not in symbols_to_scan:
-                        symbols_to_scan.append(symbol)
+            fresh_opps = DynamicMarketScanner().get_fresh_opportunities(total_limit=dynamic_limit)
+            for opp in fresh_opps:
+                _add(opp.get("symbol", ""))
+            print(f"   Using {len(symbols_to_scan)} symbols (news-first + dynamic scanner)")
+        except Exception:
+            for symbol in self.watchlist:
+                _add(symbol)
+            print(f"   Dynamic scanner unavailable — using news + watchlist ({len(symbols_to_scan)} symbols)")
+
+        return symbols_to_scan
+
+    def _hist_from_batch_or_yf(
+        self,
+        symbol: str,
+        history_batch: Optional[Dict[str, Any]] = None,
+        *,
+        min_rows: int = 2,
+    ):
+        """Prefer shared coalition history batch; fall back to yfinance once."""
+        hist = None
+        if history_batch:
+            hist = history_batch.get(symbol)
+        if hist is not None and hasattr(hist, "__len__") and len(hist) >= min_rows:
+            return hist
+        try:
+            hist = yf.Ticker(symbol).history(period="5d", interval="1d")
+            if hist is not None and len(hist) >= min_rows:
+                return hist
+        except Exception:
+            return None
+        return None
+
+    def scan_heavy_movers(
+        self,
+        limit: int = 10,
+        additional_symbols: Optional[List[str]] = None,
+        min_volume_ratio: float = None,
+        min_day_change_pct: float = None,
+        history_batch: Optional[Dict[str, Any]] = None,
+        coalition_boost: Optional[Dict[str, float]] = None,
+    ) -> List[Dict]:
+        """
+        Rank stocks with new circulation (elevated relative volume + meaningful day move).
+        Prefer news-linked symbols. Watch-oriented — not trade execution signals.
+        """
+        min_volume_ratio = (
+            self.HEAVY_MIN_VOLUME_RATIO if min_volume_ratio is None else min_volume_ratio
+        )
+        min_day_change_pct = (
+            self.HEAVY_MIN_DAY_CHANGE_PCT if min_day_change_pct is None else min_day_change_pct
+        )
+        news_set = {
+            self._normalize_symbol(s)
+            for s in (additional_symbols or [])
+            if self._normalize_symbol(s)
+        }
+
+        symbols_to_scan = self._resolve_symbols_to_scan(additional_symbols, dynamic_limit=20)
+        # Scan a wider pool than the return limit so ranking has room
+        scan_cap = min(len(symbols_to_scan), max(limit * 4, 40))
+
+        print(f"Scanning {scan_cap} stocks for heavy movers / new circulation...")
+        print(
+            f"   Criteria: day move >= {min_day_change_pct:.1f}%, "
+            f"rel volume >= {min_volume_ratio:.1f}x, "
+            f"price ${self.min_price:.1f}-${self.max_price:.1f}"
+        )
+        if history_batch:
+            print(f"   Using shared market batch ({len(history_batch)} histories)")
+
+        movers: List[Dict] = []
+        for symbol in symbols_to_scan[:scan_cap]:
+            try:
+                hist = self._hist_from_batch_or_yf(symbol, history_batch, min_rows=2)
+                if hist is None or len(hist) < 2:
+                    continue
+
+                current_price = float(hist["Close"].iloc[-1])
+                prev_close = float(hist["Close"].iloc[-2])
+                current_volume = float(hist["Volume"].iloc[-1])
+                avg_volume = float(hist["Volume"].mean())
+
+                if current_price < self.min_price:
+                    continue
+                if self.price_filter_enabled and current_price > self.max_price:
+                    continue
+                if avg_volume < self.min_volume or avg_volume <= 0 or prev_close <= 0:
+                    continue
+
+                day_change_pct = ((current_price - prev_close) / prev_close) * 100.0
+                volume_ratio = current_volume / avg_volume
+                if abs(day_change_pct) < min_day_change_pct:
+                    continue
+                if volume_ratio < min_volume_ratio:
+                    continue
+
+                rsi = self.calculate_rsi(hist["Close"])
+                from_news = symbol in news_set
+                direction = "up" if day_change_pct >= 0 else "down"
+                reason = (
+                    f"New circulation: {volume_ratio:.1f}x avg volume, "
+                    f"{day_change_pct:+.1f}% day move ({direction})"
+                )
+                if from_news:
+                    reason += " — in today's news"
+
+                rank_score = abs(day_change_pct) * volume_ratio
+                if from_news:
+                    rank_score *= self.HEAVY_NEWS_SCORE_BOOST
+                if coalition_boost and symbol in coalition_boost:
+                    rank_score *= float(coalition_boost[symbol])
+
+                movers.append({
+                    "symbol": symbol,
+                    "price": round(current_price, 2),
+                    "change_pct": round(day_change_pct, 2),
+                    "volume_ratio": round(volume_ratio, 2),
+                    "volume": int(current_volume),
+                    "avg_volume": int(avg_volume),
+                    "rsi": round(float(rsi), 2),
+                    "reason": reason,
+                    "rank_score": round(rank_score, 2),
+                    "from_news": from_news,
+                    "sector": self.get_sector(symbol),
+                    "source": "heavy_mover_watch",
+                })
+                print(
+                    f"   MOVER {symbol}: {day_change_pct:+.1f}% | "
+                    f"vol {volume_ratio:.1f}x | score {rank_score:.1f}"
+                )
+            except Exception as exc:
+                print(f"  ! Error scanning heavy mover {symbol}: {exc}")
+                continue
+
+        movers.sort(key=lambda m: m["rank_score"], reverse=True)
+        ranked = movers[:limit]
+        print(f"Found {len(ranked)} heavy mover watch candidates (of {len(movers)} qualified)")
+        return ranked
+    
+    def scan_momentum_stocks(
+        self,
+        limit=10,
+        additional_symbols=None,
+        bankroll=50.0,
+        history_batch: Optional[Dict[str, Any]] = None,
+    ):
+        """Scan for stocks with strong momentum and volume"""
+        signals = []
+        symbols_to_scan = self._resolve_symbols_to_scan(additional_symbols, dynamic_limit=20)
         
         print(f"Scanning {len(symbols_to_scan)} stocks for day trading opportunities...")
         print(f"   Criteria: Price ${self.min_price:.1f}-${self.max_price:.1f}, Volume >= {self.min_volume:,}")
         print(f"   Symbols to check: {symbols_to_scan[:10]}...")  # Show first 10 symbols
+        if history_batch:
+            print(f"   Using shared market batch ({len(history_batch)} histories)")
         
         for symbol in symbols_to_scan:
             print(f"   Checking symbol: {symbol}")
         
         for symbol in symbols_to_scan[:limit]:
             try:
-                # Get stock data
-                ticker = yf.Ticker(symbol)
-                hist = ticker.history(period="5d", interval="1d")
-                
-                if len(hist) < 5:
+                hist = self._hist_from_batch_or_yf(symbol, history_batch, min_rows=5)
+                if hist is None or len(hist) < 5:
                     print(f"  ! {symbol}: Insufficient data")
                     continue
                 
@@ -131,7 +281,7 @@ class DayTradingScanner:
                         'price_change_5d': round(price_change_5d * 100, 2),
                         'sector': self.get_sector(symbol),
                         'industry': 'Technology',
-                        'market_cap': self.get_market_cap(ticker),
+                        'market_cap': 0,
                         'pattern_strength': min(0.5, abs(price_change_5d) * 5),
                         'divergence_score': 0.0,  # Not applicable for stocks
                         'win_rate': min(0.95, max(0.35, 0.5 + abs(price_change_5d) * 2)),
@@ -273,12 +423,14 @@ class DayTradingScanner:
         }
     
     def get_market_cap(self, ticker):
-        """Get market cap from ticker info"""
+        """Get market cap from ticker info (slow; avoid on hot path)."""
         try:
+            if isinstance(ticker, str):
+                return 0
             info = ticker.info
             market_cap = info.get('marketCap', 0)
             return market_cap
-        except:
+        except Exception:
             return 1000000000  # Default $1B
 
 def get_day_trading_scanner(config=None):

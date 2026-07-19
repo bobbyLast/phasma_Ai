@@ -121,13 +121,21 @@ from utils.confidence_utils import (
 from utils.signal_data_quality import (
     SignalDataQuality,
     apply_fetched_price,
+    apply_fetched_volume,
     assess_signal_data_quality,
+    enrich_signal_market_fields,
     is_alert_only_eligible,
+    is_display_eligible,
+    resolve_pop_pct,
 )
 from core.signals.decision_pipeline import DecisionPipeline
 from core.signals.signal_decision import DecisionStatus, DecisionSummary
 from core.signals.strategy_router import StrategyRouter, classify_asset_type, has_option_contract_fields
 from core.runtime.safety_lock import print_startup_safety
+from core.runtime.budget_enforcer import RuntimeBudgetEnforcer
+from core.source_status import block_demo_geo_from_decision, is_demo_geo_event
+from utils import display_safe
+from utils.units_sizing import apply_units_sizing
 from core.supervisor.group_coordinator import GroupCoordinator
 from core.monitoring.runtime_profiler import get_runtime_profiler
 from utils.portfolio_ledger import summarize_ledger, filter_active_positions
@@ -625,6 +633,44 @@ class PhasmaTradingSystem:
 
     def _reset_cycle_caches(self):
         self._price_cache = {}
+
+    def _print_cycle_profile(
+        self,
+        cycle_stage_timings: Dict[str, float],
+        *,
+        cycle_attempt: int = 0,
+    ) -> None:
+        """Print per-stage and per-worker timings for bottleneck identification."""
+        lines = [f"\n[CYCLE PROFILE]{' (cycle ' + str(cycle_attempt) + ')' if cycle_attempt else ''}"]
+
+        total_stage = sum(cycle_stage_timings.values())
+        lines.append(f"Total tracked stage time: {total_stage:.1f}s")
+
+        if cycle_stage_timings:
+            lines.append("Stages (slowest first):")
+            for name, secs in sorted(cycle_stage_timings.items(), key=lambda x: x[1], reverse=True):
+                pct = (secs / total_stage * 100) if total_stage > 0 else 0.0
+                lines.append(f"  • {name}: {secs:.1f}s ({pct:.0f}%)")
+
+        worker_results = getattr(self.worker_supervisor, "_last_results", {})
+        if worker_results:
+            lines.append("Workers (slowest first):")
+            for name, result in sorted(
+                worker_results.items(),
+                key=lambda kv: kv[1].duration_seconds,
+                reverse=True,
+            ):
+                label = name.replace("Worker", "")
+                detail = result.detail or result.error_message or ""
+                suffix = f" — {detail[:60]}" if detail and result.status.value != "OK" else ""
+                lines.append(
+                    f"  • {label}: {result.duration_seconds:.1f}s "
+                    f"[{result.status.value}]{suffix}"
+                )
+
+        summary = "\n".join(lines)
+        print(summary)
+        logging.getLogger("phasma.main").info(summary)
 
     def _load_posted_signals(self) -> set:
         """Load previously posted signals from persistent storage"""
@@ -1129,19 +1175,34 @@ class PhasmaTradingSystem:
             except Exception:
                 pass
 
-        # ALWAYS include demo events to ensure comprehensive geopolitical coverage
-        # Real events are great, but there's always geopolitical activity happening
-        try:
-            demo_events = list(self._get_current_geopolitical_events())
-            if demo_events:
-                # Add demo events, deduping against real events
-                existing_titles = {e.get('title', '') for e in events}
+        # Demo geo only for diagnostics when live pipeline disallows demo data
+        allow_demo = bool((self.config.get("demo_data") or {}).get("allow_in_live_pipeline", False))
+        if not allow_demo:
+            try:
+                demo_events = list(self._get_current_geopolitical_events())
                 for demo in demo_events:
-                    if demo.get('title', '') not in existing_titles:
-                        events.append(demo)
-                print(f"🌍 Added {len(demo_events)} demo events to geopolitical analysis")
-        except Exception as e:
-            print(f"⚠️ Could not load demo events: {e}")
+                    demo["is_demo"] = True
+                    demo["demo_only"] = True
+                    demo["source"] = "geopolitical_demo"
+                if demo_events:
+                    self._geo_demo_diagnostics = demo_events
+                    print(
+                        f"[DEMO FIREWALL] Blocked {len(demo_events)} demo geopolitical events from DecisionGroup"
+                    )
+            except Exception as e:
+                print(f"⚠️ Could not load demo geo diagnostics: {e}")
+        else:
+            try:
+                demo_events = list(self._get_current_geopolitical_events())
+                if demo_events:
+                    existing_titles = {e.get('title', '') for e in events}
+                    for demo in demo_events:
+                        demo["is_demo"] = True
+                        if demo.get('title', '') not in existing_titles:
+                            events.append(demo)
+                    print(f"🌍 Added {len(demo_events)} demo events to geopolitical analysis (demo allowed)")
+            except Exception as e:
+                print(f"⚠️ Could not load demo events: {e}")
 
         deduped = self._dedupe_geo_events(events)
         deduped.sort(key=lambda x: float(x.get('relevance', 0) or 0), reverse=True)
@@ -1547,6 +1608,35 @@ class PhasmaTradingSystem:
                 return False, f"Too many positions in {sector} sector"
 
         return True, "Risk validated"
+
+    async def _telegram_send_async(self, text: str) -> bool:
+        """Send Telegram without blocking the asyncio event loop."""
+        bot = getattr(self, "telegram_bot", None)
+        if not bot:
+            return False
+        try:
+            if hasattr(bot, "send_message_async"):
+                return bool(await bot.send_message_async(text))
+            return bool(await asyncio.to_thread(bot.send_message, text))
+        except Exception as exc:
+            print(f"[TELEGRAM] async send failed: {exc}")
+            return False
+
+    async def _telegram_alert_async(self, signal) -> bool:
+        bot = getattr(self, "telegram_bot", None)
+        if not bot:
+            try:
+                from telegram_bot import get_telegram_bot
+                bot = get_telegram_bot()
+            except Exception:
+                return False
+        try:
+            if hasattr(bot, "send_alert_async"):
+                return bool(await bot.send_alert_async(signal))
+            return bool(await asyncio.to_thread(bot.send_alert, signal))
+        except Exception as exc:
+            logging.error("Failed to send Telegram alert: %s", exc)
+            return False
 
     def send_telegram_alert(
         self, signal: dict, *, ctx: Optional[ApplicationContext] = None
@@ -2181,7 +2271,10 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
                 brain.regime_detector.market_cache = ctx.market_cache
 
         from utils.cycle_data_context import CycleDataContext
+        from utils.news_cycle_helpers import merge_cycle_news_items
+
         if ctx.cycle_data is None:
+            print("   ⚠️ No cycle ingest snapshot — running one-time ingest fallback")
             ctx.cycle_data = await CycleDataContext.ingest(
                 brain.news_sources,
                 config=ctx.config,
@@ -2214,20 +2307,19 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
             register_cycle_prices(ctx.cycle_data.prices)
 
         if results.get('final_signals', 0) == 0:
-            cycle_data = ctx.cycle_data
-            if cycle_data and cycle_data.ingested_news:
+            if ctx.cycle_data and ctx.cycle_data.ingested_news:
                 print(
-                    "\n⚠️ No high-confidence opportunities found - "
-                    f"reusing cycle ingest snapshot ({len(cycle_data.ingested_news)} items)"
+                    "\n⚠️ No high-confidence opportunities found — "
+                    f"continuing with single cycle ingest ({len(ctx.cycle_data.ingested_news)} items)"
                 )
-                return [dict(item) for item in cycle_data.ingested_news]
-            print("\n⚠️ No high-confidence opportunities found - no duplicate news scan")
+                return merge_cycle_news_items(ctx.cycle_data)
+            print("\n⚠️ No high-confidence opportunities found — no news items to analyze")
             return []
 
         print(f"\n✅ UNIFIED BRAIN FOUND {results['final_signals']} OPPORTUNITIES!")
-        news_items: List[Dict] = []
+        priority_items: List[Dict] = []
         for signal in results.get('top_opportunities', []):
-            news_items.append({
+            priority_items.append({
                 'symbol': signal['symbol'],
                 'title': f"UNIFIED SIGNAL: {signal['symbol']} - Rank #{signal.get('rank')} | {signal.get('confidence', 0):.1%} confidence",
                 'summary': f"Convergence: {signal.get('convergence_score', 1)} systems | "
@@ -2261,8 +2353,9 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
                 }
             })
 
+        news_items = merge_cycle_news_items(ctx.cycle_data, priority_items)
         news_items = s._filter_seen_news_items(news_items, ttl_hours=12)
-        print(f"\n📊 Total items for analysis: {len(news_items)}")
+        print(f"\n📊 Total items for analysis: {len(news_items)} (single ingest + {len(priority_items)} priority signals)")
         return news_items
 
     async def _collect_unusual_whales_signals(self) -> List[Dict]:
@@ -2309,18 +2402,24 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
         # 5. SCAN NEWS AND SOCIAL ENGINES (reuse cycle snapshot when available)
         print("\n🔍 Scanning news and social engines for signals...")
 
-        # Scan news engine for trading opportunities
+        # Scan news engine for trading opportunities (single ingest per cycle — no full re-scan)
         news_signals = []
-        cycle_news_snapshot = news_items if isinstance(news_items, list) else []
+        cycle_news_snapshot = list(news_items) if isinstance(news_items, list) and news_items else []
+        if not cycle_news_snapshot and getattr(ctx, "cycle_data", None) and ctx.cycle_data.ingested_news:
+            cycle_news_snapshot = [dict(i) for i in ctx.cycle_data.ingested_news]
         try:
             if s.news_engine:
-                print("📰 Scanning news sources...")
                 if cycle_news_snapshot:
                     news_items = cycle_news_snapshot
-                    print(f"📰 Reusing cycle news snapshot: {len(news_items)} items")
+                    print(f"📰 Reusing cycle news snapshot: {len(news_items)} items (no second full scan)")
                 else:
-                    news_items = await s.news_engine.scan_all_sources()
-                    print(f"📰 Found {len(news_items)} news items")
+                    from utils.news_cycle_helpers import news_pipeline_config
+                    if news_pipeline_config(ctx.config).get("single_ingest_per_cycle", True):
+                        print("📰 Skipping duplicate full news scan (single ingest per cycle)")
+                        news_items = []
+                    else:
+                        news_items = await s.news_engine.scan_all_sources()
+                        print(f"📰 Found {len(news_items)} news items")
 
                 # Convert news items to signals
                 for item in news_items[:10]:  # Limit to prevent overload
@@ -2388,70 +2487,86 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
 
         # Scan for geopolitical events
         try:
-            events = await s._collect_geopolitical_events(hours_back=24, news_items=news_items)
-            print(f"🌍 Geopolitical events collected: {len(events)}")
-            for e in events:
-                print(f"   - {e.get('title', 'Unknown')}: relevance {e.get('relevance', 0)}")
-            if events:
-                min_geo_score = int(ctx.config.get("geopolitical_analysis", {}).get("event_threshold", 50))
-                max_geo_signals = int(ctx.config.get("geopolitical_analysis", {}).get("max_signals", 50))
+            budget = getattr(ctx, "budget_enforcer", None)
+            if budget and budget.should_skip_optional("geopolitical_secondary"):
+                print("⏭️ Geopolitical secondary scan skipped (runtime budget)")
+            else:
+                events = await s._collect_geopolitical_events(hours_back=24, news_items=news_items)
+                real_events = [
+                    e for e in events
+                    if not block_demo_geo_from_decision(e, ctx.config.data if hasattr(ctx.config, "data") else {})
+                ]
+                blocked_demo = len(events) - len(real_events)
+                if blocked_demo:
+                    print(
+                        f"[DEMO FIREWALL] Blocked {blocked_demo} demo geopolitical events from DecisionGroup"
+                    )
+                print(f"🌍 Geopolitical events collected: {len(real_events)}")
+                for e in real_events:
+                    print(f"   - {e.get('title', 'Unknown')}: relevance {e.get('relevance', 0)}")
+                if real_events:
+                    min_geo_score = int(ctx.config.get("geopolitical_analysis", {}).get("event_threshold", 50))
+                    max_geo_signals = int(ctx.config.get("geopolitical_analysis", {}).get("max_signals", 50))
 
-                # Track event-signal pairs instead of just symbols to allow same stock from different events
-                seen_pairs = set()
-                geo_signals = []
-                for event in events:
-                    analysis = s.geo_analyzer.analyze_event(event.get('description', ''))
-                    for opp in analysis.get('stock_opportunities', []):
-                        symbol = str(opp.get('symbol', '')).upper()
-                        if not symbol:
-                            continue
+                    # Track event-signal pairs instead of just symbols to allow same stock from different events
+                    seen_pairs = set()
+                    geo_signals = []
+                    for event in real_events:
+                        analysis = s.geo_analyzer.analyze_event(event.get('description', ''))
+                        for opp in analysis.get('stock_opportunities', []):
+                            symbol = str(opp.get('symbol', '')).upper()
+                            if not symbol:
+                                continue
 
-                        # Allow same symbol from different events, track by symbol+event
-                        pair_key = f"{symbol}:{event.get('title', '')}"
-                        if pair_key in seen_pairs:
-                            continue
+                            # Allow same symbol from different events, track by symbol+event
+                            pair_key = f"{symbol}:{event.get('title', '')}"
+                            if pair_key in seen_pairs:
+                                continue
 
-                        score = opp.get('score', opp.get('value_score', 0))
-                        try:
-                            score = float(score)
-                        except Exception:
-                            score = 0.0
+                            score = opp.get('score', opp.get('value_score', 0))
+                            try:
+                                score = float(score)
+                            except Exception:
+                                score = 0.0
 
-                        if score < min_geo_score:
-                            continue
+                            if score < min_geo_score:
+                                continue
 
-                        seen_pairs.add(pair_key)
+                            seen_pairs.add(pair_key)
 
-                        confidence = max(0.30, min(0.95, score / 100.0))
-                        geo_signals.append({
-                            'symbol': symbol,
-                            'action': 'BUY',
-                            'confidence': confidence,
-                            'position_size': 20,
-                            'rationale': f"Geopolitical: {event.get('title', 'Global event')} | {analysis.get('impact_type', 'unknown')}",
-                            'source': 'geopolitical_analysis',
-                            'trade_type': 'STOCK',
-                            'current_price': opp.get('price', 0),
-                            'geopolitical_event': event,
-                            'geopolitical_thesis': opp.get('thesis', ''),
-                            'geopolitical_score': score,
-                            'geopolitical_direction': opp.get('direction', 'positive'),
-                        })
+                            confidence = max(0.30, min(0.95, score / 100.0))
+                            geo_signals.append({
+                                'symbol': symbol,
+                                'action': 'BUY',
+                                'confidence': confidence,
+                                'position_size': 20,
+                                'rationale': f"Geopolitical: {event.get('title', 'Global event')} | {analysis.get('impact_type', 'unknown')}",
+                                'source': 'geopolitical_analysis',
+                                'trade_type': 'STOCK',
+                                'current_price': opp.get('price', 0),
+                                'geopolitical_event': event,
+                                'geopolitical_thesis': opp.get('thesis', ''),
+                                'geopolitical_score': score,
+                                'geopolitical_direction': opp.get('direction', 'positive'),
+                            })
 
+                            if len(geo_signals) >= max_geo_signals:
+                                break
                         if len(geo_signals) >= max_geo_signals:
                             break
-                    if len(geo_signals) >= max_geo_signals:
-                        break
 
-                if geo_signals:
-                    all_signals.extend(geo_signals)
-                    print(f"🌍 Added {len(geo_signals)} geopolitical signals")
+                    if geo_signals:
+                        all_signals.extend(geo_signals)
+                        print(f"🌍 Added {len(geo_signals)} geopolitical signals")
         except Exception as e:
             print(f"⚠️ Geopolitical analysis failed: {e}")
 
         # 5.5. Scan for underground/undiscovered stocks
         underground_signals = []
-        if s.underground_discovery:
+        budget = getattr(ctx, "budget_enforcer", None)
+        if budget and budget.should_skip_optional("underground"):
+            print("⏭️ Underground scan skipped (runtime budget)")
+        elif s.underground_discovery:
             print("\n🔍 SCANNING FOR UNDERGROUND STOCKS...")
             try:
                 underground_opportunities = s.underground_discovery.scan_for_opportunities()
@@ -2497,7 +2612,10 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
                     "(none classified as display trades this cycle)"
                 )
         else:
-            s._display_unified_results(regular_trades, overnight_moonshots, ctx=ctx)
+            try:
+                s._display_unified_results(regular_trades, overnight_moonshots, ctx=ctx)
+            except Exception as display_err:
+                print(f"⚠️ Display/reporting error (non-fatal): {display_err}")
 
         return all_signals, news_items
 
@@ -3076,21 +3194,46 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
         # ADD DAY TRADING STOCKS
         day_trading_opportunities = []
         print("\n📈 Scanning for day trading stocks...")
-        
-        # Extract symbols from news for dynamic scanning
-        news_symbols = []
+
+        # Build ranked Symbol Coalition from ingest — rank first, then local resolve + one market batch
+        from utils.symbol_coalition import (
+            apply_coalition_to_news_item,
+            build_symbol_coalition,
+            fetch_coalition_market_batch,
+            resolve_coalition_local,
+        )
+
+        coalition = build_symbol_coalition(getattr(ctx, "cycle_data", None), config=ctx.config)
+        resolve_coalition_local(coalition, cycle_data=getattr(ctx, "cycle_data", None))
+        history_batch = fetch_coalition_market_batch(coalition, getattr(ctx, "market_cache", None))
+        ctx.symbol_coalition = coalition
+
+        # Prefer coalition symbols; fall back to news_items extraction
+        news_symbols = list(coalition.symbols)
         for item in news_items:
             symbol = item.get('symbol', '')
-            if symbol and symbol not in news_symbols and not symbol.startswith('KX'):
+            if symbol and symbol not in news_symbols and not str(symbol).startswith('KX'):
                 news_symbols.append(symbol)
+            apply_coalition_to_news_item(item, coalition)
         
         # Get current bankroll from portfolio manager
         current_bankroll = s.real_portfolio.state["available_capital"]
 
+        coalition_boost = {e.symbol: coalition.boost_for_symbol(e.symbol) for e in coalition.entries}
+
+        # Heavy-mover / new-circulation watch list (shared history batch)
+        heavy_movers = s.day_trading_scanner.scan_heavy_movers(
+            limit=10,
+            additional_symbols=news_symbols,
+            history_batch=history_batch,
+            coalition_boost=coalition_boost,
+        )
+
         day_trading_signals = s.day_trading_scanner.scan_momentum_stocks(
             limit=30, 
             additional_symbols=news_symbols,
-            bankroll=current_bankroll
+            bankroll=current_bankroll,
+            history_batch=history_batch,
         )
         
         # Convert day trading signals to news items format for unified processing
@@ -3105,6 +3248,7 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
                 'catalyst_type': signal['catalyst_type'],
                 'source': 'day_trading'
             }
+            apply_coalition_to_news_item(news_item, coalition)
             news_items.append(news_item)
             
             # Run stock simulation for day trading signal
@@ -3167,40 +3311,77 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
                 'day_trading_data': signal
             }
             day_trading_opportunities.append(day_trading_opportunity)
+
+        # Ensure heavy-mover watch names also enter unified analysis even if buy-signal scan missed them
+        existing_dt_symbols = {
+            str(opp.get("symbol", "")).upper() for opp in day_trading_opportunities
+        }
+        for mover in heavy_movers:
+            sym = str(mover.get("symbol", "")).upper()
+            if not sym or sym in existing_dt_symbols:
+                continue
+            price = float(mover.get("price") or 0)
+            title = mover.get("reason") or f"{sym} new circulation watch"
+            news_items.append({
+                "symbol": sym,
+                "title": title,
+                "sector": mover.get("sector", "Technology"),
+                "industry": "Technology",
+                "avg_volume": mover.get("avg_volume", 0),
+                "market_cap": 0,
+                "catalyst_type": "NewCirculation",
+                "source": "day_trading",
+            })
+            day_trading_opportunities.append({
+                "symbol": sym,
+                "title": title,
+                "source": "day_trading",
+                "sentiment": 0.6,
+                "catalyst_score": min(0.9, max(0.4, float(mover.get("rank_score", 0) or 0) / 50.0)),
+                "sector": mover.get("sector", "Technology"),
+                "current_price": price,
+                "target_price": round(price * 1.05, 2) if price else None,
+                "day_trading_data": {
+                    "symbol": sym,
+                    "action": "WATCH",
+                    "entry_price": price,
+                    "change_pct": mover.get("change_pct"),
+                    "volume_ratio": mover.get("volume_ratio"),
+                    "rsi": mover.get("rsi"),
+                    "reason": title,
+                    "rank_score": mover.get("rank_score"),
+                    "source": "heavy_mover_watch",
+                    "catalyst_type": "NewCirculation",
+                },
+            })
+            existing_dt_symbols.add(sym)
         
         print(f"📊 Total items after adding day trading stocks: {len(news_items)}")
         
-        # Post day trading signals directly to Telegram (separate from Kalshi)
-        if s.telegram_bot and day_trading_opportunities:
-            print(f"\n📈 Posting {len(day_trading_opportunities)} day trading signals to Telegram...")
-            for opp in day_trading_opportunities:
-                try:
-                    if should_block_prediction_trade_post(s.config, opp):
-                        continue
-                    signal_data = opp.get('day_trading_data', {})
-                    if should_block_prediction_trade_post(s.config, signal_data):
-                        continue
-
-                    sym = str(signal_data.get('symbol', opp.get('symbol', ''))).upper()
-                    action = str(signal_data.get('action', 'BUY')).upper()
-                    post_key = f"DAYTRADE:{sym}:{action}"
-                    if post_key in s.posted_signals:
-                        continue
-                    
-                    # ADD RISK-FIRST VALIDATION
-                    is_valid, risk_msg = s.validate_risk_first(signal_data, ctx=ctx)
-                    if not is_valid:
-                        print(f"   🛑 Signal {signal_data.get('symbol') or 'N/A'} rejected: {risk_msg}")
-                        continue
-                    
-                    formatted_message = s.telegram_bot.format_stock_signal_message(signal_data)
-                    result = s.telegram_bot.send_message(formatted_message)
-                    if result:
-                        s.posted_signals.add(post_key)
-                        s._save_posted_signals()  # Persist to disk
-                    print(f"   📱 Posted {signal_data.get('symbol') or 'N/A'} to Telegram: {result}")
-                except Exception as e:
-                    print(f"   ❌ Failed to post {opp.get('symbol') or 'N/A'} to Telegram: {e}")
+        # One ranked heavy-mover watch list to Telegram (not per-stock BUY alerts)
+        if s.telegram_bot and heavy_movers:
+            try:
+                fingerprint = ",".join(
+                    sorted(str(m.get("symbol", "")).upper() for m in heavy_movers if m.get("symbol"))
+                )
+                post_key = f"HEAVY_MOVERS:{fingerprint}"
+                if post_key in s.posted_signals:
+                    print(f"\n📈 Heavy mover watch list already posted this set ({len(heavy_movers)} names) — skip")
+                else:
+                    print(f"\n📈 Posting heavy mover watch list ({len(heavy_movers)} stocks) to Telegram...")
+                    formatted_message = s.telegram_bot.format_heavy_mover_watchlist(heavy_movers)
+                    if formatted_message:
+                        result = await s._telegram_send_async(formatted_message)
+                        if result:
+                            s.posted_signals.add(post_key)
+                            s._save_posted_signals()
+                        print(f"   📱 Heavy mover watch list posted: {result}")
+                    else:
+                        print("   ⚠️ Heavy mover watch list formatter returned empty")
+            except Exception as e:
+                print(f"   ❌ Failed to post heavy mover watch list to Telegram: {e}")
+        elif not heavy_movers:
+            print("\n📈 No heavy movers / new circulation candidates this cycle — no watch list alert")
         
         if not news_items:
             print("💤 No real trading opportunities found from news sources")
@@ -3540,7 +3721,16 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
             revisit_news = s.skipped_opportunity_watchlist.get_revisit_news_items(
                 existing_syms, s.robust_price_fetcher
             )
-            if revisit_news:
+            budget = getattr(ctx, "budget_enforcer", None)
+            skip_revisit = not getattr(ctx, "run_deep_discovery", True)
+            if budget and budget.should_skip_optional("revisit_monte_carlo"):
+                skip_revisit = True
+            if skip_revisit:
+                if not getattr(ctx, "run_deep_discovery", True):
+                    print("⏭️ Skipped-opportunity revisit skipped (fast cycle — deep discovery not due)")
+                else:
+                    print("⏭️ Skipped-opportunity revisit skipped (runtime budget)")
+            elif revisit_news:
                 print(f"\n🔁 Skipped-opportunity revisit: injecting {len(revisit_news)} symbols for re-analysis")
                 for rn in revisit_news:
                     sym_r = str(rn.get("symbol", "")).upper()
@@ -3562,6 +3752,18 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
                 )
             except Exception:
                 cycle_price_map = {}
+
+        try:
+            from utils.news_cycle_helpers import deep_investigate_high_potential
+            supplemental = await deep_investigate_high_potential(
+                s.news_engine,
+                news_items[:40],
+                config=ctx.config,
+            )
+            if supplemental:
+                news_items = supplemental + news_items
+        except Exception as deep_err:
+            print(f"   ⚠️ Deep news investigation skipped: {deep_err}")
 
         if not news_items:
             print("💤 No news items to analyze - skipping signal generation")
@@ -3811,11 +4013,20 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
                         edge = 0.0
 
                 # Kalshi engine pop_from_sim is 0-1; rescale to 0-100 for unified POP gates
+                pop_raw = analysis.get('pop_from_sim')
+                if pop_raw is None:
+                    pop_raw = opp.get('pop_from_sim')
+                if pop_raw is None:
+                    continue
                 try:
-                    pop_raw = float(analysis.get('pop_from_sim', opp.get('pop_from_sim', 0.5)) or 0.5)
-                except Exception:
-                    pop_raw = 0.5
-                pop_pct = max(10.0, min(95.0, pop_raw * 100.0))
+                    pop_raw = float(pop_raw)
+                except (TypeError, ValueError):
+                    continue
+                if pop_raw <= 0:
+                    continue
+                pop_pct = pop_raw * 100.0 if pop_raw <= 1.0 else pop_raw
+                if pop_pct <= 0:
+                    continue
 
                 # Pattern/divergence heuristics so quality gates can work
                 divergence_score = edge
@@ -4156,6 +4367,12 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
         else:
             print(f"📊 Classifying {len(all_signals)} signals for trading...")
             for signal in all_signals:
+                prepared = s._prepare_signal_for_display(signal, ctx=ctx)
+                if prepared is None:
+                    sym = display_safe.safe_str(display_safe.as_dict(signal).get('symbol'), '?')
+                    print(f"   ⏭️ Skipped {sym} — not display/trade ready (needs validated company, real price, volume, and confidence)")
+                    continue
+                signal = prepared
                 # Moonshot criteria: High potential + overnight timing + strong catalysts
                 is_moonshot = (
                     signal.get('potential_upside', 0) >= 2.0 and  # 2x+ potential (lowered from 3x)
@@ -4418,19 +4635,16 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
                             print(f"  ⏭️ {sym_skip}: prediction-market intel only — skip Telegram trade post")
                             continue
                         symbol = getattr(signal, 'symbol', None) or 'N/A'
-                        # Only post signals that clear dynamic POP & quality gates
-                        pop_from_sim = getattr(signal, 'pop_from_sim', 50)
-                        # Ensure minimum POP of 40% for stocks (avoid 0% values)
-                        if pop_from_sim < 40:
-                            pop_from_sim = 40
-                        # Enforce both dynamic regime gate and strict minimum to avoid default 50% noise
-                        min_required_pop = max(dynamic_pop_threshold, 40)  # Lowered to 40% for stocks
+                        pop_from_sim = resolve_pop_pct(signal)
+                        if pop_from_sim is None:
+                            print(f"  ❌ {symbol}: No real POP from simulation — BLOCKED")
+                            continue
+                        min_required_pop = max(dynamic_pop_threshold, 40)
                         print(f"  🔍 {symbol}: Checking POP {pop_from_sim:.1f}% vs minimum {min_required_pop:.1f}%")
                         if pop_from_sim < min_required_pop:
                             print(f"  ❌ {symbol}: POP {pop_from_sim:.1f}% - BELOW {min_required_pop:.1f}% threshold - BLOCKED")
                             continue
-                        else:
-                            print(f"  ✅ {symbol}: POP {pop_from_sim:.1f}% - PASSED POP filter")
+                        print(f"  ✅ {symbol}: POP {pop_from_sim:.1f}% - PASSED POP filter")
 
                         symbol_upper = getattr(signal, 'symbol', '').upper()
                         # Prefer any asset-specific crash assessment already attached to the signal
@@ -4451,7 +4665,10 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
                             continue
 
                         sim_results = getattr(signal, 'simulation_results', {}) or {}
-                        win_rate = sim_results.get('win_rate', pop_from_sim / 100)
+                        win_rate = sim_results.get('win_rate')
+                        if win_rate is None:
+                            print(f"  ❌ {symbol}: No real simulation win rate — BLOCKED")
+                            continue
 
                         divergence_analysis = getattr(signal, 'divergence_analysis', {}) or {}
                         divergence_score = divergence_analysis.get('divergence_score', getattr(signal, 'divergence_score', 0))
@@ -5132,6 +5349,14 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
     async def run_full_cycle(self, *, cycle_attempt: int = 1):
         """Run complete unified trading cycle with all analysis methods"""
         from core.supervisor import CycleContext
+        from engines.news_engine_integrated import IntegratedNewsSources
+        from utils.news_cycle_helpers import news_pipeline_config
+
+        pipe_cfg = news_pipeline_config(self.config)
+        IntegratedNewsSources.set_single_ingest_per_cycle(
+            bool(pipe_cfg.get("single_ingest_per_cycle", True))
+        )
+        IntegratedNewsSources.begin_cycle(cycle_attempt)
 
         self.group_coordinator.begin_cycle(cycle_attempt)
         run_deep = self.group_coordinator.cadence.is_due(
@@ -5156,6 +5381,10 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
         ctx = ApplicationContext.bind(self, cycle_stage_timings)
         ctx.run_deep_discovery = run_deep
         ctx.fast_risk_only = fast_risk_only
+        _cfg_data = self.config.data if hasattr(self.config, "data") else dict(self.config)
+        budget_enforcer = RuntimeBudgetEnforcer(_cfg_data)
+        budget_enforcer.begin_cycle()
+        ctx.budget_enforcer = budget_enforcer
         _stage_name = "preflight_and_risk"
         _stage_start = time.perf_counter()
         print("\n--- STAGE: preflight ---")
@@ -5194,10 +5423,14 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
         ctx.skip_news_signals = sup_ctx.skip_news_signals
 
         if sup_ctx.skip_news_signals:
+            cycle_stage_timings[_stage_name] = time.perf_counter() - _stage_start
             await self.worker_supervisor.run_worker("SignalGenerationWorker", sup_ctx)
+            self._print_cycle_profile(cycle_stage_timings, cycle_attempt=cycle_attempt)
             self.worker_supervisor.print_health_summary(
                 extra={"Execution": f"{self.execution_router.mode}, OK"},
             )
+            if hasattr(ctx, "budget_enforcer") and ctx.budget_enforcer:
+                ctx.budget_enforcer.print_exceeded_if_needed()
             self.group_coordinator.print_group_health()
             return []
 
@@ -5269,9 +5502,12 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
         except Exception as grade_err:
             print(f"⚠️ Outcome grader cycle failed: {grade_err}")
 
+        self._print_cycle_profile(cycle_stage_timings, cycle_attempt=cycle_attempt)
         self.worker_supervisor.print_health_summary(
             extra={"Execution": f"{self.execution_router.mode}, OK"},
         )
+        if hasattr(ctx, "budget_enforcer") and ctx.budget_enforcer:
+            ctx.budget_enforcer.print_exceeded_if_needed()
         self.group_coordinator.print_group_health()
 
         # Save decision snapshot if available
@@ -5341,15 +5577,34 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
                 continue
 
             try:
-                # Company Validation: Only process real, valid companies (not just AI)
-                fact_check = ps.news_engine._fact_check_company(news_item)
-                if not isinstance(fact_check, dict):
-                    fact_check = {'is_valid': False, 'validation_score': 0.0, 'company_info': {}}
-                if 'is_valid' not in fact_check:
-                    fact_check['is_valid'] = False
-                fact_check = get_resolver().enrich_fact_check(
-                    fact_check, news_item.get('symbol'), news_item.get('title')
-                )
+                # Coalition already resolved this name locally — skip heavy fact-check chain
+                if news_item.get("coalition_resolved") and news_item.get("fact_check"):
+                    fact_check = news_item["fact_check"]
+                    if not isinstance(fact_check, dict):
+                        fact_check = {
+                            "is_valid": True,
+                            "validation_score": 0.7,
+                            "company_info": {
+                                "symbol": symbol,
+                                "name": news_item.get("company_name") or symbol,
+                                "company_name": news_item.get("company_name") or symbol,
+                                "sector": news_item.get("sector") or "Equities",
+                                "industry": news_item.get("industry") or "Equities",
+                                "resolver_status": news_item.get("resolver_status") or "coalition_local",
+                            },
+                            "risk_level": "MEDIUM",
+                        }
+                    print(f"  ✓ Coalition skip fact-check: {symbol}")
+                else:
+                    # Company Validation: Only process real, valid companies (not just AI)
+                    fact_check = ps.news_engine._fact_check_company(news_item)
+                    if not isinstance(fact_check, dict):
+                        fact_check = {'is_valid': False, 'validation_score': 0.0, 'company_info': {}}
+                    if 'is_valid' not in fact_check:
+                        fact_check['is_valid'] = False
+                    fact_check = get_resolver().enrich_fact_check(
+                        fact_check, news_item.get('symbol'), news_item.get('title')
+                    )
                 news_item['fact_check'] = fact_check
 
                 # Debug: Check what fact_check returned
@@ -5376,13 +5631,46 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
 
                 # Debug: Show what company we're analyzing
                 company_info = fact_check.get('company_info', {})
-                real_ticker = company_info.get('real_ticker', False)
-                avg_volume = company_info.get('avg_volume', 'N/A')
+                market_row = {
+                    "symbol": news_item.get("symbol"),
+                    "fact_check": fact_check,
+                    "current_price": news_item.get("current_price"),
+                }
+                enrich_signal_market_fields(
+                    market_row,
+                    market_cache=getattr(ps, "market_cache", None),
+                    price_fetcher=getattr(ps, "robust_price_fetcher", None),
+                )
+                fact_check = market_row.get("fact_check") or fact_check
+                news_item["fact_check"] = fact_check
+                if market_row.get("current_price"):
+                    news_item["current_price"] = market_row["current_price"]
+                if market_row.get("avg_volume"):
+                    news_item["avg_volume"] = market_row["avg_volume"]
+                company_info = fact_check.get("company_info", {}) if isinstance(fact_check, dict) else company_info
+
+                avg_volume = company_info.get('avg_volume') or market_row.get('avg_volume')
                 try:
-                    avg_volume_display = f"{int(avg_volume):,}"
-                except Exception:
-                    avg_volume_display = str(avg_volume)
-                price_range = company_info.get('price_range', 'N/A')
+                    avg_vol_int = int(avg_volume)
+                    avg_volume_display = f"{avg_vol_int:,}" if avg_vol_int > 0 else None
+                except (TypeError, ValueError):
+                    avg_volume_display = None
+
+                price_range = company_info.get('price_range')
+                if not price_range or str(price_range).strip().upper() in ("N/A", "NA", ""):
+                    try:
+                        _cp = float(
+                            market_row.get("current_price")
+                            or news_item.get("current_price")
+                            or 0
+                        )
+                        price_range = f"${_cp:.2f}" if _cp > 0 else None
+                    except (TypeError, ValueError):
+                        price_range = None
+
+                if not avg_volume_display or not price_range:
+                    print(f"  ❌ Skipping {news_item.get('symbol')} - missing real volume or price data")
+                    continue
 
                 sector = get_resolver().coalesce(
                     news_item.get('sector'),
@@ -5396,6 +5684,9 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
                 company_name = ps._resolve_company_label(
                     news_item.get('symbol'), news_item.get('title'), company_info
                 )
+                if is_placeholder(company_name):
+                    print(f"  ❌ Skipping {news_item.get('symbol')} - no verified company name")
+                    continue
 
                 print(
                     f"  🎯 Real Company: {news_item.get('symbol')} - "
@@ -5598,6 +5889,11 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
                     # Only require basic pattern detection and minimal confidence
                     if pattern_strength > 0.01 and unified_confidence > 0.05:  # ULTRA LOW thresholds for more opportunities
 
+                        budget_mc = getattr(ctx, "budget_enforcer", None)
+                        if budget_mc and not budget_mc.allow_monte_carlo():
+                            print(f"   ⏭️ Monte Carlo skipped for {symbol} (runtime budget / cap)")
+                            continue
+
                         # Step 4: Monte Carlo simulation for realistic predictions
                         monte_carlo = get_monte_carlo_engine(cfg)
 
@@ -5708,9 +6004,19 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
                         # CRITICAL: Scale confidence from simulation win rate (reality check)
                         # If AI thinks 90% confident but sim shows 30% win rate, confidence becomes 50%
                         initial_confidence = unified_confidence
-                        sim_win_rate = sim_results['win_rate']
+                        sim_win_rate = sim_results.get('win_rate') if sim_results else None
+                        try:
+                            sim_win_f = float(sim_win_rate) if sim_win_rate is not None else 0.0
+                        except (TypeError, ValueError):
+                            sim_win_f = 0.0
+                        if sim_win_f <= 0:
+                            print(
+                                f"  ❌ Skipping {symbol} — simulation win rate unavailable or 0% "
+                                "(need real Monte Carlo result)"
+                            )
+                            continue
 
-                        sim_validation = compare_sim_validation(initial_confidence, sim_win_rate)
+                        sim_validation = compare_sim_validation(initial_confidence, sim_win_f)
                         if sim_validation["status"] == "MATCH":
                             final_confidence = initial_confidence
                         else:
@@ -5811,8 +6117,9 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
                             'unified_confidence': unified_confidence,
                             'sim_scaled_confidence': sim_results.get('sim_scaled_confidence', final_confidence),
                             'pop_from_sim': sim_results.get('pop_from_sim', 0),
-                            'initial_confidence': initial_confidence,  # For debugging
-                            'sim_win_rate': sim_win_rate,  # For debugging
+                            'initial_confidence': initial_confidence,
+                            'sim_win_rate': sim_win_f,
+                            'company_validation': bool(fact_check.get('is_valid')),
                             'title': news_item.get('title', ''),  # Add title for moonshot detection
                             'current_price': real_price,
                             'entry_price': real_price,
@@ -5832,6 +6139,11 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
 
                         ps._enrich_signal_metadata(signal, news_item)
                         apply_fetched_price(signal, real_price)
+                        enrich_signal_market_fields(
+                            signal,
+                            market_cache=getattr(ps, "market_cache", None),
+                            price_fetcher=getattr(ps, "robust_price_fetcher", None),
+                        )
                         quality = assess_signal_data_quality(signal)
                         signal['data_quality'] = quality.value
                         if quality == SignalDataQuality.MISSING_PRICE:
@@ -5840,8 +6152,9 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
                         if quality == SignalDataQuality.INVALID_COMPANY:
                             print(f"  ❌ DATA QUALITY: {symbol} - invalid company, skipping")
                             continue
-                        if quality == SignalDataQuality.PARTIAL_PRICE_ONLY:
-                            print(f"  ⚠️ DATA QUALITY: {symbol} - PARTIAL (volume N/A), alert-only eligible")
+                        if quality != SignalDataQuality.COMPLETE:
+                            print(f"  ❌ DATA QUALITY: {symbol} - incomplete market data (volume/price/name), skipping")
+                            continue
                         signals.append(signal)
 
             except Exception as e:
@@ -5869,122 +6182,123 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
 
             max_concurrent = int(cfg.get("trading.max_concurrent_trades", 8) or 8)
 
-            # UNITS-BASED POSITION SIZING (Sports Betting Style)
-            print(f"[UNITS SIZING] 🎯 Calculating units-based positions for {len(signals)} signals...")
-            
-            # Update unit value based on current bankroll
-            ps.unit_value = bankroll * (ps.unit_size_percent / 100)
-            ps.standard_trade_size = ps.unit_value * ps.standard_units
-            
-            print(f"[UNITS SIZING] 💰 1 Unit = ${ps.unit_value:.2f} ({ps.unit_size_percent}% of ${bankroll:.0f} bankroll)")
-            print(f"[UNITS SIZING] 📊 Standard Trade = {ps.standard_units} units = ${ps.standard_trade_size:.2f}")
+            if bankroll <= 0:
+                apply_units_sizing(ps, signals, cfg, status=status)
+            else:
+                # UNITS-BASED POSITION SIZING (Sports Betting Style)
+                print(f"[UNITS SIZING] 🎯 Calculating units-based positions for {len(signals)} signals...")
+                
+                # Update unit value based on current bankroll
+                ps.unit_value = bankroll * (ps.unit_size_percent / 100)
+                ps.standard_trade_size = ps.unit_value * ps.standard_units
+                
+                print(f"[UNITS SIZING] 💰 1 Unit = ${ps.unit_value:.2f} ({ps.unit_size_percent}% of ${bankroll:.0f} bankroll)")
+                print(f"[UNITS SIZING] 📊 Standard Trade = {ps.standard_units} units = ${ps.standard_trade_size:.2f}")
 
-            # If recent performance is not positive, scale sizes down even more
-            performance_scale = 1.0
-            try:
-                recent_pnl = float(status.get('daily_pnl', 0.0) or 0.0)
-                if recent_pnl <= 0:
+                # If recent performance is not positive, scale sizes down even more
+                performance_scale = 1.0
+                try:
+                    recent_pnl = float(status.get('daily_pnl', 0.0) or 0.0)
+                    if recent_pnl <= 0:
+                        performance_scale = 0.5
+                    elif recent_pnl < bankroll * 0.01:
+                        performance_scale = 0.7
+                except Exception:
                     performance_scale = 0.5
-                elif recent_pnl < bankroll * 0.01:
-                    performance_scale = 0.7
-            except Exception:
-                performance_scale = 0.5
 
-            performance_scale *= bankroll / bankroll  # Simplified: use bankroll instead of portfolio value
+                max_conf_pct = max(
+                    (normalize_confidence_to_pct(s.get('confidence', 0.0)) for s in signals),
+                    default=0.0,
+                )
+                if max_conf_pct <= 0:
+                    max_conf_pct = 100.0
 
-            max_conf_pct = max(
-                (normalize_confidence_to_pct(s.get('confidence', 0.0)) for s in signals),
-                default=0.0,
-            )
-            if max_conf_pct <= 0:
-                max_conf_pct = 100.0
+                for s in signals:
+                    try:
+                        raw_size = float(s.get('position_size', 0.0) or 0.0)
+                    except Exception:
+                        raw_size = 0.0
 
-            for s in signals:
-                try:
-                    raw_size = float(s.get('position_size', 0.0) or 0.0)
-                except Exception:
-                    raw_size = 0.0
+                    if raw_size <= 0:
+                        continue
 
-                if raw_size <= 0:
-                    continue
+                    conf_pct = normalize_confidence_to_pct(s.get('confidence', 0.0))
+                    conf_weight = 0.5 + 0.5 * (conf_pct / max_conf_pct)
 
-                conf_pct = normalize_confidence_to_pct(s.get('confidence', 0.0))
-                conf_weight = 0.5 + 0.5 * (conf_pct / max_conf_pct)
+                    # Calculate units based on confidence (1-10 units)
+                    units = max(ps.min_units, min(ps.max_units, round(conf_weight * ps.standard_units)))
+                    
+                    # Convert units to dollar amount
+                    position_size = units * ps.unit_value * performance_scale
+                    
+                    symbol = (s.get("symbol") or "N/A") if isinstance(s, dict) else (getattr(s, "symbol", None) or "N/A")
+                    print(f"[UNITS] 🎯 {symbol}: {units} units = ${position_size:.2f} (confidence {conf_pct:.0f}%)")
 
-        # UNITS-BASED POSITION CALCULATION (Sports Betting Style)
-                # Calculate units based on confidence (1-10 units)
-                units = max(ps.min_units, min(ps.max_units, round(conf_weight * ps.standard_units)))
-                
-                # Convert units to dollar amount
-                position_size = units * ps.unit_value
-                
-                symbol = (s.get("symbol") or "N/A") if isinstance(s, dict) else (getattr(s, "symbol", None) or "N/A")
-                print(f"[UNITS] 🎯 {symbol}: {units} units = ${position_size:.2f} (confidence {conf_pct:.0f}%)")
+                    # Also scale by POP / simulated chance of profit
+                    try:
+                        pop = float(s.get('pop_from_sim', 0.0) or 0.0)
+                    except Exception:
+                        pop = 0.0
 
-                # Also scale by POP / simulated chance of profit
-                try:
-                    pop = float(s.get('pop_from_sim', 0.0) or 0.0)
-                except Exception:
-                    pop = 0.0
-
-                if pop <= 40:
-                    pop_factor = 0.3
-                elif pop <= 50:
-                    pop_factor = 0.5
-                elif pop <= 60:
-                    pop_factor = 0.8
-                else:
-                    pop_factor = 1.0
-
-                # Apply POP scaling to units
-                units = int(units * pop_factor)
-                units = max(1, units)  # Minimum 1 unit
-                position_size = units * ps.unit_value
-
-                print(f"[UNITS] 📊 {symbol}: After POP scaling: {units} units = ${position_size:.2f}")
-
-                sim = s.get('simulation_results', {}) or {}
-                try:
-                    avg_pnl = float(sim.get('avg_pnl', 0.0) or 0.0)
-                except Exception:
-                    avg_pnl = 0.0
-                try:
-                    win_rate = float(sim.get('win_rate', 0.0) or 0.0)
-                except Exception:
-                    win_rate = 0.0
-                try:
-                    p10 = float(sim.get('percentile_10', 0.0) or 0.0)
-                except Exception:
-                    p10 = 0.0
-
-                ev_factor = 1.0
-                if avg_pnl <= 0.0 or win_rate < 0.35:
-                    ev_factor = 0.25
-                else:
-                    typical_loss = abs(p10) if p10 < 0.0 else 0.0
-                    if typical_loss > 0.0:
-                        pl_ratio = avg_pnl / typical_loss
-                        if pl_ratio < 1.5:
-                            ev_factor = 0.5
-                        elif pl_ratio >= 3.0:
-                            ev_factor = 1.0
-                        else:
-                            ev_factor = 0.5 + (pl_ratio - 1.5) * (0.5 / 1.5)
+                    if pop <= 40:
+                        pop_factor = 0.3
+                    elif pop <= 50:
+                        pop_factor = 0.5
+                    elif pop <= 60:
+                        pop_factor = 0.8
                     else:
-                        ev_factor = 0.5
+                        pop_factor = 1.0
 
-                # Apply EV scaling to units
-                units = int(units * ev_factor)
-                units = max(1, units)  # Minimum 1 unit
-                position_size = units * ps.unit_value
+                    # Apply POP scaling to units
+                    units = int(units * pop_factor)
+                    units = max(1, units)  # Minimum 1 unit
+                    position_size = units * ps.unit_value * performance_scale
 
-                print(f"[UNITS] 🎲 {symbol}: After EV scaling: {units} units = ${position_size:.2f}")
+                    print(f"[UNITS] 📊 {symbol}: After POP scaling: {units} units = ${position_size:.2f}")
 
-                # ASSIGN UNITS-BASED POSITION SIZE TO SIGNAL
-                s['position_size'] = position_size
-                s['units'] = units
+                    sim = s.get('simulation_results', {}) or {}
+                    try:
+                        avg_pnl = float(sim.get('avg_pnl', 0.0) or 0.0)
+                    except Exception:
+                        avg_pnl = 0.0
+                    try:
+                        win_rate = float(sim.get('win_rate', 0.0) or 0.0)
+                    except Exception:
+                        win_rate = 0.0
+                    try:
+                        p10 = float(sim.get('percentile_10', 0.0) or 0.0)
+                    except Exception:
+                        p10 = 0.0
 
-                print(f"[UNITS] ✅ FINAL: {symbol}: {units} units = ${position_size:.2f} assigned to signal")
+                    ev_factor = 1.0
+                    if avg_pnl <= 0.0 or win_rate < 0.35:
+                        ev_factor = 0.25
+                    else:
+                        typical_loss = abs(p10) if p10 < 0.0 else 0.0
+                        if typical_loss > 0.0:
+                            pl_ratio = avg_pnl / typical_loss
+                            if pl_ratio < 1.5:
+                                ev_factor = 0.5
+                            elif pl_ratio >= 3.0:
+                                ev_factor = 1.0
+                            else:
+                                ev_factor = 0.5 + (pl_ratio - 1.5) * (0.5 / 1.5)
+                        else:
+                            ev_factor = 0.5
+
+                    # Apply EV scaling to units
+                    units = int(units * ev_factor)
+                    units = max(1, units)  # Minimum 1 unit
+                    position_size = units * ps.unit_value * performance_scale
+
+                    print(f"[UNITS] 🎲 {symbol}: After EV scaling: {units} units = ${position_size:.2f}")
+
+                    # ASSIGN UNITS-BASED POSITION SIZE TO SIGNAL
+                    s['position_size'] = position_size
+                    s['units'] = units
+                    s['sizing_status'] = 'OK'
+
+                    print(f"[UNITS] ✅ FINAL: {symbol}: {units} units = ${position_size:.2f} assigned to signal")
 
         if skipped_missing_symbol:
             print(f"  Skipped {skipped_missing_symbol} news items: no symbol after title enrichment")
@@ -6124,6 +6438,233 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
                     f"confidence {before:.1%} → {after:.1%} based on {len(bullish_children)} strong ecosystem signals"
                 )
 
+    def _prepare_signal_for_display(
+        self,
+        signal: Any,
+        *,
+        ctx: Optional[ApplicationContext] = None,
+    ) -> Optional[Dict]:
+        """Ensure signal has validated company + real price before showing or trading."""
+        sig = display_safe.as_dict(signal)
+        if not sig:
+            return None
+
+        sym = str(sig.get("symbol") or "").upper().strip()
+        if not sym or sym.startswith("KX"):
+            return None
+
+        title = sig.get("title")
+        fc = sig.get("fact_check") if isinstance(sig.get("fact_check"), dict) else {}
+        if not fc.get("is_valid"):
+            try:
+                if self.news_engine:
+                    item = {"symbol": sym, "title": title or "", "summary": sig.get("rationale", "")}
+                    fc = self.news_engine._fact_check_company(item)
+                    fc = get_resolver().enrich_fact_check(fc, sym, title)
+                    sig["fact_check"] = fc
+            except Exception:
+                fc = sig.get("fact_check") or {}
+
+        if not fc.get("is_valid"):
+            return None
+
+        sig["company_validation"] = True
+        company_info = fc.get("company_info") if isinstance(fc.get("company_info"), dict) else {}
+        fc["company_info"] = company_info
+
+        price = sig.get("current_price") or sig.get("entry_price")
+        try:
+            price = float(price) if price is not None else None
+        except (TypeError, ValueError):
+            price = None
+        if not price or price <= 0:
+            price = self._get_cached_price(sym, ctx)
+        if not price or price <= 0:
+            try:
+                price = self.robust_price_fetcher.get_real_price(sym)
+            except Exception:
+                price = None
+        if not price or price <= 0:
+            return None
+
+        apply_fetched_price(sig, price)
+        company_info["price_range"] = f"${price:.2f}"
+        fc["company_info"] = company_info
+        sig["fact_check"] = fc
+
+        enrich_signal_market_fields(
+            sig,
+            market_cache=getattr(self, "market_cache", None),
+            price_fetcher=self.robust_price_fetcher,
+        )
+        fc = sig.get("fact_check") if isinstance(sig.get("fact_check"), dict) else fc
+        company_info = fc.get("company_info") if isinstance(fc.get("company_info"), dict) else company_info
+
+        if sig.get("initial_confidence") is None:
+            sig["initial_confidence"] = sig.get("unified_confidence", sig.get("confidence", 0))
+
+        sim_wr = sig.get("sim_win_rate")
+        if sim_wr is None and isinstance(sig.get("simulation_results"), dict):
+            sim_wr = sig["simulation_results"].get("win_rate")
+        if sim_wr is not None:
+            try:
+                sig["sim_win_rate"] = float(sim_wr)
+            except (TypeError, ValueError):
+                pass
+
+        self._enrich_signal_metadata(sig)
+        if normalize_confidence_to_pct(sig.get("confidence") or sig.get("unified_confidence") or 0) <= 0:
+            init = sig.get("initial_confidence") or sig.get("unified_confidence")
+            if normalize_confidence_to_pct(init or 0) > 0:
+                sig["confidence"] = init
+        return sig if is_display_eligible(sig) else None
+
+    def _print_signal_display_row(self, signal, ps, *, moonshot: bool = False) -> None:
+        """Print one signal for unified results display; never raises."""
+        fact_check = display_safe.as_dict(signal).get('fact_check', {}) or {}
+        if not isinstance(fact_check, dict):
+            fact_check = {}
+        company_info = fact_check.get('company_info', {}) or {}
+        if not isinstance(company_info, dict):
+            company_info = {}
+
+        avg_volume = company_info.get('avg_volume') or display_safe.as_dict(signal).get('avg_volume')
+        try:
+            avg_vol_int = int(avg_volume)
+        except (TypeError, ValueError):
+            return
+        if avg_vol_int <= 0:
+            return
+
+        full_company_name = ps._resolve_company_label(
+            display_safe.as_dict(signal).get('symbol'),
+            display_safe.as_dict(signal).get('title'),
+            company_info,
+        )
+        if is_placeholder(full_company_name):
+            return
+
+        initial_conf = normalize_confidence_to_pct(display_safe.as_dict(signal).get('initial_confidence', 0))
+        final_conf = normalize_confidence_to_pct(display_safe.as_dict(signal).get('confidence', 0))
+        if final_conf <= 0:
+            return
+        sim_win = normalize_confidence_to_pct(display_safe.as_dict(signal).get('sim_win_rate', 0))
+
+        avg_volume_display = f"{avg_vol_int:,}"
+        price_range = company_info.get('price_range')
+        if not price_range or str(price_range).strip().upper() in ("N/A", "NA", ""):
+            cp = display_safe.as_dict(signal).get('current_price') or display_safe.as_dict(signal).get('entry_price')
+            try:
+                price_range = f"${float(cp):.2f}"
+            except (TypeError, ValueError):
+                return
+
+        symbol = str(display_safe.as_dict(signal).get('symbol') or "").strip().upper()
+        if not symbol:
+            return
+        action = display_safe.safe_str(display_safe.as_dict(signal).get('action'), "HOLD")
+
+        if symbol.startswith('KX'):
+            if action == 'BUY_CALL':
+                action = 'BUY_YES'
+            elif action == 'BUY_PUT':
+                action = 'BUY_NO'
+        else:
+            if action == 'BUY_CALL':
+                action = 'BUY'
+            elif action == 'BUY_PUT':
+                action = 'SELL'
+
+        print(f"   🎯 TRADE: {symbol} {action} - {full_company_name}")
+        if sim_win > 0:
+            print(f"   📊 Confidence: {final_conf:.1f}% (AI: {initial_conf:.1f}% → Reality Check: {sim_win:.1f}%)")
+        else:
+            print(f"   📊 Confidence: {final_conf:.1f}% (AI: {initial_conf:.1f}%)")
+
+        pop = resolve_pop_pct(display_safe.as_dict(signal))
+        potential = display_safe.safe_float(display_safe.as_dict(signal).get('potential_upside'), -1.0)
+        pop_parts = []
+        if pop is not None and pop > 0:
+            pop_parts.append(f"POP: {pop:.1f}%")
+        if potential > 0:
+            pop_parts.append(f"Potential: {potential:.1f}X")
+        if pop_parts:
+            print(f"   💰 {' | '.join(pop_parts)}")
+
+        sim_results = display_safe.as_dict(signal).get('simulation_results', {}) or {}
+        if not isinstance(sim_results, dict):
+            sim_results = {}
+        avg_pnl = display_safe.safe_float(sim_results.get('avg_pnl'), -1.0)
+        if avg_pnl > 0:
+            print(f"   💰 Sim Avg P&L: ${avg_pnl:.0f}")
+
+        proj = display_safe.as_dict(signal).get('price_projection')
+        display_price = price_range
+        if isinstance(proj, dict) and proj.get('current_price') is not None:
+            cp = display_safe.safe_float(proj.get('current_price'))
+            up = proj.get('upside_price')
+            down = proj.get('downside_price')
+            action_dir = action.upper()
+            if 'PUT' in action_dir or action == 'SELL':
+                if down is not None:
+                    print(
+                        f"   📉 Downside Floor: ${display_safe.safe_float(down):.2f} "
+                        f"({display_safe.safe_float(proj.get('downside_return_pct', 0)) * 100:.1f}% vs ${cp:.2f})"
+                    )
+            else:
+                if up is not None:
+                    print(
+                        f"   📈 Upside Target: ${display_safe.safe_float(up):.2f} "
+                        f"({display_safe.safe_float(proj.get('upside_return_pct', 0)) * 100:.1f}% vs ${cp:.2f})"
+                    )
+            if cp > 0:
+                display_price = f"${cp:.2f}"
+
+        optimal_days = int(display_safe.safe_float(sim_results.get('optimal_exit_day', 5), 5))
+        total_days = int(display_safe.safe_float(display_safe.as_dict(signal).get('days_to_expiry', 7), 7))
+        timeframe_type = display_safe.safe_str(display_safe.as_dict(signal).get('timeframe_type'), "STANDARD")
+        print(f"   📅 Timeframe: {total_days} days ({timeframe_type})")
+        if moonshot:
+            print(f"   🎯 Optimal Exit: Day {optimal_days} (Sim peak within {total_days}d window)")
+        else:
+            timeframe_reason = display_safe.safe_str(display_safe.as_dict(signal).get('timeframe_reasoning'), "Standard play")
+            print(f"   💡 Why: {timeframe_reason}")
+            print(f"   🎯 Optimal Exit: Day {optimal_days} (of {total_days})")
+
+        patterns = display_safe.patterns_text(signal)
+        if patterns and patterns.upper() not in ("N/A", "UNKNOWN"):
+            print(f"   📈 Patterns: {patterns}")
+        entry = display_safe.entry_action(signal)
+        if entry and entry.upper() not in ("N/A", "UNKNOWN"):
+            print(f"   ⏰ Action: {entry} → Exit Day {optimal_days}")
+        pos_label = display_safe.position_size_label(signal)
+        if pos_label and not pos_label.startswith("N/A"):
+            if moonshot:
+                stop = display_safe.exit_stop_label(signal)
+                if stop and not stop.startswith("N/A"):
+                    print(f"   💰 Position: {pos_label} | Stop: {stop}")
+                else:
+                    print(f"   💰 Position: {pos_label}")
+            else:
+                print(f"   💰 Position: {pos_label}")
+        print(
+            f"   ✅ Valid Company: {fact_check.get('is_valid', False)} | "
+            f"Risk: {display_safe.safe_str(fact_check.get('risk_level'), 'MEDIUM')}"
+        )
+        print(f"   📊 Company Info: {avg_volume_display} avg volume | Price: {display_price}")
+        print(f"   🎯 Company Status: ✅ VALIDATED")
+        print(f"   ⚡ Confidence Floor: {'✅ ABOVE 15%' if final_conf >= 15 else '❌ BELOW 15%'}")
+        if sim_win > 0:
+            print(f"   📊 WIN RATE: {sim_win:.1f}% chance of profit ({display_safe.win_rate_label(sim_win)})")
+            if initial_conf > final_conf + 1.0:
+                print(f"   ⚠️ REALITY CHECK: AI overconfident — adjusted from {initial_conf:.1f}% to {final_conf:.1f}%")
+            elif final_conf > initial_conf + 1.0 and initial_conf > 0:
+                print(f"   ℹ️ Confidence raised after simulation validation ({initial_conf:.1f}% → {final_conf:.1f}%)")
+        rationale = display_safe.rationale_text(signal)
+        if rationale and rationale.lower() not in ("unknown", "n/a"):
+            print(f"   🔍 Unified Analysis: {rationale}")
+        print()
+
     def _display_unified_results(
         self, regular_trades, overnight_moonshots, *, ctx: Optional[ApplicationContext] = None
     ):
@@ -6137,183 +6678,43 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
             print("\n🚀 OVERNIGHT MOONSHOTS (Can Explode Tonight/Tomorrow):")
             print("-" * 60)
             for signal in overnight_moonshots[:3]:  # Show top 3 moonshots
-                fact_check = signal.get('fact_check', {})
-                company_info = fact_check.get('company_info', {})
-                full_company_name = ps._resolve_company_label(
-                    signal.get('symbol'), signal.get('title'), company_info
-                )
-
-                initial_conf = signal.get('initial_confidence', 0) * 100
-                final_conf = signal.get('confidence', 0) * 100
-                sim_win = signal.get('sim_win_rate', 0) * 100
-
-                # Get company info for display
-                company_info = fact_check.get('company_info', {})
-                real_ticker = company_info.get('real_ticker', False)
-                avg_volume = company_info.get('avg_volume', 'N/A')
                 try:
-                    avg_volume_display = f"{int(avg_volume):,}"
-                except Exception:
-                    avg_volume_display = str(avg_volume)
-                price_range = company_info.get('price_range', 'N/A')
-
-                symbol = signal.get('symbol') or 'N/A'
-                action = signal.get('action') or 'HOLD'
-                
-                # Convert options terminology to appropriate format
-                if symbol.startswith('KX'):
-                    # Kalshi prediction markets use YES/NO
-                    if action == 'BUY_CALL':
-                        action = 'BUY_YES'
-                    elif action == 'BUY_PUT':
-                        action = 'BUY_NO'
-                else:
-                    # Regular stocks use simple BUY/SELL
-                    if action == 'BUY_CALL':
-                        action = 'BUY'
-                    elif action == 'BUY_PUT':
-                        action = 'SELL'
-                
-                print(f"   🎯 TRADE: {symbol} {action} - {full_company_name}")
-
-                print(f"   📊 Confidence: {final_conf:.1f}% (AI: {initial_conf:.1f}% → Reality Check: {sim_win:.1f}%)")
-                print(f"   💰 POP: {signal.get('pop_from_sim', 50):.1f}% | Potential: {signal.get('potential_upside', 0):.1f}X")
-                print(f"   💰 Sim Avg P&L: ${signal.get('simulation_results', {}).get('avg_pnl', 0):.0f}")
-                proj = signal.get('price_projection')
-                display_price = price_range
-                if proj and proj.get('current_price') is not None:
-                    cp = proj['current_price']
-                    up = proj.get('upside_price')
-                    down = proj.get('downside_price')
-                    action_dir = str(signal.get('action', '')).upper()
-                    if 'PUT' in action_dir:
-                        if down is not None:
-                            print(f"   📉 Downside Floor: ${down:.2f} ({proj.get('downside_return_pct', 0)*100:.1f}% vs ${cp:.2f})")
-                    else:
-                        if up is not None:
-                            print(f"   📈 Upside Target: ${up:.2f} ({proj.get('upside_return_pct', 0)*100:.1f}% vs ${cp:.2f})")
-
-                    try:
-                        real_px = float(cp)
-                        if real_px > 0:
-                            display_price = f"${real_px:.2f}"
-                    except Exception:
-                        pass
-                optimal_days = signal.get('simulation_results', {}).get('optimal_exit_day', 5)
-                total_days = signal.get('days_to_expiry', 7)
-                timeframe_type = signal.get('timeframe_type', 'STANDARD')
-                print(f"   📅 Timeframe: {total_days} days ({timeframe_type})")
-                print(f"   🎯 Optimal Exit: Day {optimal_days} (Sim peak within {total_days}d window)")
-                print(f"   📈 Patterns: {', '.join(signal.get('patterns', []))}")
-                print(f"   ⏰ Action: {signal['entry_timing'].get('recommended_action', 'BUY')} → Exit Day {optimal_days}")
-                print(f"   💰 Position: ${signal['position_size']:.0f} | Stop: {signal['exit_timing'].get('stop_loss', 0.3):.1%}")
-                print(f"   ✅ Valid Company: {fact_check.get('is_valid', False)} | Risk: {fact_check.get('risk_level') or 'MEDIUM'}")
-                print(f"   📊 Company Info: {avg_volume_display} avg volume | Price: {display_price}")
-                print(f"   🎯 Company Status: {'✅ VALIDATED' if signal.get('company_validation', False) else '⚠️ UNVALIDATED'}")
-                print(f"   ⚡ Confidence Floor: {'✅ ABOVE 15%' if final_conf >= 15 else '❌ BELOW 15%'}")
-                print(f"   📊 WIN RATE: {sim_win:.1f}% chance of profit (1 in {100/sim_win:.1f} trades)")
-                if initial_conf != final_conf:
-                    print(f"   ⚠️ REALITY CHECK: AI overconfident - adjusted from {initial_conf:.1f}% to {final_conf:.1f}%")
-                print(f"   🔍 Unified Analysis: {signal['rationale']}")
-                print()
+                    prepared = ps._prepare_signal_for_display(signal, ctx=ctx)
+                    if prepared is None:
+                        continue
+                    self._print_signal_display_row(prepared, ps, moonshot=True)
+                except Exception as display_err:
+                    sym = display_safe.safe_str(display_safe.as_dict(signal).get('symbol'), 'unknown')
+                    print(f"   ⚠️ Display skipped for {sym}: {display_err}")
 
         # Show regular trades
         if regular_trades:
             print("\n📊 REGULAR TRADING OPPORTUNITIES:")
             print("-" * 50)
             for signal in regular_trades[:5]:  # Show top 5 regular trades
-                fact_check = signal.get('fact_check', {})
-                company_info = fact_check.get('company_info', {})
-                full_company_name = ps._resolve_company_label(
-                    signal.get('symbol'), signal.get('title'), company_info
-                )
-
-                initial_conf = signal.get('initial_confidence', 0) * 100
-                final_conf = signal.get('confidence', 0) * 100
-                sim_win = signal.get('sim_win_rate', 0) * 100
-
-                # Get company info for display
-                company_info = fact_check.get('company_info', {})
-                real_ticker = company_info.get('real_ticker', False)
-                avg_volume = company_info.get('avg_volume', 'N/A')
                 try:
-                    avg_volume_display = f"{int(avg_volume):,}"
-                except Exception:
-                    avg_volume_display = str(avg_volume)
-                price_range = company_info.get('price_range', 'N/A')
-
-                symbol = signal.get('symbol') or 'N/A'
-                action = signal.get('action') or 'HOLD'
-                
-                # Convert options terminology to appropriate format
-                if symbol.startswith('KX'):
-                    # Kalshi prediction markets use YES/NO
-                    if action == 'BUY_CALL':
-                        action = 'BUY_YES'
-                    elif action == 'BUY_PUT':
-                        action = 'BUY_NO'
-                else:
-                    # Regular stocks use simple BUY/SELL
-                    if action == 'BUY_CALL':
-                        action = 'BUY'
-                    elif action == 'BUY_PUT':
-                        action = 'SELL'
-                
-                print(f"   🎯 TRADE: {symbol} {action} - {full_company_name}")
-
-                optimal_days = signal.get('simulation_results', {}).get('optimal_exit_day', 5)
-                total_days = signal.get('days_to_expiry', 7)
-                timeframe_type = signal.get('timeframe_type', 'STANDARD')
-                timeframe_reason = signal.get('timeframe_reasoning', 'Standard play')
-                print(f"   📊 Confidence: {final_conf:.1f}% (AI: {initial_conf:.1f}% → Reality Check: {sim_win:.1f}%)")
-                print(f"   💰 POP: {signal.get('pop_from_sim', 50):.1f}% | Potential: {signal.get('potential_upside', 0):.1f}X")
-                print(f"   💰 Sim Avg P&L: ${signal.get('simulation_results', {}).get('avg_pnl', 0):.0f}")
-                proj = signal.get('price_projection')
-                display_price = price_range
-                if proj and proj.get('current_price') is not None:
-                    cp = proj['current_price']
-                    up = proj.get('upside_price')
-                    down = proj.get('downside_price')
-                    action_dir = str(signal.get('action', '')).upper()
-                    if 'PUT' in action_dir:
-                        if down is not None:
-                            print(f"   📉 Downside Floor: ${down:.2f} ({proj.get('downside_return_pct', 0)*100:.1f}% vs ${cp:.2f})")
-                    else:
-                        if up is not None:
-                            print(f"   📈 Upside Target: ${up:.2f} ({proj.get('upside_return_pct', 0)*100:.1f}% vs ${cp:.2f})")
-
-                    try:
-                        real_px = float(cp)
-                        if real_px > 0:
-                            display_price = f"${real_px:.2f}"
-                    except Exception:
-                        pass
-                print(f"   📅 Timeframe: {total_days} days ({timeframe_type})")
-                print(f"   💡 Why: {timeframe_reason}")
-                print(f"   🎯 Optimal Exit: Day {optimal_days} (of {total_days})")
-                print(f"   📈 Patterns: {', '.join(signal.get('patterns', []))}")
-                print(f"   ⏰ Action: {signal['entry_timing'].get('recommended_action', 'BUY')} → Exit Day {optimal_days}")
-                print(f"   💰 Position: ${signal['position_size']:.0f}")
-                print(f"   ✅ Valid Company: {fact_check.get('is_valid', False)} | Risk: {fact_check.get('risk_level') or 'MEDIUM'}")
-                print(f"   📊 Company Info: {avg_volume_display} avg volume | Price: {display_price}")
-                print(f"   🎯 Company Status: {'✅ VALIDATED' if signal.get('company_validation', False) else '⚠️ UNVALIDATED'}")
-                print(f"   ⚡ Confidence Floor: {'✅ ABOVE 15%' if final_conf >= 15 else '❌ BELOW 15%'}")
-                print(f"   📊 WIN RATE: {sim_win:.1f}% chance of profit (1 in {100/sim_win:.1f} trades)")
-                if initial_conf != final_conf:
-                    print(f"   ⚠️ REALITY CHECK: AI overconfident - adjusted from {initial_conf:.1f}% to {final_conf:.1f}%")
-                print(f"   🔍 Unified Analysis: {signal['rationale']}")
-                print()
+                    prepared = ps._prepare_signal_for_display(signal, ctx=ctx)
+                    if prepared is None:
+                        continue
+                    self._print_signal_display_row(prepared, ps, moonshot=False)
+                except Exception as display_err:
+                    sym = display_safe.safe_str(display_safe.as_dict(signal).get('symbol'), 'unknown')
+                    print(f"   ⚠️ Display skipped for {sym}: {display_err}")
 
         # System status
-        status = ps.meta_brain.get_status()
+        try:
+            status = ps.meta_brain.get_status()
+        except Exception:
+            status = {}
         print("\n📈 UNIFIED SYSTEM STATUS:")
         print("-" * 40)
         print(f"🧠 Meta-Brain: {'Active' if ps.is_running else 'Standby'}")
-        print(f"💰 Bankroll: ${status['bankroll']}")
-        print(f"📊 Daily P&L: ${status['daily_pnl']:.2f}")
-        print(f"🎯 Open Positions: {status['open_positions']}")
-        print(f"⚡ Active Engines: {len(status['active_engines'])}")
-        print(f"📈 Performance Records: {status['performance_records']}")
+        print(f"💰 Bankroll: ${display_safe.safe_str(status.get('bankroll'), 'N/A')}")
+        print(f"📊 Daily P&L: ${display_safe.safe_float(status.get('daily_pnl', 0)):.2f}")
+        print(f"🎯 Open Positions: {display_safe.safe_str(status.get('open_positions'), 'N/A')}")
+        active_engines = status.get('active_engines') or []
+        print(f"⚡ Active Engines: {len(active_engines) if hasattr(active_engines, '__len__') else 'N/A'}")
+        print(f"📈 Performance Records: {display_safe.safe_str(status.get('performance_records'), 'N/A')}")
 
         # Show active trades (open positions) with basic details
         open_positions = getattr(ps.meta_brain.risk_manager, 'open_positions', {}) or {}
@@ -6759,6 +7160,7 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
             while self.is_running and (max_cycles is None or completed_cycles < max_cycles):
                 cycle_attempt += 1
                 self.worker_supervisor.cycle_attempt = cycle_attempt
+                cycle_started = time.monotonic()
                 try:
                     logger.info("Cycle attempt %s started", cycle_attempt)
                     print(
@@ -6844,9 +7246,6 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
                                 # Send Telegram alert for high-confidence signals
                                 if ctx.config.get('monitoring.telegram_alerts_enabled', True):
                                     try:
-                                        from telegram_bot import get_telegram_bot
-                                        bot = get_telegram_bot()
-                                        
                                         # Create unique key for deduplication
                                         symbol = getattr(signal, 'symbol', None) or 'N/A'
                                         action = getattr(signal, 'action', None) or 'HOLD'
@@ -6854,7 +7253,7 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
                                         monitor_key = f"MONITOR:{symbol}:{action}:{int(entry_price)}"
                                         
                                         if monitor_key not in self.posted_signals:
-                                            result = bot.send_alert(signal)
+                                            result = await self._telegram_alert_async(signal)
                                             if result:
                                                 self.posted_signals.add(monitor_key)
                                                 self._save_posted_signals()
@@ -6866,12 +7265,14 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
                                     except Exception as e:
                                         logging.error(f"Failed to send Telegram alert: {e}")
                     
+                    elapsed = time.monotonic() - cycle_started
                     logger.info(
-                        "Cycle attempt %s completed | completed_cycles=%s signals=%s high_conf=%s",
+                        "Cycle attempt %s completed | completed_cycles=%s signals=%s high_conf=%s elapsed=%.1fs",
                         cycle_attempt,
                         completed_cycles,
                         len(signals) if signals else 0,
                         high_confidence_count,
+                        elapsed,
                     )
                     
                     # Periodic position review (every 10 completed cycles)
@@ -6888,12 +7289,25 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
                         print(f"📈 Market Regime: {current_regime}")
                     
                     if self.is_running and (max_cycles is None or completed_cycles < max_cycles):
-                        print(f"\n⏰ Next scan in {interval_minutes} minutes...")
-                        print(f"💤 System will continue monitoring in background")
-                        await asyncio.sleep(interval_minutes * 60)
+                        interval_s = max(1, int(interval_minutes) * 60)
+                        sleep_s = max(30.0, interval_s - elapsed)
+                        next_wake = datetime.now() + timedelta(seconds=sleep_s)
+                        quarantined = self.worker_supervisor.quarantined_worker_names()
+                        print(
+                            f"\n💓 24/7 HEALTH | completed={completed_cycles} "
+                            f"last_cycle={elapsed:.0f}s "
+                            f"quarantined={','.join(quarantined) if quarantined else 'none'} "
+                            f"next_wake={next_wake.strftime('%H:%M:%S')}"
+                        )
+                        print(
+                            f"⏰ Wall-clock cadence: sleep {sleep_s:.0f}s "
+                            f"(interval {interval_minutes}m, cycle took {elapsed:.0f}s)"
+                        )
+                        await asyncio.sleep(sleep_s)
                     
                 except Exception as e:
-                    logger.exception("Cycle attempt %s failed: %s", cycle_attempt, e)
+                    elapsed = time.monotonic() - cycle_started
+                    logger.exception("Cycle attempt %s failed after %.1fs: %s", cycle_attempt, elapsed, e)
                     print(f"❌ CYCLE ATTEMPT {cycle_attempt} failed: {e}")
                     print(f"   Completed cycles: {completed_cycles}")
                     quarantined = self.worker_supervisor.quarantined_worker_names()
@@ -6904,8 +7318,10 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
                     self.worker_supervisor.print_health_summary(
                         extra={"Execution": f"{self.execution_router.mode}, OK"},
                     )
-                    print(f"🔄 Continuing monitoring after error...")
-                    await asyncio.sleep(60)
+                    interval_s = max(1, int(interval_minutes) * 60)
+                    sleep_s = max(30.0, min(60.0, interval_s - elapsed))
+                    print(f"🔄 Continuing monitoring after error (sleep {sleep_s:.0f}s)...")
+                    await asyncio.sleep(sleep_s)
                     
         except KeyboardInterrupt:
             logger.info("Monitoring stopped by user | completed_cycles=%s", completed_cycles)
@@ -6913,6 +7329,7 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
             print(f"📊 Completed cycles: {completed_cycles}")
             print(f"📊 Total attempts: {cycle_attempt}")
             print(f"⏰ Approx monitoring time: {completed_cycles * interval_minutes} minutes")
+            return True
             
         except Exception as e:
             logger.exception("Fatal error in continuous monitoring: %s", e)
@@ -6920,6 +7337,7 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
             print(f"🚨 Emergency shutdown initiated")
             import traceback
             print(traceback.format_exc())
+            return False
             
         finally:
             self.monitoring_active = False
@@ -6938,6 +7356,8 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
                     self.daily_learning_tracker.print_daily_roi_report(ending_balance)
                 except Exception as e:
                     print(f"⚠️ Could not generate ROI report: {e}")
+
+        return True
 
     def get_monitoring_status(self) -> Dict:
         """Get current monitoring status"""
@@ -7315,6 +7735,78 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
             macro_conditions=macro_conditions
         )
 
+def run_continuous_with_restart(
+    *,
+    config_path: str = "config.json",
+    interval_minutes: int = 5,
+    max_runtime_hours: int = 0,
+    system: Optional["PhasmaTradingSystem"] = None,
+) -> int:
+    """
+    Outer auto-restart for overnight 24/7 runs.
+    Returns 0 on clean/user stop, 1 on abandon after repeated instant crashes.
+    """
+    logger = logging.getLogger("phasma.main")
+    restart_count = 0
+    max_instant_crashes = 5
+    instant_crashes = 0
+
+    while True:
+        started = time.monotonic()
+        if system is None:
+            print(f"🔧 Initializing Phasma AI (restart #{restart_count})...")
+            system = PhasmaTradingSystem(config_path)
+        max_cycles = None if max_runtime_hours == 0 else (max_runtime_hours * 60) // max(1, interval_minutes)
+        clean = True
+        try:
+            clean = bool(
+                asyncio.run(
+                    system.run_continuous(
+                        cycles=max_cycles,
+                        interval_minutes=interval_minutes,
+                    )
+                )
+            )
+        except KeyboardInterrupt:
+            print("\n🛑 Monitoring stopped by user")
+            clean = True
+        except Exception as exc:
+            clean = False
+            logger.exception("Outer continuous wrapper crash: %s", exc)
+            print(f"\n⚠️ Continuous wrapper crash: {exc}")
+        finally:
+            try:
+                asyncio.run(system.shutdown())
+            except Exception as shutdown_err:
+                print(f"⚠️ Shutdown error: {shutdown_err}")
+
+        elapsed = time.monotonic() - started
+        if clean:
+            return 0
+
+        restart_count += 1
+        if elapsed < 120:
+            instant_crashes += 1
+            backoff = min(300, 60 * instant_crashes)
+        else:
+            instant_crashes = 0
+            backoff = 45
+
+        if instant_crashes >= max_instant_crashes:
+            print(
+                f"❌ Too many rapid crashes ({instant_crashes}) — "
+                "stopping auto-restart. Fix the error and relaunch."
+            )
+            return 1
+
+        print(
+            f"♻️ Auto-restart #{restart_count} in {backoff}s "
+            f"(last run lasted {elapsed:.0f}s)..."
+        )
+        time.sleep(backoff)
+        system = None  # force fresh init
+
+
 def parse_arguments():
     import argparse
     
@@ -7439,23 +7931,17 @@ if __name__ == "__main__":
             print("   Each cycle re-scans news and discovery; skipped names are reconsidered on later cycles.")
             print(f" Scan interval: {args.interval} minutes")
             print(f" Max runtime: {'Unlimited' if args.max_runtime == 0 else f'{args.max_runtime} hours'}")
-            print(" Press Ctrl+C to stop")
+            print(" Auto-restart on fatal crash is ON (Ctrl+C to stop)")
             print("=" * 60)
 
-            try:
-                max_cycles = None if args.max_runtime == 0 else (args.max_runtime * 60) // args.interval
-                asyncio.run(system.run_continuous(
-                    cycles=max_cycles,
-                    interval_minutes=args.interval
-                ))
-            except KeyboardInterrupt:
-                print("\n🛑 Monitoring stopped by user")
-            finally:
-                try:
-                    asyncio.run(system.shutdown())
-                except Exception as shutdown_err:
-                    print(f"⚠️ Shutdown error: {shutdown_err}")
-            
+            exit_code = run_continuous_with_restart(
+                config_path="config.json",
+                interval_minutes=args.interval,
+                max_runtime_hours=args.max_runtime,
+                system=system,
+            )
+            if exit_code:
+                sys.exit(exit_code)
     except KeyboardInterrupt:
         logging.getLogger("phasma.main").info("Phasma AI stopped by user (Ctrl+C)")
         print("\n🛑 Phasma AI stopped by user (Ctrl+C)")

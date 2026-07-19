@@ -16,6 +16,7 @@ import re
 # Import new integrations
 from .sec_edgar_integration import SECEdgarIntegration
 from .real_company_data import AlphaVantageIntegration, FinancialModelingPrepIntegration, PolygonIOIntegration
+from utils.company_resolver import get_resolver, is_placeholder
 
 class CompanyValidator:
     """
@@ -120,6 +121,9 @@ class CompanyValidator:
         # API rate limiting
         self.api_call_count = 0
         self.last_api_reset = time.time()
+
+        # Build once — never rebuild on every property access (was a major cycle cost)
+        self._company_db = self._build_company_db()
 
     def _load_symbols_from_config(self) -> Dict[str, List[str]]:
         """Load symbols from phasma_state.json sector watchlist instead of hardcoded lists."""
@@ -227,10 +231,13 @@ class CompanyValidator:
         # Try SEC EDGAR first (most reliable, free)
         sec_data = self.sec_edgar.get_company_info(symbol_upper)
         if sec_data:
+            sec_data = dict(sec_data)
+            sec_data["resolver_status"] = "sec_exact"
+            sec_data["validation_method"] = "sec_edgar"
             self.logger.info(f"✅ SEC EDGAR found: {symbol_upper} - {sec_data['name']}")
             return {
                 'is_valid': True,
-                'validation_score': 0.9,  # High confidence for SEC data
+                'validation_score': 0.9,
                 'company_info': sec_data,
                 'risk_level': self._calculate_risk_level(sec_data)
             }
@@ -238,6 +245,8 @@ class CompanyValidator:
         # Try Alpha Vantage second (if API key configured)
         alpha_data = self.alpha_vantage.get_company_overview(symbol_upper)
         if alpha_data:
+            alpha_data = dict(alpha_data)
+            alpha_data["resolver_status"] = "quote_exact"
             self.logger.info(f"✅ Alpha Vantage found: {symbol_upper} - {alpha_data['name']}")
             return {
                 'is_valid': True,
@@ -249,6 +258,8 @@ class CompanyValidator:
         # Try Financial Modeling Prep third (if API key configured)
         fmp_data = self.fmp.get_company_profile(symbol_upper)
         if fmp_data:
+            fmp_data = dict(fmp_data)
+            fmp_data["resolver_status"] = "quote_exact"
             self.logger.info(f"✅ FMP found: {symbol_upper} - {fmp_data['name']}")
             return {
                 'is_valid': True,
@@ -260,6 +271,8 @@ class CompanyValidator:
         # Try Polygon.io fourth (if API key configured)
         polygon_data = self.polygon.get_ticker_details(symbol_upper)
         if polygon_data:
+            polygon_data = dict(polygon_data)
+            polygon_data["resolver_status"] = "quote_exact"
             self.logger.info(f"✅ Polygon found: {symbol_upper} - {polygon_data['name']}")
             return {
                 'is_valid': True,
@@ -341,12 +354,14 @@ class CompanyValidator:
                 }
                 return self._fallback_validation(symbol)
 
+            resolved = get_resolver().resolve(symbol_upper)
             # Extract key information
             company_data = {
                 'symbol': symbol_upper,
-                'name': info.get('longName', symbol),
-                'sector': info.get('sector', 'Unknown'),
-                'industry': info.get('industry', 'Unknown'),
+                'name': info.get('longName') or resolved['company_name'],
+                'full_name': info.get('longName') or resolved['full_name'],
+                'sector': info.get('sector') or resolved['sector'],
+                'industry': info.get('industry') or resolved['industry'],
                 'market_cap': info.get('marketCap', 0),
                 'avg_volume': info.get('averageVolume', 0),
                 'price': info.get('regularMarketPrice', 0),
@@ -424,12 +439,14 @@ class CompanyValidator:
                 'risk_level': self._calculate_risk_level(company_data)
             }
 
-        # Unknown symbol fallback - mark invalid but structured
+        # Unverified symbol — structured metadata without UNKNOWN placeholders
+        resolved = get_resolver().resolve(symbol_upper)
         company_data = {
             'symbol': symbol_upper,
-            'name': f"{symbol_upper} - Fallback",
-            'sector': 'UNKNOWN',
-            'industry': 'UNKNOWN',
+            'name': resolved['company_name'],
+            'full_name': resolved['full_name'],
+            'sector': resolved['sector'],
+            'industry': resolved['industry'],
             'market_cap': 0,
             'avg_volume': 0,
             'price': 0,
@@ -445,7 +462,7 @@ class CompanyValidator:
             'is_valid': False,
             'validation_score': 0.0,
             'company_info': company_data,
-            'risk_level': 'UNKNOWN'
+            'risk_level': 'HIGH'
         }
 
     def _calculate_risk_level(self, company_data: Dict) -> str:
@@ -520,12 +537,14 @@ class CompanyValidator:
             cached_data = self.validation_cache[symbol_upper]
             if current_time - cached_data.get('timestamp', 0) < self.cache_expiry:
                 self.logger.info(f"Valid cache hit: {symbol_upper} - using cached validation")
-                return {
+                cached_data = dict(cached_data)
+                cached_data["resolver_status"] = "cache_exact"
+                return self._normalize_fact_check({
                     'is_valid': cached_data.get('is_valid', False),
                     'validation_score': cached_data.get('validation_score', 0.0),
                     'company_info': cached_data,
                     'risk_level': self._calculate_risk_level(cached_data)
-                }
+                }, symbol_upper, news_item.get('title'))
 
         # 4. REJECTED CACHE - Recently rejected symbols
         if symbol_upper in self.rejected_cache:
@@ -541,7 +560,20 @@ class CompanyValidator:
 
         # 5. NEW SYMBOL - Use enhanced validation with multiple sources
         self.logger.info(f"New symbol: {symbol_upper} - using enhanced validation")
-        return self.validate_company_enhanced(symbol)
+        result = self.validate_company_enhanced(symbol)
+        return self._normalize_fact_check(result, symbol_upper, news_item.get('title'))
+
+    def _normalize_fact_check(self, fact_check: Dict, symbol: str, title: Optional[str] = None) -> Dict:
+        """Ensure company_info fields are populated with real or derived labels."""
+        if not isinstance(fact_check, dict):
+            return fact_check
+        info = get_resolver().enrich_company_info(
+            fact_check.get('company_info'), symbol, title
+        )
+        fact_check['company_info'] = info
+        if is_placeholder(fact_check.get('risk_level')):
+            fact_check['risk_level'] = 'HIGH' if not fact_check.get('is_valid') else 'MEDIUM'
+        return fact_check
 
     def _validate_index(self, symbol: str, news_item: Dict) -> Dict:
         """Validate indices with flexible criteria based on market conditions"""
@@ -681,12 +713,10 @@ class CompanyValidator:
         return "Technology"  # Default fallback
 
     # Legacy methods for backward compatibility
-    @property
-    def company_db(self):
-        """Build comprehensive company database from all high-volume industries"""
-        # Start with fallback database
+    def _build_company_db(self) -> Dict:
+        """Build comprehensive company database once (local aliases only — no web resolve)."""
         comprehensive_db = self.fallback_db.copy()
-        
+
         # Add all symbols from high_vol_industries with company name aliases
         company_names = {
             # Tech/AI
@@ -696,13 +726,13 @@ class CompanyValidator:
             'CRM': ['Salesforce'], 'ORCL': ['Oracle'], 'INTC': ['Intel'],
             'QCOM': ['Qualcomm'], 'TXN': ['Texas Instruments'], 'ADBE': ['Adobe'],
             'TSLA': ['Tesla'], 'NFLX': ['Netflix'], 'AMZN': ['Amazon'],
-            
+
             # Energy
             'XOM': ['Exxon', 'ExxonMobil'], 'CVX': ['Chevron'], 'COP': ['ConocoPhillips'],
             'EOG': ['EOG Resources'], 'SLB': ['Schlumberger'], 'MPC': ['Marathon Petroleum'],
             'PSX': ['Phillips 66'], 'VLO': ['Valero'], 'OXY': ['Occidental', 'Occidental Petroleum'],
             'BP': ['BP', 'British Petroleum'],
-            
+
             # Consumer/Food
             'WMT': ['Walmart'], 'HD': ['Home Depot'], 'MCD': ['McDonald', 'McDonalds'],
             'KO': ['Coca-Cola', 'Coke'], 'PEP': ['Pepsi', 'PepsiCo'], 'PG': ['Procter & Gamble', 'P&G'],
@@ -710,59 +740,65 @@ class CompanyValidator:
             'DIS': ['Disney', 'Walt Disney'], 'NKE': ['Nike'],
             'GME': ['GameStop', 'Gamestop'], 'BBY': ['Best Buy'], 'BB': ['BlackBerry'],
             'KSS': ['Kohl\'s', 'Kohls'],
-            
+
             # EV/Auto
             'F': ['Ford'], 'GM': ['General Motors', 'GM'], 'TM': ['Toyota'],
             'HMC': ['Honda'], 'RIVN': ['Rivian'], 'LCID': ['Lucid', 'Lucid Motors'],
-            
+
             # Biotech/Health
             'JNJ': ['Johnson & Johnson', 'J&J'], 'PFE': ['Pfizer'], 'UNH': ['UnitedHealth'],
             'ABBV': ['AbbVie'], 'LLY': ['Eli Lilly', 'Lilly'], 'TMO': ['Thermo Fisher'],
             'ABT': ['Abbott'], 'DHR': ['Danaher'], 'BMY': ['Bristol-Myers', 'Bristol Myers Squibb'],
             'AMGN': ['Amgen'], 'GILD': ['Gilead'], 'MRNA': ['Moderna'],
-            
+
             # Finance
             'JPM': ['JPMorgan', 'JP Morgan'], 'BAC': ['Bank of America', 'BofA'],
             'WFC': ['Wells Fargo'], 'C': ['Citigroup', 'Citi'], 'GS': ['Goldman Sachs'],
             'MS': ['Morgan Stanley'], 'BLK': ['BlackRock'], 'SCHW': ['Charles Schwab', 'Schwab'],
             'AXP': ['American Express', 'Amex'], 'USB': ['US Bank', 'U.S. Bank'],
-            
+
             # Mining/Metals
             'FCX': ['Freeport', 'Freeport-McMoRan'], 'NEM': ['Newmont'], 'GOLD': ['Barrick Gold'],
             'AA': ['Alcoa'], 'X': ['US Steel', 'U.S. Steel'], 'CLF': ['Cleveland-Cliffs'],
-            
+
             # Crypto
             'COIN': ['Coinbase'], 'MSTR': ['MicroStrategy'], 'RIOT': ['Riot Platforms', 'Riot Blockchain'],
             'MARA': ['Marathon Digital'], 'SQ': ['Block', 'Square'], 'PYPL': ['PayPal'],
-            
+
             # Other major companies
             'BRK.B': ['Berkshire', 'Berkshire Hathaway', 'Buffett'], 'ATVI': ['Activision', 'Activision Blizzard'],
             'MRVL': ['Marvell', 'Marvell Technology'], 'BHC': ['Bausch', 'Bausch Health'],
         }
-        
-        # Build comprehensive database
+
         for industry, symbols in self.high_vol_industries.items():
             for symbol in symbols:
                 if symbol not in comprehensive_db:
+                    aliases = company_names.get(symbol, [])
                     comprehensive_db[symbol] = {
-                        'name': company_names.get(symbol, [symbol])[0] if company_names.get(symbol) else symbol,
+                        'name': aliases[0] if aliases else symbol,
                         'sector': self._get_sector_from_industry(industry),
                         'industry': industry,
-                        'aliases': company_names.get(symbol, [])
+                        'aliases': aliases,
                     }
-        
-        # Add extra companies with aliases
+
         for symbol, aliases in company_names.items():
             if symbol not in comprehensive_db:
                 comprehensive_db[symbol] = {
                     'name': aliases[0] if aliases else symbol,
-                    'sector': 'Unknown',
-                    'industry': 'Unknown',
-                    'aliases': aliases
+                    'sector': 'Equities',
+                    'industry': 'Equities',
+                    'aliases': aliases,
                 }
-        
+
         return comprehensive_db
-    
+
+    @property
+    def company_db(self):
+        """Cached company database (built once at init)."""
+        if not getattr(self, "_company_db", None):
+            self._company_db = self._build_company_db()
+        return self._company_db
+
     def _get_sector_from_industry(self, industry: str) -> str:
         """Map industry to sector"""
         industry_sector_map = {
@@ -775,7 +811,7 @@ class CompanyValidator:
             'Mining/Metals': 'Mining',
             'Crypto/Blockchain': 'Technology'
         }
-        return industry_sector_map.get(industry, 'Unknown')
+        return industry_sector_map.get(industry, 'Equities')
 
     def get_industry_symbols(self, industry: str) -> List[str]:
         """Get all symbols for a specific industry"""

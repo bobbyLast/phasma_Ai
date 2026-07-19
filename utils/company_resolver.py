@@ -12,9 +12,15 @@ import re
 import time
 from typing import Any, Callable, Dict, Optional
 
-from utils.web_search_resolver import get_web_search_resolver
+from utils.web_search_resolver import get_web_search_resolver, is_sector_category_name
 
 logger = logging.getLogger(__name__)
+
+RESOLVER_TRUSTED_STATUSES = frozenset({
+    "sec_exact",
+    "quote_exact",
+    "cache_exact",
+})
 
 _PLACEHOLDER_VALUES = frozenset({
     "", "unknown", "UNKNOWN", "Unknown", "n/a", "N/A", "null", "None", "none",
@@ -130,7 +136,15 @@ class CompanyResolver:
             logger.debug("Web search lookup failed for %s: %s", symbol, exc)
             return None
 
-    def resolve(self, symbol: Any, title: Optional[str] = None) -> Dict[str, str]:
+    def resolve(
+        self,
+        symbol: Any,
+        title: Optional[str] = None,
+        *,
+        allow_yf: bool = True,
+        allow_web: bool = True,
+    ) -> Dict[str, str]:
+        """Resolve symbol metadata. Hot path should use allow_yf=False, allow_web=False."""
         sym = _clean_symbol(symbol)
         if sym in self._static:
             row = self._static[sym]
@@ -141,29 +155,34 @@ class CompanyResolver:
                 "sector": row["sector"],
                 "industry": row["industry"],
                 "source": row["source"],
+                "resolver_status": "cache_exact",
             }
 
-        yf_row = self._yf_lookup(sym) if sym else None
-        if yf_row:
-            return {
-                "symbol": sym,
-                "company_name": yf_row["company_name"],
-                "full_name": yf_row["company_name"],
-                "sector": yf_row["sector"],
-                "industry": yf_row["industry"],
-                "source": yf_row["source"],
-            }
+        if allow_yf:
+            yf_row = self._yf_lookup(sym) if sym else None
+            if yf_row:
+                return {
+                    "symbol": sym,
+                    "company_name": yf_row["company_name"],
+                    "full_name": yf_row["company_name"],
+                    "sector": yf_row["sector"],
+                    "industry": yf_row["industry"],
+                    "source": yf_row["source"],
+                    "resolver_status": "quote_exact",
+                }
 
-        web_row = self._web_lookup(sym, title) if sym else None
-        if web_row:
-            return {
-                "symbol": sym,
-                "company_name": web_row["company_name"],
-                "full_name": web_row["company_name"],
-                "sector": web_row["sector"],
-                "industry": web_row["industry"],
-                "source": web_row["source"],
-            }
+        if allow_web:
+            web_row = self._web_lookup(sym, title) if sym else None
+            if web_row and not is_sector_category_name(web_row.get("company_name")):
+                return {
+                    "symbol": sym,
+                    "company_name": web_row["company_name"],
+                    "full_name": web_row["company_name"],
+                    "sector": web_row["sector"],
+                    "industry": web_row["industry"],
+                    "source": web_row["source"],
+                    "resolver_status": "web_suggested",
+                }
 
         snippet = _title_snippet(title)
         if sym and snippet:
@@ -182,7 +201,12 @@ class CompanyResolver:
             "sector": "Equities",
             "industry": "Equities",
             "source": "derived",
+            "resolver_status": "derived" if sym else "unknown",
         }
+
+    def resolve_local(self, symbol: Any, title: Optional[str] = None) -> Dict[str, str]:
+        """CSV/static-only resolve — never hits yfinance or web search."""
+        return self.resolve(symbol, title, allow_yf=False, allow_web=False)
 
     def company_name(self, symbol: Any, title: Optional[str] = None) -> str:
         return self.resolve(symbol, title)["company_name"]
@@ -202,7 +226,30 @@ class CompanyResolver:
     ) -> Dict[str, str]:
         info = dict(company_info or {})
         sym = _clean_symbol(symbol or info.get("symbol"))
+        status = str(info.get("resolver_status") or info.get("validation_method") or "").lower()
+        trusted = status in RESOLVER_TRUSTED_STATUSES or status in (
+            "sec_edgar", "alpha_vantage", "financial_modeling_prep", "polygon_io", "validation_cache",
+        )
+
+        if trusted and not is_placeholder(info.get("name")):
+            if sym:
+                info["symbol"] = sym
+            if is_placeholder(info.get("full_name")):
+                info["full_name"] = info.get("name") or info.get("company_name")
+            if is_placeholder(info.get("company_name")):
+                info["company_name"] = info.get("name") or info.get("full_name")
+            return info
+
         resolved = self.resolve(sym or info.get("symbol"), title)
+        resolved_status = str(resolved.get("resolver_status") or "").lower()
+        if resolved_status == "web_suggested" and trusted:
+            if is_placeholder(info.get("sector")) and resolved.get("sector"):
+                info["sector"] = resolved["sector"]
+            if is_placeholder(info.get("industry")) and resolved.get("industry"):
+                info["industry"] = resolved["industry"]
+            if sym:
+                info["symbol"] = sym
+            return info
 
         if is_placeholder(info.get("name")):
             info["name"] = resolved["company_name"]
@@ -214,6 +261,8 @@ class CompanyResolver:
             info["industry"] = resolved["industry"]
         if sym:
             info["symbol"] = sym
+        if not info.get("resolver_status"):
+            info["resolver_status"] = resolved.get("resolver_status", "unknown")
         return info
 
     def enrich_fact_check(
@@ -226,12 +275,28 @@ class CompanyResolver:
             fc["risk_level"] = "HIGH" if not fc.get("is_valid") else "MEDIUM"
         return fc
 
-    def enrich_news_item(self, item: Dict) -> Dict:
+    def enrich_news_item(
+        self,
+        item: Dict,
+        *,
+        allow_yf: bool = True,
+        allow_web: bool = True,
+        local_only: bool = False,
+    ) -> Dict:
         if not isinstance(item, dict):
             return item
+        if local_only:
+            allow_yf = False
+            allow_web = False
         sym = _clean_symbol(item.get("symbol"))
         title = item.get("title") or item.get("summary")
-        resolved = self.resolve(sym, title)
+        # Hot-path local enrich: only stamp known CSV tickers
+        if not allow_yf and not allow_web and sym and sym not in self._static:
+            if sym:
+                item["symbol"] = sym
+            return item
+
+        resolved = self.resolve(sym, title, allow_yf=allow_yf, allow_web=allow_web)
 
         if sym:
             item["symbol"] = sym
@@ -247,7 +312,7 @@ class CompanyResolver:
             item["source"] = resolved.get("source", "news")
 
         fc = item.get("fact_check")
-        if isinstance(fc, dict):
+        if isinstance(fc, dict) and (allow_yf or allow_web or sym in self._static):
             item["fact_check"] = self.enrich_fact_check(fc, sym or item.get("symbol"), title)
         return item
 
@@ -261,8 +326,17 @@ class CompanyResolver:
         if sym:
             signal["symbol"] = sym
             signal["ticker"] = sym
+        fc_info = (signal.get("fact_check") or {}).get("company_info") or {}
+        trusted_name = fc_info.get("name") or fc_info.get("company_name")
+        resolver_status = str(fc_info.get("resolver_status") or fc_info.get("validation_method") or "").lower()
+        name_is_trusted = resolver_status in RESOLVER_TRUSTED_STATUSES or resolver_status in (
+            "sec_edgar", "alpha_vantage", "financial_modeling_prep", "polygon_io", "validation_cache",
+        )
         if is_placeholder(signal.get("company_name")):
-            signal["company_name"] = resolved["company_name"]
+            if name_is_trusted and not is_placeholder(trusted_name):
+                signal["company_name"] = trusted_name
+            else:
+                signal["company_name"] = resolved["company_name"]
         if is_placeholder(signal.get("sector")):
             signal["sector"] = resolved["sector"]
         if is_placeholder(signal.get("industry")):
