@@ -15,6 +15,8 @@ from datetime import datetime
 from typing import List, Dict, Set, Tuple
 import re
 
+from utils.confidence_utils import format_confidence_fields
+
 class SectorIntelligenceEngine:
     """Understands sector correlations and cross-platform opportunities"""
     
@@ -143,8 +145,14 @@ class SectorIntelligenceEngine:
             if self._is_good_run(data):
                 opportunity = await self._create_sector_opportunity(sector, data)
                 sector_opportunities.append(opportunity)
-                
-                print(f"   ✅ {sector}: {len(data['tickers'])} stocks | {data['confidence_score']:.1%} confidence")
+                conf_fields = format_confidence_fields(
+                    data['confidence_score'], is_sum=True, count=len(data['news_items'])
+                )
+                print(
+                    f"   ✅ {sector}: {len(data['tickers'])} stocks | "
+                    f"{conf_fields['confidence_pct']:.1f}% confidence "
+                    f"({conf_fields['confidence_label']})"
+                )
         
         print(f"\n   Found {len(sector_opportunities)} sector opportunities")
         return sector_opportunities
@@ -257,11 +265,15 @@ class SectorIntelligenceEngine:
         """Create a sector-wide opportunity"""
         
         avg_confidence = data['confidence_score'] / len(data['news_items'])
-        
+        conf_fields = format_confidence_fields(avg_confidence)
+
         return {
             'sector': sector,
             'tickers': list(data['tickers']),
-            'confidence': avg_confidence,
+            'confidence': conf_fields['confidence_pct'] / 100.0,
+            'raw_score': conf_fields['raw_score'],
+            'confidence_pct': conf_fields['confidence_pct'],
+            'confidence_label': conf_fields['confidence_label'],
             'news_count': len(data['news_items']),
             'event_type': self._identify_event_type(data['news_items']),
             'etfs': self.sector_mappings[sector]['etfs'],

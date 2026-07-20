@@ -4,6 +4,7 @@ Fetches comprehensive company information from SEC EDGAR database
 Free, reliable source for all US public companies
 """
 
+import os
 import requests
 import json
 import time
@@ -12,6 +13,27 @@ from typing import Dict, List, Optional
 from datetime import datetime
 import logging
 
+def _project_root() -> str:
+    return os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+
+
+def _sec_user_agent() -> str:
+    ua = (os.getenv('SEC_USER_AGENT') or '').strip()
+    if ua:
+        return ua
+    return 'Phasma AI Trading System (research@phasma.ai)'
+
+
+def _sec_cache_refresh_seconds() -> float:
+    try:
+        hours = float(os.getenv('SEC_CACHE_REFRESH_HOURS', '24'))
+    except (TypeError, ValueError):
+        hours = 24.0
+    if hours <= 0:
+        hours = 24.0
+    return hours * 3600
+
+
 class SECEdgarIntegration:
     """SEC EDGAR database integration for company data"""
     
@@ -19,35 +41,60 @@ class SECEdgarIntegration:
         self.base_url = "https://www.sec.gov/files/edgar"
         self.company_db = {}
         self.last_update = 0
-        self.cache_file = "data/sec_company_database.json"
+        self.cache_file = os.path.join(_project_root(), "data", "sec_company_database.json")
+        self.headers = {'User-Agent': _sec_user_agent()}
         self.logger = logging.getLogger(__name__)
         
-        # Load existing database if available
         self._load_cache()
+        if not self.company_db:
+            self.download_company_tickers()
     
     def _load_cache(self):
         """Load cached company database"""
         try:
             with open(self.cache_file, 'r') as f:
-                self.company_db = json.load(f)
-                self.logger.info(f"Loaded {len(self.company_db)} companies from SEC cache")
+                data = json.load(f)
+            if isinstance(data, dict) and 'companies' in data:
+                self.company_db = data.get('companies') or {}
+                self.last_update = float(data.get('last_update') or 0)
+            elif isinstance(data, dict):
+                self.company_db = data
+                self.last_update = 0
+            else:
+                self.company_db = {}
+                self.last_update = 0
+            self.logger.info(f"Loaded {len(self.company_db)} companies from SEC cache")
         except FileNotFoundError:
             self.logger.info("No SEC cache found, will download fresh data")
             self.company_db = {}
         except Exception as e:
             self.logger.warning(f"Error loading SEC cache: {e}")
             self.company_db = {}
+        self._refresh_if_stale()
     
     def _save_cache(self):
         """Save company database to cache"""
         try:
-            import os
             os.makedirs(os.path.dirname(self.cache_file), exist_ok=True)
             with open(self.cache_file, 'w') as f:
-                json.dump(self.company_db, f, indent=2)
+                json.dump(
+                    {'last_update': self.last_update, 'companies': self.company_db},
+                    f,
+                    indent=2,
+                )
             self.logger.info(f"Saved {len(self.company_db)} companies to SEC cache")
         except Exception as e:
             self.logger.warning(f"Error saving SEC cache: {e}")
+
+    def _refresh_if_stale(self) -> None:
+        refresh_seconds = _sec_cache_refresh_seconds()
+        if self.last_update and time.time() - self.last_update <= refresh_seconds:
+            return
+        if not self.last_update and not self.company_db:
+            return
+        age_hours = (time.time() - self.last_update) / 3600 if self.last_update else 0
+        self.logger.info(f"SEC cache stale ({age_hours:.1f}h), refreshing...")
+        self.download_company_tickers()
     
     def download_company_tickers(self) -> bool:
         """Download company ticker data from SEC"""
@@ -56,7 +103,7 @@ class SECEdgarIntegration:
             url = "https://www.sec.gov/files/company_tickers.json"
             
             self.logger.info("Downloading SEC company tickers...")
-            response = requests.get(url, timeout=30)
+            response = requests.get(url, headers=self.headers, timeout=30)
             response.raise_for_status()
             
             ticker_data = response.json()
@@ -104,10 +151,7 @@ class SECEdgarIntegration:
         """Get company information for a symbol"""
         symbol = symbol.upper()
         
-        # Update database if old (update daily)
-        if time.time() - self.last_update > 86400:  # 24 hours
-            self.download_company_tickers()
-        
+        self._refresh_if_stale()
         return self.company_db.get(symbol)
     
     def search_companies_by_name(self, name_query: str) -> List[Dict]:

@@ -10,6 +10,7 @@ import requests
 from datetime import datetime, timedelta
 from typing import List, Dict, Optional
 from engines.advanced_geopolitical_thinker import AdvancedGeopoliticalThinker
+from core.runtime_paths import runtime_path
 
 class MultiPlatformScanner:
     """Scans multiple trading platforms for geopolitical opportunities"""
@@ -412,10 +413,12 @@ def main():
     
     # Save results
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-    with open(f"multi_platform_scan_{timestamp}.json", 'w') as f:
+    scan_path = runtime_path("diagnostics", "multi_platform_scan", f"multi_platform_scan_{timestamp}.json")
+    os.makedirs(os.path.dirname(scan_path), exist_ok=True)
+    with open(scan_path, 'w') as f:
         json.dump(scan_results, f, indent=2)
-    
-    print(f"\n💾 Results saved to multi_platform_scan_{timestamp}.json")
+
+    print(f"\n💾 Results saved to {scan_path}")
 
 if __name__ == "__main__":
     main()

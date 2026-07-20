@@ -11,6 +11,8 @@ from datetime import datetime, timedelta
 from collections import defaultdict
 import json
 
+from utils.confidence_utils import format_confidence_fields
+
 logger = logging.getLogger(__name__)
 
 class SignalConvergenceEngine:
@@ -48,6 +50,20 @@ class SignalConvergenceEngine:
         required_fields = ['source', 'ticker', 'confidence', 'timestamp']
         if not all(field in signal for field in required_fields):
             logger.warning(f"Signal missing required fields: {signal}")
+            return
+
+        try:
+            conf = float(signal.get("confidence") or 0)
+        except (TypeError, ValueError):
+            conf = 0.0
+        # Skip zero-confidence junk (especially Kalshi flood of 0.0% markets)
+        if conf <= 0:
+            logger.debug(
+                "Skipping %s signal for %s — confidence %.3f",
+                signal.get("source"),
+                signal.get("ticker"),
+                conf,
+            )
             return
         
         # Normalize signal data
@@ -151,6 +167,7 @@ class SignalConvergenceEngine:
         
         # Cap at 100%
         convergence_score = min(convergence_score, 1.0)
+        conf_fields = format_confidence_fields(convergence_score)
         
         # Analyze signal alignment and consistency
         actions = [s['action'] for s in signals]
@@ -176,6 +193,9 @@ class SignalConvergenceEngine:
             'opportunity_type': opportunity_type,
             'primary_ticker': primary_ticker,
             'convergence_score': convergence_score,
+            'raw_score': conf_fields['raw_score'],
+            'confidence_pct': conf_fields['confidence_pct'],
+            'confidence_label': conf_fields['confidence_label'],
             'unique_sources': unique_sources,
             'total_signals': len(signals),
             'action_consensus': action_consensus,
@@ -288,7 +308,11 @@ class SignalConvergenceEngine:
             'BA': 'INDUSTRIALS', 'CAT': 'INDUSTRIALS', 'GE': 'INDUSTRIALS', 'MMM': 'INDUSTRIALS'
         }
         
-        return sector_mapping.get(ticker.upper(), 'UNKNOWN')
+        from utils.company_resolver import get_resolver
+        mapped = sector_mapping.get(ticker.upper())
+        if mapped:
+            return mapped
+        return get_resolver().sector(ticker)
     
     def _get_best_ticker_for_sector(self, signals: List[Dict[str, Any]]) -> str:
         """Get the most representative ticker for a sector convergence."""

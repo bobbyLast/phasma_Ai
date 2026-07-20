@@ -1,11 +1,7 @@
 """
-Real Portfolio Manager - Tracks actual trades and positions
+Local portfolio ledger — tracks positions in JSON (not a real brokerage).
 
-Fixes the critical bug where unrealized P&L was counted as real bankroll.
-Now properly separates:
-- Realized P&L (actual closed trades)
-- Unrealized P&L (open positions)
-- Available capital (actual bankroll)
+Legacy name RealPortfolioManager kept for backward compatibility.
 """
 
 import json
@@ -15,7 +11,7 @@ from typing import Dict, List, Optional, Any
 import yfinance as yf
 
 class RealPortfolioManager:
-    """Portfolio manager that tracks real trades, not paper profits"""
+    """Local JSON portfolio ledger — not a real brokerage account."""
     
     def __init__(self, config: dict = None, test_mode: bool = False, state_file: str = None):
         self.config = config or {}
@@ -432,3 +428,7 @@ class RealPortfolioManager:
                       f"P&L: ${pos['unrealized_pnl']:.2f} ({pos['unrealized_pct']:.1f}%)")
         
         print("="*60)
+
+# Backward-compatible aliases (local simulation only, not real brokerage)
+LocalPortfolioLedger = RealPortfolioManager
+SimulatedPortfolioManager = RealPortfolioManager

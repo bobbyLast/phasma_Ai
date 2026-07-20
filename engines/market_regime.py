@@ -5,15 +5,22 @@ Detects market conditions (bull/bear/sideways) and adapts trading strategies
 
 import yfinance as yf
 import numpy as np
-from typing import Dict, Optional, Tuple
+from typing import Dict, Optional, Tuple, Any
 from datetime import datetime, timedelta
 import logging
+import requests
+
+try:
+    from utils.market_data_cache import MarketDataCache
+except ImportError:
+    MarketDataCache = None
 
 class PhasmaMarketRegimeDetector:
     """Detects market regime and adapts trading strategies accordingly"""
 
-    def __init__(self, config):
+    def __init__(self, config, market_cache: Any = None):
         self.config = config
+        self.market_cache = market_cache
 
         # VIX thresholds for regime detection
         self.vix_thresholds = {
@@ -55,18 +62,44 @@ class PhasmaMarketRegimeDetector:
             self.logger.error(f"Error detecting market regime: {e}")
             return 'normal'  # Default to normal regime
 
+    def _cached_macro(self) -> Optional[Dict]:
+        if self.market_cache and MarketDataCache:
+            return self.market_cache.fetch_macro_data()
+        return None
+
     def _get_current_vix(self) -> float:
         """Get current VIX level"""
+        macro = self._cached_macro()
+        if macro:
+            vix_current = macro.get('vix', {}).get('current')
+            if vix_current is not None and vix_current > 0:
+                return float(vix_current)
+
         try:
             vix = yf.Ticker('^VIX')
-            vix_data = vix.history(period='1d')
-            return vix_data['Close'].iloc[-1]
+            vix_data = vix.history(period='5d')
+            closes = vix_data['Close'].dropna()
+            if len(closes) > 0:
+                return closes.iloc[-1]
         except Exception as e:
             self.logger.warning(f"Could not get VIX data: {e}")
-            return 20.0  # Default normal level
+        chart_closes = self._get_yahoo_chart_closes('^VIX')
+        if chart_closes:
+            return chart_closes[-1]
+        return 20.0  # Default normal level
 
     def _get_market_trend(self) -> float:
         """Get overall market trend (positive = bullish, negative = bearish)"""
+        if self.market_cache and MarketDataCache:
+            try:
+                hist = self.market_cache.fetch_history('SPY', '1mo')
+                if hist is not None and len(hist) >= 2:
+                    start_price = hist['Close'].iloc[0]
+                    end_price = hist['Close'].iloc[-1]
+                    return (end_price - start_price) / start_price
+            except Exception as e:
+                self.logger.debug(f"SPY trend from market cache failed: {e}")
+
         try:
             total_return = 0.0
             valid_indices = 0
@@ -82,9 +115,24 @@ class PhasmaMarketRegimeDetector:
                         monthly_return = (end_price - start_price) / start_price
                         total_return += monthly_return
                         valid_indices += 1
+                    else:
+                        closes = self._get_yahoo_chart_closes(index)
+                        if len(closes) >= 2:
+                            start_price = closes[0]
+                            end_price = closes[-1]
+                            monthly_return = (end_price - start_price) / start_price
+                            total_return += monthly_return
+                            valid_indices += 1
 
                 except Exception as e:
                     self.logger.warning(f"Could not get data for {index}: {e}")
+                    closes = self._get_yahoo_chart_closes(index)
+                    if len(closes) >= 2:
+                        start_price = closes[0]
+                        end_price = closes[-1]
+                        monthly_return = (end_price - start_price) / start_price
+                        total_return += monthly_return
+                        valid_indices += 1
                     continue
 
             if valid_indices == 0:
@@ -98,6 +146,15 @@ class PhasmaMarketRegimeDetector:
 
     def _get_realized_volatility(self) -> float:
         """Calculate realized volatility of SPY"""
+        if self.market_cache and MarketDataCache:
+            try:
+                data = self.market_cache.fetch_history('SPY', '3mo')
+                if data is not None and len(data) >= 20:
+                    daily_returns = data['Close'].pct_change().dropna()
+                    return daily_returns.std() * np.sqrt(252)
+            except Exception as e:
+                self.logger.debug(f"SPY volatility from market cache failed: {e}")
+
         try:
             spy = yf.Ticker('SPY')
             data = spy.history(period='3mo')  # 3 months data
@@ -116,6 +173,23 @@ class PhasmaMarketRegimeDetector:
         except Exception as e:
             self.logger.error(f"Error calculating realized volatility: {e}")
             return 0.20  # Default
+
+    def _get_yahoo_chart_closes(self, symbol: str) -> list:
+        """Fetch recent closes from Yahoo chart API when yfinance is unavailable."""
+        try:
+            encoded_symbol = symbol.replace("^", "%5E")
+            response = requests.get(
+                f"https://query1.finance.yahoo.com/v8/finance/chart/{encoded_symbol}",
+                params={"range": "1mo", "interval": "1d"},
+                headers={"User-Agent": "Mozilla/5.0"},
+                timeout=10,
+            )
+            data = response.json()
+            result = (data.get("chart", {}).get("result") or [None])[0]
+            closes = ((result or {}).get("indicators", {}).get("quote") or [{}])[0].get("close") or []
+            return [float(close) for close in closes if close is not None]
+        except Exception:
+            return []
 
     def _classify_regime(self, vix: float, market_trend: float, realized_vol: float) -> str:
         """Classify market regime based on indicators"""

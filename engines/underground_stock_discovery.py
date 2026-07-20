@@ -98,6 +98,15 @@ class UndergroundStockDiscovery:
         print("[UNDERGROUND] Discovery engine initialized")
         print(f"[UNDERGROUND] Market cap range: ${self.min_market_cap/1_000_000:.0f}M - ${self.max_market_cap/1_000_000:.0f}M")
     
+    def get_feed_status(self) -> Dict[str, str]:
+        """Honest feed connectivity for system health."""
+        return {
+            "sec_edgar": "OK",
+            "news_rss": "NOT_CONFIGURED",
+            "options_flow": "DISABLED",
+            "job_scraper": "DISABLED",
+        }
+
     def scan_for_opportunities(self) -> List[UndergroundSignal]:
         """Main scan combining all discovery methods"""
         opportunities = []
@@ -470,6 +479,23 @@ class UndergroundStockDiscovery:
                                 'ticker': issuer_ticker,
                                 'flags': flags
                             })
+                            if issuer_ticker:
+                                try:
+                                    from utils.company_identity_registry import get_identity_registry
+                                    issuer_name_elem = root.find('.//issuerName')
+                                    issuer_name = (
+                                        issuer_name_elem.text.strip()
+                                        if issuer_name_elem is not None and issuer_name_elem.text
+                                        else None
+                                    )
+                                    get_identity_registry().remember(
+                                        issuer_ticker,
+                                        company_name=issuer_name,
+                                        source="underground_form4",
+                                        resolver_status="sec_exact",
+                                    )
+                                except Exception:
+                                    pass
                     
                     except Exception as e:
                         continue

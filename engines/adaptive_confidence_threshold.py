@@ -4,6 +4,8 @@ from datetime import datetime, timedelta
 from typing import Dict, List, Optional
 from collections import defaultdict
 
+from core.runtime_paths import engine_state_path
+
 class AdaptiveConfidenceThreshold:
     """
     Dynamically adjusts confidence threshold based on historical performance
@@ -26,16 +28,16 @@ class AdaptiveConfidenceThreshold:
         self.max_threshold = 75.0
         self.adjustment_period = 20  # Adjust after every 20 trades per level
         self.last_adjustment = datetime.now()
+        self.performance_file = engine_state_path("adaptive_threshold_performance.json")
         
         # Load historical data
         self.load_performance_data()
         
     def load_performance_data(self):
         """Load historical performance data"""
-        data_file = 'adaptive_threshold_performance.json'
         try:
-            if os.path.exists(data_file):
-                with open(data_file, 'r') as f:
+            if os.path.exists(self.performance_file):
+                with open(self.performance_file, 'r') as f:
                     data = json.load(f)
                     for level, stats in data.items():
                         self.performance_data[float(level)] = stats
@@ -45,11 +47,10 @@ class AdaptiveConfidenceThreshold:
     
     def save_performance_data(self):
         """Save performance data to file"""
-        data_file = 'adaptive_threshold_performance.json'
         try:
             # Convert to regular dict for JSON serialization
             data = {str(k): v for k, v in self.performance_data.items()}
-            with open(data_file, 'w') as f:
+            with open(self.performance_file, 'w') as f:
                 json.dump(data, f, indent=2)
         except Exception as e:
             print(f"⚠️ Could not save performance data: {e}")

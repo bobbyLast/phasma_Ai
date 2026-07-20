@@ -12,8 +12,9 @@ from datetime import datetime, timedelta
 class DynamicMarketScanner:
     """Scans market for fresh opportunities based on real-time data"""
     
-    def __init__(self):
-        # Broad universe of liquid US stocks
+    def __init__(self, config=None):
+        self.config = config or {}
+        # Seed universe — expanded at runtime via InfiniteSymbolProvider
         self.stock_universe = [
             # Tech Giants
             'AAPL', 'MSFT', 'GOOGL', 'GOOG', 'META', 'NVDA', 'AMD', 'INTC', 'CSCO', 'ORCL',
@@ -54,26 +55,45 @@ class DynamicMarketScanner:
             # Utilities
             'NEE', 'DUK', 'SO', 'AEP', 'EXC', 'SRE', 'XEL', 'ED', 'PEG', 'WEC'
         ]
+        self._expand_universe_from_provider()
         
         # Daily movers from different sectors
         self.sectors = {
-            'Technology': ['AAPL', 'MSFT', 'NVDA', 'AMD', 'META', 'GOOGL', 'CRM', 'NOW'],
-            'Healthcare': ['JNJ', 'UNH', 'PFE', 'ABBV', 'TMO', 'MRK', 'LLY', 'ABT'],
-            'Finance': ['JPM', 'BAC', 'WFC', 'GS', 'MS', 'C', 'AXP', 'BLK'],
-            'Consumer': ['WMT', 'COST', 'HD', 'MCD', 'NKE', 'SBUX', 'KO', 'PEP'],
-            'Energy': ['XOM', 'CVX', 'COP', 'SLB', 'HAL', 'BP', 'SHEL', 'ENPH'],
-            'Industrial': ['CAT', 'DE', 'BA', 'GE', 'MMM', 'HON', 'UPS', 'RTX']
+            'Technology': ['AAPL', 'MSFT', 'NVDA', 'AMD', 'META', 'GOOGL', 'CRM', 'NOW', 'ORCL', 'ADBE', 'INTC', 'CSCO'],
+            'Healthcare': ['JNJ', 'UNH', 'PFE', 'ABBV', 'TMO', 'MRK', 'LLY', 'ABT', 'AMGN', 'GILD', 'BMY', 'ISRG'],
+            'Finance': ['JPM', 'BAC', 'WFC', 'GS', 'MS', 'C', 'AXP', 'BLK', 'SCHW', 'USB', 'PNC', 'TFC'],
+            'Consumer': ['WMT', 'COST', 'HD', 'MCD', 'NKE', 'SBUX', 'KO', 'PEP', 'TGT', 'LOW', 'SBUX', 'PG'],
+            'Energy': ['XOM', 'CVX', 'COP', 'SLB', 'HAL', 'BP', 'SHEL', 'ENPH', 'OXY', 'EOG', 'MPC', 'VLO'],
+            'Industrial': ['CAT', 'DE', 'BA', 'GE', 'MMM', 'HON', 'UPS', 'RTX', 'LMT', 'UNP', 'FDX', 'EMR'],
+            'Software': ['CRM', 'NOW', 'SNOW', 'DDOG', 'ZS', 'OKTA', 'TEAM', 'PLTR', 'PATH', 'NET', 'CRWD', 'PANW'],
+            'Biotech': ['MRNA', 'BNTX', 'REGN', 'VRTX', 'BIIB', 'ILMN', 'ALNY', 'SGEN', 'EXAS', 'NBIX'],
         }
+
+    def _expand_universe_from_provider(self) -> None:
+        """Merge S&P/NASDAQ/ETF/crypto pools so we are not stuck on ~190 names."""
+        try:
+            from utils.infinite_symbol_provider import InfiniteSymbolProvider
+            provider = InfiniteSymbolProvider()
+            extra = provider.get_symbols(category="all", limit=None) or []
+            merged = list(dict.fromkeys(
+                [str(s).upper().replace(".", "-") for s in (self.stock_universe + list(extra)) if s]
+            ))
+            # Prefer equity tickers for mover scans (keep crypto/ETF separately usable)
+            equities = [s for s in merged if "-" not in s and len(s) <= 5]
+            self.stock_universe = equities if len(equities) >= 100 else merged
+            print(f"   Dynamic scanner universe expanded to {len(self.stock_universe)} symbols")
+        except Exception as exc:
+            print(f"   Dynamic scanner universe expand skipped: {exc}")
+
     
     def get_daily_movers(self, min_volume=1000000, min_price=5.0, max_stocks=20) -> List[Dict]:
-        """Find today's top movers with high volume"""
+        """Find today's top movers with high volume across all sectors + universe sample."""
         movers = []
         
-        # Randomly select different sectors each day to ensure variety
-        selected_sectors = random.sample(list(self.sectors.keys()), k=min(5, len(self.sectors)))
+        # Scan ALL sectors (not a random 5) for competitive coverage
+        selected_sectors = list(self.sectors.keys())
         
         for sector in selected_sectors:
-            # Get symbols from this sector
             sector_symbols = self.sectors[sector]
             
             for symbol in sector_symbols:
@@ -115,14 +135,48 @@ class DynamicMarketScanner:
         
         # Sort by absolute change and return top movers
         movers.sort(key=lambda x: abs(x['change_pct']), reverse=True)
+
+        # Extra pass: sample broader liquid universe beyond sector seeds
+        if len(movers) < max_stocks and self.stock_universe:
+            seen = {m['symbol'] for m in movers}
+            sample_n = min(120, len(self.stock_universe))
+            for symbol in random.sample(self.stock_universe, k=sample_n):
+                if symbol in seen:
+                    continue
+                try:
+                    hist = yf.Ticker(symbol).history(period="5d")
+                    if hist is None or len(hist) < 2:
+                        continue
+                    current_price = float(hist['Close'].iloc[-1])
+                    prev_price = float(hist['Close'].iloc[-2])
+                    if current_price < min_price:
+                        continue
+                    pct_change = ((current_price - prev_price) / prev_price) * 100
+                    volume = float(hist['Volume'].iloc[-1])
+                    if volume > min_volume and abs(pct_change) > 2:
+                        movers.append({
+                            'symbol': symbol,
+                            'sector': 'Broad',
+                            'price': round(current_price, 2),
+                            'change_pct': round(pct_change, 2),
+                            'volume': volume,
+                            'momentum': 'BULLISH' if pct_change > 0 else 'BEARISH'
+                        })
+                        seen.add(symbol)
+                    if len(movers) >= max_stocks * 2:
+                        break
+                except Exception:
+                    continue
+            movers.sort(key=lambda x: abs(x['change_pct']), reverse=True)
+
         return movers[:max_stocks]
     
     def get_breakout_candidates(self, min_volume=500000, max_stocks=15) -> List[Dict]:
         """Find stocks breaking out of recent ranges"""
         breakouts = []
         
-        # Sample different stocks each day
-        symbols_to_check = random.sample(self.stock_universe, k=min(50, len(self.stock_universe)))
+        # Sample a large slice of the expanded universe each cycle
+        symbols_to_check = random.sample(self.stock_universe, k=min(150, len(self.stock_universe)))
         
         for symbol in symbols_to_check:
             try:
@@ -168,7 +222,7 @@ class DynamicMarketScanner:
         undervalued = []
         
         # Look for stocks that dropped significantly but might be oversold
-        symbols_to_check = random.sample(self.stock_universe, k=min(30, len(self.stock_universe)))
+        symbols_to_check = random.sample(self.stock_universe, k=min(100, len(self.stock_universe)))
         
         for symbol in symbols_to_check:
             try:
@@ -203,17 +257,18 @@ class DynamicMarketScanner:
     def get_fresh_opportunities(self, total_limit=25) -> List[Dict]:
         """Get a mix of fresh opportunities from different strategies"""
         all_opportunities = []
+        # Scale sub-scans with requested total (competitive discovery)
+        movers_n = max(10, int(total_limit * 0.45))
+        break_n = max(8, int(total_limit * 0.35))
+        value_n = max(7, int(total_limit * 0.25))
         
-        # Get daily movers
-        movers = self.get_daily_movers(max_stocks=10)
+        movers = self.get_daily_movers(max_stocks=movers_n)
         all_opportunities.extend(movers)
         
-        # Get breakouts
-        breakouts = self.get_breakout_candidates(max_stocks=8)
+        breakouts = self.get_breakout_candidates(max_stocks=break_n)
         all_opportunities.extend(breakouts)
         
-        # Get undervalued
-        undervalued = self.get_undervalued_stocks(max_stocks=7)
+        undervalued = self.get_undervalued_stocks(max_stocks=value_n)
         all_opportunities.extend(undervalued)
         
         # Remove duplicates and return

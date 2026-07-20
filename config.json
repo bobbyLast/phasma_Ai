@@ -3,6 +3,29 @@
   "max_stock_price": null,
   "telegram_enabled": true,
   "max_discovery": true,
+  "discovery_limits": {
+    "max": {
+      "news_symbol_limit": 250,
+      "prediction_market_limit": 150,
+      "cache_prefetch_symbols": 120,
+      "underground_signal_cap": 80,
+      "social_reddit_limit": 50,
+      "news_articles_per_api": 25,
+      "news_entries_per_rss": 15,
+      "day_trade_dynamic_limit": 80,
+      "day_trade_momentum_limit": 80,
+      "heavy_mover_limit": 30,
+      "fresh_opportunity_limit": 100,
+      "kalshi_priority_series": 80
+    }
+  },
+  "competitive_discovery": {
+    "enabled": true,
+    "news_first": true,
+    "use_infinite_symbol_universe": true,
+    "scan_all_sectors": true,
+    "ai_watchlist_max": 500
+  },
   "bankroll": 100,
   "apis": {
     "alpha_vantage": {
@@ -30,7 +53,7 @@
     "news_api_key": "your_newsapi_key_here",
     "bing_api_key": "your_bing_api_key_here",
     "event_threshold": 70,
-    "max_signals": 5,
+    "max_signals": 15,
     "scan_interval_minutes": 60
   },
   "unusual_whales": {
@@ -38,7 +61,7 @@
     "api_key": "YOUR_UNUSUAL_WHALES_API_KEY",
     "min_volume_multiplier": 3,
     "min_confidence": 60,
-    "max_signals_per_cycle": 10
+    "max_signals_per_cycle": 25
   },
   "debug": {
     "kalshi_expiry_debug": false
@@ -47,25 +70,40 @@
     "allow_in_live_pipeline": false
   },
   "kalshi_scan": {
-    "max_event_series_per_cycle": 50,
-    "max_priority_series_per_cycle": 20,
-    "series_cache_ttl_seconds": 300
+    "max_event_series_per_cycle": 40,
+    "max_priority_series_per_cycle": 25,
+    "series_cache_ttl_seconds": 300,
+    "markets_cache_ttl_seconds": 180,
+    "max_market_pages_per_cycle": 4,
+    "min_request_interval_seconds": 1.25,
+    "max_requests_per_minute": 25,
+    "max_requests_per_cycle": 35,
+    "cooldown_on_429_seconds": 45,
+    "broad_keyword_scan": true,
+    "include_non_keyword_fill": false
   },
   "news_pipeline": {
     "single_ingest_per_cycle": true,
     "deep_investigate_enabled": true,
-    "deep_investigate_max_items": 3,
-    "deep_investigate_min_score": 0.55
+    "deep_investigate_max_items": 12,
+    "deep_investigate_min_score": 0.45,
+    "max_news_age_days": 7,
+    "freshness_classes": {
+      "BREAKING": 2,
+      "INTRADAY": 18,
+      "RECENT_CATALYST": 72,
+      "BACKGROUND": 168
+    }
   },
   "engine_groups": {
-    "ingest": {"cadence": "every_cycle", "max_seconds": 90},
-    "market": {"cadence": "every_cycle", "max_seconds": 30},
-    "risk_fast": {"cadence": "every_cycle", "max_seconds": 20},
-    "risk_deep": {"cadence": "hourly", "max_seconds": 90},
-    "discovery_fast": {"cadence": "15min", "max_seconds": 60},
-    "discovery_deep": {"cadence": "hourly", "max_seconds": 180},
-    "partnership": {"cadence": "4h", "max_seconds": 180},
-    "underground": {"cadence": "daily", "max_seconds": 180},
+    "ingest": {"cadence": "every_cycle", "max_seconds": 120},
+    "market": {"cadence": "every_cycle", "max_seconds": 45},
+    "risk_fast": {"cadence": "every_cycle", "max_seconds": 25},
+    "risk_deep": {"cadence": "hourly", "max_seconds": 120},
+    "discovery_fast": {"cadence": "15min", "max_seconds": 120},
+    "discovery_deep": {"cadence": "hourly", "max_seconds": 300},
+    "partnership": {"cadence": "4h", "max_seconds": 240},
+    "underground": {"cadence": "daily", "max_seconds": 300},
     "politician": {"cadence": "daily", "max_seconds": 120},
     "insider": {"cadence": "daily", "max_seconds": 120},
     "decision": {"cadence": "every_cycle", "max_seconds": 45},
@@ -74,17 +112,17 @@
     "learning": {"cadence": "every_cycle_if_due", "max_seconds": 30}
   },
   "runtime_budget": {
-    "max_cycle_seconds": 240,
-    "max_engine_seconds": 60,
-    "max_network_calls_per_cycle": 100,
-    "max_symbols_crash_detector_fast": 3,
-    "max_symbols_partnership_fast": 0,
-    "max_candidates_deep_analysis": 10,
-    "max_candidates_monte_carlo": 5,
-    "skip_low_value_engines_when_over_budget": true
+    "max_cycle_seconds": 480,
+    "max_engine_seconds": 120,
+    "max_network_calls_per_cycle": 250,
+    "max_symbols_crash_detector_fast": 8,
+    "max_symbols_partnership_fast": 5,
+    "max_candidates_deep_analysis": 40,
+    "max_candidates_monte_carlo": 15,
+    "skip_low_value_engines_when_over_budget": false
   },
   "execution": {
-    "mode": "ALERT_ONLY",
+    "mode": "PAPER_ALPACA",
     "allow_live_trading": false,
     "kalshi_execution_enabled": false,
     "require_price": true,
@@ -106,7 +144,7 @@
     "kill_switch": false
   },
   "paper_trading": {
-    "enabled": false,
+    "enabled": true,
     "starting_capital": 10000,
     "track_ai_performance": true,
     "auto_trade_signals": true,
@@ -166,7 +204,8 @@
     "enabled": true,
     "bankroll": 50,
     "max_positions": 5,
-    "position_size": 10
+    "position_size": 10,
+    "min_reward_risk_ratio": 5.0
   },
   "kalshi_trading": {
     "enabled": true,
@@ -258,10 +297,10 @@
   },
   "underground_discovery": {
     "enabled": true,
-    "min_market_cap": 10000000,
-    "max_market_cap": 500000000,
-    "min_adv": 50000,
-    "max_signals_per_day": 10,
+    "min_market_cap": 5000000,
+    "max_market_cap": 2000000000,
+    "min_adv": 25000,
+    "max_signals_per_day": 40,
     "require_corroboration": true
   },
   "global_macro": {

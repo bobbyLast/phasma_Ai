@@ -24,6 +24,8 @@ import math
 import statistics
 from collections import defaultdict
 
+from core.runtime_paths import engine_state_path
+
 try:
     from engines.kalshi_engine import KalshiPredictionEngine
     from engines.scenario_graph_engine import ScenarioGraphEngine
@@ -179,8 +181,8 @@ class EarningsDriftEngine:
         self.earnings_analyses: Dict[str, EarningsDriftAnalysis] = {}
 
         # Data files
-        self.patterns_file = "earnings_patterns.json"
-        self.analyses_file = "earnings_analyses.json"
+        self.patterns_file = engine_state_path("earnings_patterns.json")
+        self.analyses_file = engine_state_path("earnings_analyses.json")
 
         # Initialize with known patterns
         self._initialize_earnings_patterns()

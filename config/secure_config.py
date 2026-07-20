@@ -6,8 +6,14 @@ Loads all API keys from .env file securely
 """
 
 import os
+import sys
 from pathlib import Path
 from dotenv import load_dotenv
+
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+if hasattr(sys.stderr, "reconfigure"):
+    sys.stderr.reconfigure(encoding="utf-8", errors="replace")
 
 class PhasmaConfig:
     """Secure configuration loader for Phasma AI"""
@@ -136,6 +142,20 @@ class PhasmaConfig:
             warnings.append("Polygon API key not set - using free data sources")
         
         return errors, warnings
+
+    def get(self, key, default=None):
+        """Get configuration value with dot-notation support."""
+        value = self
+        for part in str(key).split('.'):
+            if isinstance(value, dict):
+                if part not in value:
+                    return default
+                value = value[part]
+            elif hasattr(value, part):
+                value = getattr(value, part)
+            else:
+                return default
+        return value
     
     def print_status(self):
         """Print configuration status"""

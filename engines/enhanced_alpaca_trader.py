@@ -13,13 +13,22 @@ class EnhancedAlpacaPaperTrader:
     
     def __init__(self):
         """Initialize Alpaca paper trading client"""
-        self.api_key = "PKY7UOZU5S7AZZ4QIH2BJ5F52X"
-        self.api_secret = "J8iDXzCoHhrvpPK8yTXu3dRP1FybmAVW77QWZDPyzJs3"
-        self.base_url = "https://paper-api.alpaca.markets"
+        self.api_key = os.getenv("ALPACA_API_KEY") or os.getenv("ALPACA_KEY")
+        self.api_secret = (
+            os.getenv("ALPACA_API_SECRET")
+            or os.getenv("ALPACA_SECRET_KEY")
+        )
+        self.base_url = os.getenv(
+            "ALPACA_BASE_URL", "https://paper-api.alpaca.markets"
+        )
         self.open_positions = {}  # Track open positions for auto-selling
         
+        if not self.api_key or not self.api_secret:
+            print("❌ Alpaca credentials missing (set ALPACA_API_KEY and ALPACA_API_SECRET in .env)")
+            self.alpaca = None
+            return
+
         try:
-            # Test with real credentials
             self.alpaca = tradeapi.REST(
                 key_id=self.api_key,
                 secret_key=self.api_secret,

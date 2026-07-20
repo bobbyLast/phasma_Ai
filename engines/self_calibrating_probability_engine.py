@@ -29,6 +29,8 @@ import numpy as np
 from collections import defaultdict
 import statistics
 
+from core.runtime_paths import engine_state_path
+
 try:
     from engines.kalshi_engine import KalshiPredictionEngine
     from engines.scenario_graph_engine import ScenarioGraphEngine
@@ -131,9 +133,9 @@ class SelfCalibratingProbabilityEngine:
         self.calibration_adjustments: Dict[str, List[CalibrationAdjustment]] = defaultdict(list)
         self.scoring_history: List[ScoringRuleResult] = []
 
-        self.predictions_file = "prediction_records.json"
-        self.calibration_file = "calibration_adjustments.json"
-        self.scoring_file = "scoring_history.json"
+        self.predictions_file = engine_state_path("prediction_records.json")
+        self.calibration_file = engine_state_path("calibration_adjustments.json")
+        self.scoring_file = engine_state_path("scoring_history.json")
 
         self._load_data()
 

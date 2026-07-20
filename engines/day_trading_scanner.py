@@ -22,14 +22,21 @@ class DayTradingScanner:
         self.min_price = 5.0  # Minimum stock price
         self.max_price = cap if self.price_filter_enabled else 10000.0
         
-        # Popular day trading stocks to watch
+        # Fallback seed list — expanded via InfiniteSymbolProvider when available
         self.watchlist = [
             'AAPL', 'MSFT', 'GOOGL', 'AMZN', 'TSLA', 'META', 'NVDA',
             'AMD', 'NFLX', 'PYPL', 'DIS', 'BABA', 'UBER', 'LYFT',
-            'SNAP', 'TWTR', 'ROKU', 'ZM', 'PLTR', 'GME', 'AMC',
+            'SNAP', 'ROKU', 'ZM', 'PLTR', 'GME', 'AMC',
             'BB', 'NOK', 'SNDL', 'BNGO', 'MVIS', 'SPCE', 'RIVN',
-            'LCID', 'CHPT', 'BLNK', 'FSR', 'LCID', 'RIVN'
+            'LCID', 'CHPT', 'BLNK', 'SOFI', 'HOOD', 'COIN', 'MARA',
+            'RIOT', 'SMCI', 'ARM', 'AVGO', 'MU', 'CRM', 'NOW', 'SNOW',
         ]
+        try:
+            from utils.infinite_symbol_provider import InfiniteSymbolProvider
+            extra = InfiniteSymbolProvider().get_symbols(category='stocks', limit=400) or []
+            self.watchlist = list(dict.fromkeys(self.watchlist + [str(s).upper() for s in extra if s]))
+        except Exception:
+            pass
 
     def _normalize_symbol(self, symbol: str) -> str:
         return str(symbol or "").strip().upper()
@@ -39,7 +46,11 @@ class DayTradingScanner:
         additional_symbols: Optional[List[str]] = None,
         dynamic_limit: int = 20,
     ) -> List[str]:
-        """News-linked symbols first, then dynamic fresh names, then watchlist."""
+        """News-linked symbols first, then dynamic fresh names, then broad watchlist."""
+        from utils.discovery_limits import discovery_limit
+        dynamic_limit = int(
+            discovery_limit(self.config, "day_trade_dynamic_limit", dynamic_limit) or dynamic_limit
+        )
         symbols_to_scan: List[str] = []
         seen: Set[str] = set()
 
@@ -55,14 +66,14 @@ class DayTradingScanner:
 
         try:
             from engines.dynamic_market_scanner import DynamicMarketScanner
-            fresh_opps = DynamicMarketScanner().get_fresh_opportunities(total_limit=dynamic_limit)
+            fresh_opps = DynamicMarketScanner(self.config).get_fresh_opportunities(total_limit=dynamic_limit)
             for opp in fresh_opps:
                 _add(opp.get("symbol", ""))
-            print(f"   Using {len(symbols_to_scan)} symbols (news-first + dynamic scanner)")
+            print(f"   Using {len(symbols_to_scan)} symbols (news-first + broad dynamic scanner)")
         except Exception:
             for symbol in self.watchlist:
                 _add(symbol)
-            print(f"   Dynamic scanner unavailable — using news + watchlist ({len(symbols_to_scan)} symbols)")
+            print(f"   Dynamic scanner unavailable — using news + expanded watchlist ({len(symbols_to_scan)} symbols)")
 
         return symbols_to_scan
 
@@ -112,7 +123,15 @@ class DayTradingScanner:
             if self._normalize_symbol(s)
         }
 
-        symbols_to_scan = self._resolve_symbols_to_scan(additional_symbols, dynamic_limit=20)
+        symbols_to_scan = self._resolve_symbols_to_scan(
+            additional_symbols,
+            dynamic_limit=int(
+                __import__("utils.discovery_limits", fromlist=["discovery_limit"]).discovery_limit(
+                    self.config, "day_trade_dynamic_limit", 20
+                )
+                or 20
+            ),
+        )
         # Scan a wider pool than the return limit so ranking has room
         scan_cap = min(len(symbols_to_scan), max(limit * 4, 40))
 
@@ -203,7 +222,9 @@ class DayTradingScanner:
     ):
         """Scan for stocks with strong momentum and volume"""
         signals = []
-        symbols_to_scan = self._resolve_symbols_to_scan(additional_symbols, dynamic_limit=20)
+        from utils.discovery_limits import discovery_limit
+        dyn = int(discovery_limit(self.config, "day_trade_dynamic_limit", 20) or 20)
+        symbols_to_scan = self._resolve_symbols_to_scan(additional_symbols, dynamic_limit=dyn)
         
         print(f"Scanning {len(symbols_to_scan)} stocks for day trading opportunities...")
         print(f"   Criteria: Price ${self.min_price:.1f}-${self.max_price:.1f}, Volume >= {self.min_volume:,}")
@@ -211,10 +232,9 @@ class DayTradingScanner:
         if history_batch:
             print(f"   Using shared market batch ({len(history_batch)} histories)")
         
-        for symbol in symbols_to_scan:
-            print(f"   Checking symbol: {symbol}")
-        
-        for symbol in symbols_to_scan[:limit]:
+        # Scan a wide set; keep top `limit` signals
+        scan_cap = min(len(symbols_to_scan), max(int(limit) * 3, 40))
+        for symbol in symbols_to_scan[:scan_cap]:
             try:
                 hist = self._hist_from_batch_or_yf(symbol, history_batch, min_rows=5)
                 if hist is None or len(hist) < 5:
@@ -284,7 +304,11 @@ class DayTradingScanner:
                         'market_cap': 0,
                         'pattern_strength': min(0.5, abs(price_change_5d) * 5),
                         'divergence_score': 0.0,  # Not applicable for stocks
-                        'win_rate': min(0.95, max(0.35, 0.5 + abs(price_change_5d) * 2)),
+                        'win_rate': self._measured_day_trade_win_rate(
+                            fallback=min(0.95, max(0.35, 0.5 + abs(price_change_5d) * 2))
+                        ),
+                        'asset_class': 'DAY_TRADE',
+                        'ledger_asset_class': 'DAY_TRADE',
                         'catalyst_type': 'Momentum',
                         'title': f"{symbol} shows strong momentum with {volume_ratio:.1f}x volume",
                         'source': 'day_trading',
@@ -304,7 +328,7 @@ class DayTradingScanner:
                 continue
         
         print(f"Found {len(signals)} day trading opportunities")
-        return signals
+        return signals[:limit]
     
     def calculate_rsi(self, prices, periods=14):
         """Calculate RSI indicator"""
@@ -363,6 +387,17 @@ class DayTradingScanner:
             'CHPT': 'Industrials', 'BLNK': 'Consumer Discretionary', 'FSR': 'Consumer Discretionary'
         }
         return sectors.get(symbol, 'Technology')
+
+    def _measured_day_trade_win_rate(self, fallback: float = 0.5) -> float:
+        """Prefer ledger-measured day-trade win rate; else heuristic fallback."""
+        try:
+            from utils.trade_performance_ledger import ASSET_DAY_TRADE, get_trade_performance_ledger
+            wr = get_trade_performance_ledger().win_rate(asset_class=ASSET_DAY_TRADE, min_samples=5)
+            if wr.get("win_rate") is not None:
+                return float(wr["win_rate"])
+        except Exception:
+            pass
+        return float(fallback)
     
     def calculate_dynamic_risk(self, confidence, simulation_win_rate=None):
         """Calculate risk percentage based on confidence and simulation results"""

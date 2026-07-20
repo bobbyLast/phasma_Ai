@@ -4,6 +4,7 @@ from typing import Any, Dict, Optional, Union
 
 ConfigLike = Union[Dict[str, Any], Any]
 
+# Conservative defaults (max_discovery=false)
 _NORMAL = {
     "news_symbol_limit": 25,
     "prediction_market_limit": 25,
@@ -13,6 +14,13 @@ _NORMAL = {
     "underground_signal_cap": 20,
     "partnership_symbol_scan": 3,
     "social_reddit_limit": 10,
+    "news_articles_per_api": 10,
+    "news_entries_per_rss": 5,
+    "day_trade_dynamic_limit": 20,
+    "day_trade_momentum_limit": 30,
+    "heavy_mover_limit": 10,
+    "fresh_opportunity_limit": 25,
+    "kalshi_priority_series": 20,
     "intelligence_timeouts": {
         "universal_opportunities": 180,
         "bull_runs": 180,
@@ -23,22 +31,30 @@ _NORMAL = {
     },
 }
 
+# Competitive discovery — cast a wide net across news + liquid US names
 _MAX = {
-    "news_symbol_limit": 75,
-    "prediction_market_limit": 75,
+    "news_symbol_limit": 250,
+    "prediction_market_limit": 150,
     "news_cache_minutes": 2,
     "market_cache_minutes": 5,
-    "cache_prefetch_symbols": 50,
-    "underground_signal_cap": 50,
-    "partnership_symbol_scan": 15,
-    "social_reddit_limit": 25,
+    "cache_prefetch_symbols": 120,
+    "underground_signal_cap": 80,
+    "partnership_symbol_scan": 25,
+    "social_reddit_limit": 50,
+    "news_articles_per_api": 25,
+    "news_entries_per_rss": 15,
+    "day_trade_dynamic_limit": 80,
+    "day_trade_momentum_limit": 80,
+    "heavy_mover_limit": 30,
+    "fresh_opportunity_limit": 100,
+    "kalshi_priority_series": 80,
     "intelligence_timeouts": {
-        "universal_opportunities": 300,
-        "bull_runs": 300,
-        "hot_stocks": 300,
-        "social_signals": 120,
-        "partnership_opportunities": 180,
-        "underground_stocks": 240,
+        "universal_opportunities": 420,
+        "bull_runs": 420,
+        "hot_stocks": 420,
+        "social_signals": 180,
+        "partnership_opportunities": 240,
+        "underground_stocks": 300,
     },
 }
 

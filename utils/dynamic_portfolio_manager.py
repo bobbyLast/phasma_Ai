@@ -96,12 +96,12 @@ class DynamicPortfolioManager:
         return [
             CapitalTier(
                 min_capital=0,
-                max_price=50.0,
+                max_price=10000.0,
                 tier_name="Starter Trader",
                 max_position_pct=0.40,  # 40% max per trade for small bankroll
                 risk_per_trade=0.02,    # 2% risk per trade
                 max_concurrent_trades=2,
-                description="Focus on affordable stocks under $50 with $50 bankroll"
+                description="Starter tier (per-share cap from config when enabled)"
             ),
             CapitalTier(
                 min_capital=100,

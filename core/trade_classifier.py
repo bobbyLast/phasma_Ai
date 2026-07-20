@@ -44,7 +44,7 @@ class TradeClassifier:
                 'moonshot_stop_pct': 0.05,    # 5% stop loss
                 'swing_stop_pct': 0.07,       # 7% stop loss
                 'position_stop_pct': 0.10,     # 10% stop loss
-                'min_risk_reward': 2.0,        # Minimum risk:reward ratio
+                'min_risk_reward': 5.0,        # Minimum reward:risk ratio ($1 risk → $5 upside)
             }
         }
     

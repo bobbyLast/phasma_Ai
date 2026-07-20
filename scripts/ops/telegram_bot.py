@@ -22,6 +22,9 @@ class TelegramBot:
 
     def send_message(self, text):
         """Send a message to the Telegram chat (hard network timeout)."""
+        if not text or not str(text).strip():
+            print("[TELEGRAM] Skip empty message (unresolved company / suppressed)")
+            return False
         url = f"https://api.telegram.org/bot{self.token}/sendMessage"
         payload = {
             "chat_id": self.chat_id,
@@ -52,7 +55,47 @@ class TelegramBot:
     async def send_alert_async(self, signal):
         return await asyncio.to_thread(self.send_alert, signal)
 
+    @staticmethod
+    def _as_signal_dict(signal) -> Dict[str, Any]:
+        """Normalize Meta-Brain Signal objects or dicts for formatters."""
+        if isinstance(signal, dict):
+            return signal
+        if signal is None:
+            return {}
+        if hasattr(signal, "to_dict") and callable(signal.to_dict):
+            try:
+                data = signal.to_dict()
+                if isinstance(data, dict):
+                    return data
+            except Exception:
+                pass
+        out: Dict[str, Any] = {}
+        for key in (
+            "symbol", "ticker", "action", "confidence", "source", "title",
+            "entry_price", "current_price", "target_price", "stop_price",
+            "rationale", "kalshi_signal", "kalshi_action", "trade_link",
+            "kalshi_analysis", "sim_scaled_confidence", "pop_from_sim",
+            "monte_carlo_sim_score", "simulation_pop", "position_size",
+            "fact_check", "details", "yes_price", "no_price",
+            "implied_probability", "market_title",
+        ):
+            if hasattr(signal, key):
+                val = getattr(signal, key)
+                if val is not None:
+                    out[key] = val
+        details = getattr(signal, "details", None)
+        if isinstance(details, dict):
+            for k, v in details.items():
+                out.setdefault(k, v)
+        # Nested opportunity payloads sometimes carry the real trade link
+        for nest_key in ("details", "kalshi_analysis", "kalshi_market_data"):
+            nest = out.get(nest_key)
+            if isinstance(nest, dict) and nest.get("trade_link") and not out.get("trade_link"):
+                out["trade_link"] = nest["trade_link"]
+        return out
+
     def format_signal_message(self, signal):
+        signal = self._as_signal_dict(signal)
         # Check if this is a Kalshi prediction market signal
         signal_source = signal.get('source', 'unknown')
         has_kalshi_signal = signal.get('kalshi_signal', False)
@@ -61,7 +104,7 @@ class TelegramBot:
         if signal_source == 'kalshi_prediction' or has_kalshi_signal:
             print("📈 Using Kalshi signal formatter (should include trade links)")
             return self.format_kalshi_signal_message(signal)
-        elif signal_source == 'options_engine' or 'CALL' in signal.get('action', '') or 'PUT' in signal.get('action', ''):
+        elif signal_source == 'options_engine' or 'CALL' in str(signal.get('action', '')) or 'PUT' in str(signal.get('action', '')):
             print("📊 Using options formatter")
             return self.format_options_signal_message(signal)
         else:
@@ -149,6 +192,15 @@ class TelegramBot:
         # Get company info
         company_info = signal.get('fact_check', {}).get('company_info', {})
         company_name = company_info.get('name') or company_info.get('full_name') or symbol
+        try:
+            from utils.company_identity_registry import get_identity_registry
+            resolved = get_identity_registry().resolve_for_alert(signal if isinstance(signal, dict) else {})
+            if resolved:
+                company_name = resolved
+            elif str(company_name).strip().lower() in ("unknown", "n/a", ""):
+                return ""
+        except Exception:
+            pass
 
         # Build concise WHY with key data
         why_lines = []
@@ -320,6 +372,16 @@ Probability of Profit: {pop:.0f}%"""
         # Get company name from fact_check if available
         company_info = signal.get('fact_check', {}).get('company_info', {})
         company_name = company_info.get('name') or company_info.get('full_name') or symbol
+        try:
+            from utils.company_identity_registry import get_identity_registry
+            resolved = get_identity_registry().resolve_for_alert(signal if isinstance(signal, dict) else {})
+            if resolved:
+                company_name = resolved
+            elif str(company_name).strip().lower() in ("unknown", "n/a", "") or company_name == symbol:
+                # Do not post Unknown / bare ticker as company identity
+                return ""
+        except Exception:
+            pass
         
         # Fix confidence format - if it's already a percentage (like 75), don't multiply by 100
         confidence = signal.get('confidence', 0)
@@ -333,6 +395,21 @@ Probability of Profit: {pop:.0f}%"""
         pop_from_sim = resolve_pop_pct(signal)
         entry_price = signal.get('entry_price', 'N/A')
         target_price = signal.get('target_price', 'N/A')
+        stop_price = signal.get('stop_loss') or signal.get('stop_price') or 'N/A'
+        rr = signal.get('reward_risk_ratio') or signal.get('risk_reward_ratio')
+        try:
+            from utils.stock_reward_risk import apply_stock_rr_targets, compute_reward_risk
+            apply_stock_rr_targets(signal, invent_target=True)
+            rr = signal.get('reward_risk_ratio') or compute_reward_risk(
+                signal.get('entry_price') or signal.get('current_price'),
+                signal.get('stop_loss') or signal.get('stop_price'),
+                signal.get('target_price'),
+            )
+            stop_price = signal.get('stop_loss') or signal.get('stop_price') or stop_price
+            target_price = signal.get('target_price') or target_price
+            entry_price = signal.get('entry_price') or signal.get('current_price') or entry_price
+        except Exception:
+            pass
         
         # Check if this is a fundamental analysis signal (undervalued stock)
         is_fundamental = source == 'fundamental_analysis' or signal.get('valuation_score') is not None
@@ -361,15 +438,19 @@ Probability of Profit: {pop:.0f}%"""
             pe_ratio = signal.get('pe_ratio', 0)
             industry_pe = signal.get('industry_pe', 0)
             valuation_score = signal.get('valuation_score', 0)
-            valuation_level = signal.get('valuation_level', 'Unknown')
+            valuation_level = signal.get('valuation_level') or ''
+            if str(valuation_level).strip().lower() in ('unknown', 'n/a', ''):
+                valuation_level = ''
             expected_gain = signal.get('expected_gain', 0)
             
             if pe_ratio > 0 and industry_pe > 0:
                 pe_vs_industry = (pe_ratio / industry_pe) * 100
                 why_lines.append(f"Valuation: P/E {pe_ratio:.1f} vs Industry {industry_pe:.1f} ({pe_vs_industry:.0f}%)")
             
-            if valuation_score:
+            if valuation_score and valuation_level:
                 why_lines.append(f"Score: {valuation_score}/10 ({valuation_level})")
+            elif valuation_score:
+                why_lines.append(f"Score: {valuation_score}/10")
             
             if expected_gain:
                 why_lines.append(f"Expected: +{expected_gain:.1f}%")
@@ -464,9 +545,11 @@ Exit: {exit_text}
 📊 KEY LEVELS
 ━━━━━━━━━━━━━━━━━━━━━━
 
-Entry: ${entry_price} | Target: ${target_price}"""
+        Entry: ${entry_price} | Stop: ${stop_price} | Target: ${target_price}
+        Angle: {f'{float(rr):.1f}:1' if rr else 'n/a'} reward:risk (min 5:1)"""
 
         message += self._execution_status_block(signal)
+        message += self._win_rate_block(signal)
 
         # Add combined FUNDAMENTALS & CONFLUENCE section for value stocks
         if is_fundamental:
@@ -485,16 +568,52 @@ Score: {signal.get('valuation_score', 0)}/10 | Confluence: {confluence_score:.0f
         
         return message
     
+    def _win_rate_block(self, signal: Dict[str, Any]) -> str:
+        """Rolling measured win-rates from the performance ledger."""
+        overall = signal.get("win_rate_overall")
+        stocks = signal.get("win_rate_stocks")
+        day = signal.get("win_rate_day_trade")
+        kalshi = signal.get("win_rate_kalshi")
+        if not any([overall, stocks, day, kalshi]):
+            try:
+                from utils.trade_performance_ledger import (
+                    ASSET_DAY_TRADE,
+                    ASSET_KALSHI,
+                    ASSET_STOCK,
+                    get_trade_performance_ledger,
+                )
+                ledger = get_trade_performance_ledger()
+                overall = ledger.win_rate().get("label")
+                stocks = ledger.win_rate(asset_class=ASSET_STOCK).get("label")
+                day = ledger.win_rate(asset_class=ASSET_DAY_TRADE).get("label")
+                kalshi = ledger.win_rate(asset_class=ASSET_KALSHI).get("label")
+            except Exception:
+                return ""
+        return (
+            "\n\n━━━━━━━━━━━━━━━━━━━━━━\n"
+            "📊 MEASURED WIN RATES\n"
+            "━━━━━━━━━━━━━━━━━━━━━━\n"
+            f"Overall: {overall or 'n/a'}\n"
+            f"Stocks: {stocks or 'n/a'} | Day trades: {day or 'n/a'}\n"
+            f"Kalshi (virtual): {kalshi or 'n/a'}"
+        )
+
     def _execution_status_block(self, signal: Dict[str, Any]) -> str:
         """Honest execution/reporting footer — report only, never implies live brokerage."""
         mode = signal.get("execution_mode", "ALERT_ONLY")
         decision = signal.get("execution_decision", "skipped")
         reason = signal.get("execution_reason") or signal.get("skip_reason") or ""
         label = signal.get("execution_alert_label") or ""
-        if decision in ("skipped", "rejected") and not label:
+        if decision in ("filled", "submitted") and mode == "PAPER_ALPACA":
+            label = "PAPER FILL (Alpaca)"
+            fill_px = signal.get("fill_price")
+            fill_qty = signal.get("fill_quantity")
+            if fill_px is not None:
+                reason = f"filled {fill_qty or 1} @ ${float(fill_px):.2f}" + (f" | {reason}" if reason else "")
+        elif decision in ("skipped", "rejected") and not label:
             label = "NO TRADE"
         elif decision in ("filled", "submitted") and "PAPER" not in str(label).upper():
-            label = "PAPER TRADE" if mode.startswith("PAPER") else label
+            label = "PAPER TRADE" if str(mode).startswith("PAPER") else label
 
         conf_type = signal.get("confidence_type", "heuristic")
         data_age = signal.get("data_age_seconds")
@@ -508,7 +627,7 @@ Score: {signal.get('valuation_score', 0)}/10 | Confluence: {confluence_score:.0f
         lines = [
             "",
             "━━━━━━━━━━━━━━━━━━━━━━",
-            "🛡️ EXECUTION STATUS (report-only)",
+            "🛡️ EXECUTION STATUS",
             "━━━━━━━━━━━━━━━━━━━━━━",
             f"Mode: {mode}",
             f"Execution: {decision}",
@@ -526,30 +645,111 @@ Score: {signal.get('valuation_score', 0)}/10 | Confluence: {confluence_score:.0f
 
     def format_kalshi_signal_message(self, signal):
         """Format Kalshi prediction market signals with direct trade links."""
-        
-        symbol = signal.get('symbol', 'UNKNOWN')
-        kalshi_signal = signal.get('kalshi_signal', 'BUY_YES')
-        kalshi_action = signal.get('kalshi_action', 'BUY_CALL')
-        confidence = signal.get('sim_scaled_confidence', signal.get('confidence', 0) * 100)
+        signal = self._as_signal_dict(signal)
+
+        symbol = signal.get('symbol') or signal.get('ticker') or 'UNKNOWN'
+        kalshi_signal = str(signal.get('kalshi_signal') or signal.get('action') or 'BUY_YES').upper()
+        confidence_raw = signal.get('sim_scaled_confidence', signal.get('confidence', 0))
+        try:
+            confidence = float(confidence_raw)
+            if confidence <= 1.0:
+                confidence *= 100.0
+        except (TypeError, ValueError):
+            confidence = 0.0
+
         pop_from_sim = resolve_pop_pct(signal)
-        if pop_from_sim is None:
-            raise ValueError(f"Cannot post {symbol} — no real POP from simulation")
-        
-        # Get Kalshi-specific data
-        kalshi_analysis = signal.get('kalshi_analysis', {})
-        rationale = kalshi_analysis.get('rationale', 'AI-generated prediction signal')
-        market_assessment = kalshi_analysis.get('market_assessment', {})
-        
-        # Build concise WHY with key data - Strategy First
-        why_lines = []
-        why_lines.append(f"Strategy: PREDICTION MARKET")
-        why_lines.append(f"Type: Event-based trading")
-        why_lines.append(f"Confidence: {confidence:.1f}% | Success Rate: {pop_from_sim:.1f}%")
-        why_lines.append(f"Analysis: {rationale[:100]}...")
+        # Watch/intel alerts may not have a simulation POP — still post the bet link
+        pop_display = f"{pop_from_sim:.1f}%" if pop_from_sim is not None else "n/a"
+
+        kalshi_analysis = signal.get('kalshi_analysis') or {}
+        if not isinstance(kalshi_analysis, dict):
+            kalshi_analysis = {}
+        details = signal.get('details') if isinstance(signal.get('details'), dict) else {}
+        market_data = signal.get('kalshi_market_data') or details.get('kalshi_market_data') or {}
+        if not isinstance(market_data, dict):
+            market_data = {}
+
+        market_title = (
+            signal.get('market_title')
+            or signal.get('title')
+            or market_data.get('title')
+            or kalshi_analysis.get('market_title')
+            or symbol
+        )
+        # Prefer live Kalshi API title over stale web-scrape labels
+        if isinstance(market_title, str) and (
+            "leaves apple" in market_title.lower()
+            or "tim cook" in market_title.lower() and "kalshi" not in market_title.lower()
+        ):
+            api_title = market_data.get("title") or kalshi_analysis.get("rationale")
+            if api_title:
+                market_title = api_title
+
+        rationale = kalshi_analysis.get('rationale') or signal.get('rationale') or 'AI-generated prediction signal'
+        yes_price = (
+            signal.get('yes_price')
+            or market_data.get('yes_price')
+            or market_data.get('yes_bid')
+            or kalshi_analysis.get('yes_price')
+        )
+        no_price = (
+            signal.get('no_price')
+            or market_data.get('no_price')
+            or market_data.get('no_bid')
+            or kalshi_analysis.get('no_price')
+        )
+        implied = signal.get('implied_probability') or market_data.get('implied_probability')
+        try:
+            if implied is not None and float(implied) <= 1.0:
+                yes_pct = float(implied) * 100.0
+            elif yes_price is not None and float(yes_price) <= 1.0:
+                yes_pct = float(yes_price) * 100.0
+            elif yes_price is not None:
+                yes_pct = float(yes_price)
+            else:
+                yes_pct = None
+        except (TypeError, ValueError):
+            yes_pct = None
+
+        if "NO" in kalshi_signal:
+            pick = "BUY NO"
+            pick_detail = f"NO @ {float(no_price):.0f}¢" if no_price is not None and float(no_price) > 1 else (
+                f"NO @ {float(no_price)*100:.0f}¢" if no_price is not None else "NO"
+            )
+        else:
+            pick = "BUY YES"
+            pick_detail = f"YES @ {float(yes_price):.0f}¢" if yes_price is not None and float(yes_price) > 1 else (
+                f"YES @ {float(yes_price)*100:.0f}¢" if yes_price is not None else "YES"
+            )
+
+        trade_link = (
+            signal.get('trade_link')
+            or details.get('trade_link')
+            or market_data.get('trade_link')
+            or kalshi_analysis.get('trade_link')
+        )
+        if not trade_link:
+            # Prefer event URL shape used by KalshiEngine.get_market_trade_link
+            event = str(symbol).lower()
+            if '-' in event:
+                parts = event.split('-')
+                if len(parts) > 2 and parts[-1].isdigit():
+                    event = '-'.join(parts[:-1])
+            trade_link = f"https://kalshi.com/events/{event}"
+
+        yes_line = f"YES odds: {yes_pct:.1f}%" if yes_pct is not None else "YES odds: n/a"
+        why_lines = [
+            "Strategy: PREDICTION MARKET",
+            f"Market: {str(market_title)[:120]}",
+            f"Pick: {pick} ({pick_detail})",
+            yes_line,
+            f"Confidence: {confidence:.1f}% | POP: {pop_display}",
+            f"Analysis: {str(rationale)[:100]}",
+        ]
         why_text = "\n".join(why_lines)
-        
-        # Build message - Strategy First
-        message = f"""🎯 KALSHI PREDICTION MARKET - {symbol}
+
+        message = f"""🎯 KALSHI VIRTUAL / RESEARCH — {symbol}
+(Not a brokerage fill — tracked for win-rate learning)
 
 ━━━━━━━━━━━━━━━━━━━━━━
 🎯 STRATEGY
@@ -560,19 +760,27 @@ Score: {signal.get('valuation_score', 0)}/10 | Confluence: {confluence_score:.0f
 Exit: Hold until event resolution. Close early if probability shifts against position.
 
 ━━━━━━━━━━━━━━━━━━━━━━
-📊 MARKET DETAILS:
+📊 BET OPTIONS (VIRTUAL)
 ━━━━━━━━━━━━━━━━━━━━━━
 
-Signal: {kalshi_signal}
-Confidence: {confidence:.1f}%
-POP: {pop_from_sim:.1f}%
+• YES — {pick_detail if pick == 'BUY YES' else 'alternate side'}
+• NO  — {(pick_detail if pick == 'BUY NO' else 'alternate side')}
+AI pick: {pick}
 
 ━━━━━━━━━━━━━━━━━━━━━━
-📱 TRADE LINK:
+📱 TRADE LINK (open & place bet yourself)
 ━━━━━━━━━━━━━━━━━━━━━━
 
-https://kalshi.com/markets/{symbol}"""
-        
+{trade_link}"""
+
+        try:
+            from engines.kalshi_virtual_book import get_kalshi_virtual_book
+            wr = get_kalshi_virtual_book().win_rate_label()
+            message += f"\n\nKalshi virtual win-rate: {wr}"
+        except Exception:
+            pass
+        message += self._win_rate_block(signal)
+
         return message
 
     def format_heavy_mover_watchlist(self, movers, max_items=10):
@@ -605,6 +813,9 @@ https://kalshi.com/markets/{symbol}"""
 
     async def post_signal(self, signal):
         message = self.format_signal_message(signal)
+        if not message or not str(message).strip():
+            print("[TELEGRAM] Signal suppressed — missing company identity or empty formatter")
+            return False
         return await self.send_message_async(message)
 
 def get_telegram_bot():

@@ -7,7 +7,7 @@ from typing import Dict, Optional, List
 import logging
 import pandas as pd
 from dotenv import load_dotenv
-from utils.robust_price_fetcher import get_robust_price_fetcher
+from utils.robust_price_fetcher import get_robust_price_fetcher, register_cycle_prices, get_cycle_price
 load_dotenv()
 
 
@@ -17,7 +17,8 @@ class MarketDataCache:
     Fetches all needed data once at cycle start, then modules read from cache.
     """
     
-    def __init__(self, cache_duration_minutes: int = 10):
+    def __init__(self, cache_duration_minutes: int = 10, config=None):
+        self.config = config
         self.cache_duration = timedelta(minutes=cache_duration_minutes)
         self.logger = logging.getLogger(__name__)
         
@@ -29,16 +30,24 @@ class MarketDataCache:
         self._ticker_info_cache: Dict[str, Dict] = {}
         self._price_cache: Dict[str, float] = {}
         self._history_cache: Dict[str, any] = {}
-        self._macro_cache: Dict[str, any] = {}  # Missing macro cache
         
         # Cache timestamps
         self._macro_timestamp: Optional[datetime] = None
-        self._macro_timestamps: Dict[str, datetime] = {}  # Missing macro timestamps dict
         self._ticker_timestamps: Dict[str, datetime] = {}
         self._price_timestamps: Dict[str, datetime] = {}
         self._history_timestamps: Dict[str, datetime] = {}
-        self._info_timestamps: Dict[str, datetime] = {}  # Missing timestamp cache for ticker info
+        self._info_timestamps: Dict[str, datetime] = {}
         self._alpha_vantage_key = os.getenv('ALPHA_VANTAGE_KEY') or os.getenv('ALPHA_VANTAGE_API_KEY')
+        if not self._alpha_vantage_key and config is not None:
+            apis = getattr(config, "data", config) if not isinstance(config, dict) else config
+            if isinstance(apis, dict):
+                av = (apis.get("apis") or {}).get("alpha_vantage") or {}
+                if av.get("enabled") and av.get("api_key") and "YOUR_" not in str(av.get("api_key", "")):
+                    self._alpha_vantage_key = av["api_key"]
+            elif hasattr(config, "get"):
+                av = config.get("apis.alpha_vantage") or {}
+                if isinstance(av, dict) and av.get("enabled") and av.get("api_key"):
+                    self._alpha_vantage_key = av["api_key"]
 
     def _fetch_alpha_vantage_series(self, symbol: str, period: str):
         """Fetch OHLC history from Alpha Vantage and normalize as a DataFrame."""
@@ -133,56 +142,120 @@ class MarketDataCache:
         except Exception as e:
             self.logger.debug(f"Finnhub history fetch failed for {symbol}: {e}")
             return None
-    
+
+    def _load_macro_from_finnhub(self) -> Dict:
+        """Fetch macro indicators (DXY, VIX, US10Y, SPY) from Finnhub."""
+        now = datetime.now()
+        macro_data = {
+            'dxy': {'hist': None, 'current': None, 'change': 0.0},
+            'vix': {'hist': None, 'current': None, 'level': 0.5},
+            'us10y': {'hist': None, 'current': None, 'change': 0.0},
+            'spy': {'hist': None, 'current': None, 'change': 0.0},
+            'timestamp': now,
+        }
+
+        _defaults = {'vix': 20.0, 'us10y': 4.35, 'dxy': 103.5, 'spy': 520.0}
+        _fh_syms = {'vix': 'TVC:VIX', 'us10y': 'TVC:US10Y', 'dxy': 'TVC:DXY', 'spy': 'SPY'}
+        _fk = os.getenv('FINNHUB_API_KEY')
+
+        for key, sym in _fh_syms.items():
+            val = _defaults[key]
+            if _fk:
+                try:
+                    d = requests.get(
+                        'https://finnhub.io/api/v1/quote',
+                        params={'symbol': sym, 'token': _fk},
+                        timeout=6,
+                    ).json()
+                    if d.get('c', 0) > 0:
+                        val = float(d['c'])
+                except Exception:
+                    pass
+            macro_data[key]['current'] = val
+            if key == 'vix':
+                macro_data[key]['level'] = min(1.0, val / 40)
+
+        return macro_data
+
     def fetch_macro_data(self, force_refresh: bool = False) -> Dict:
         """
         Fetch macro indicators (DXY, VIX, US10Y, SPY) once per cycle.
         Returns cached data if still valid.
         """
         now = datetime.now()
-        
-        # Return cached if valid
+
         if not force_refresh and self._macro_data and self._macro_timestamp:
             if now - self._macro_timestamp < self.cache_duration:
                 self.logger.debug("Using cached macro data")
                 return self._macro_data
-        
-        self.logger.info("Fetching macro data (DXY, VIX, US10Y, SPY)...")
-        
-        macro_data = {
-            'dxy': {'hist': None, 'current': None, 'change': 0.0},
-            'vix': {'hist': None, 'current': None, 'level': 0.5},
-            'us10y': {'hist': None, 'current': None, 'change': 0.0},
-            'spy': {'hist': None, 'current': None, 'change': 0.0},
-            'timestamp': now
-        }
-        
+
         try:
-            import requests as _r
-            _fk = os.getenv('FINNHUB_API_KEY')
-            _defaults = {'vix': 20.0, 'us10y': 4.35, 'dxy': 103.5, 'spy': 520.0}
-            _fh_syms = {'vix': 'TVC:VIX', 'us10y': 'TVC:US10Y', 'dxy': 'TVC:DXY', 'spy': 'SPY'}
-            for key, sym in _fh_syms.items():
-                val = _defaults[key]
-                if _fk:
-                    try:
-                        d = _r.get('https://finnhub.io/api/v1/quote', params={'symbol': sym, 'token': _fk}, timeout=6).json()
-                        if d.get('c', 0) > 0:
-                            val = float(d['c'])
-                    except Exception:
-                        pass
-                macro_data[key]['current'] = val
-                if key == 'vix':
-                    macro_data[key]['level'] = min(1.0, val / 40)
+            macro_data = self._load_macro_from_finnhub()
             self._macro_data = macro_data
             self._macro_timestamp = now
-            self.logger.info("Market data cache refreshed 30 days")
+            self.logger.info("Macro data ready (DXY, VIX, US10Y, SPY)")
         except Exception as e:
             self.logger.error(f"Error fetching macro data: {e}")
             if self._macro_data:
                 return self._macro_data
-        return macro_data
+
+        return self._macro_data or {}
     
+    def get_avg_volume(self, symbol: str, force_refresh: bool = False) -> Optional[int]:
+        """Average daily share volume (20d history or vendor info). Returns None if unavailable."""
+        sym = str(symbol or "").upper().strip()
+        if not sym:
+            return None
+
+        cache_key = f"{sym}_avg_vol"
+        now = datetime.now()
+        if not force_refresh and cache_key in self._ticker_info_cache:
+            ts = self._info_timestamps.get(cache_key)
+            if ts and now - ts < self.cache_duration:
+                cached = self._ticker_info_cache[cache_key].get("avg_volume")
+                if cached and int(cached) > 0:
+                    return int(cached)
+
+        try:
+            import yfinance as yf
+
+            info = yf.Ticker(sym).info or {}
+            for key in ("averageVolume", "averageVolume10days", "averageDailyVolume10Day"):
+                val = info.get(key)
+                if val and int(val) > 0:
+                    vol = int(val)
+                    self._ticker_info_cache[cache_key] = {"avg_volume": vol}
+                    self._info_timestamps[cache_key] = now
+                    return vol
+        except Exception as exc:
+            self.logger.debug("yfinance avg volume failed for %s: %s", sym, exc)
+
+        hist = self.fetch_history(sym, "1mo", force_refresh=force_refresh)
+        if hist is not None and not hist.empty and "Volume" in hist.columns:
+            tail = hist["Volume"].tail(20)
+            if not tail.empty:
+                avg = int(tail.mean())
+                if avg > 0:
+                    self._ticker_info_cache[cache_key] = {"avg_volume": avg}
+                    self._info_timestamps[cache_key] = now
+                    return avg
+
+        try:
+            import yfinance as yf
+
+            yhist = yf.Ticker(sym).history(period="1mo", interval="1d")
+            if yhist is not None and not yhist.empty and "Volume" in yhist.columns:
+                tail = yhist["Volume"].tail(20)
+                if not tail.empty:
+                    avg = int(tail.mean())
+                    if avg > 0:
+                        self._ticker_info_cache[cache_key] = {"avg_volume": avg}
+                        self._info_timestamps[cache_key] = now
+                        return avg
+        except Exception as exc:
+            self.logger.debug("yfinance history avg volume failed for %s: %s", sym, exc)
+        return None
+
     def fetch_ticker_info(self, symbol: str, force_refresh: bool = False) -> Optional[Dict]:
         """
         Fetch ticker info once per symbol per cycle.
@@ -198,11 +271,10 @@ class MarketDataCache:
                     return self._ticker_info_cache[symbol]
         
         try:
-            import requests as _r
             _fk = os.getenv('FINNHUB_API_KEY')
             info = {}
             if _fk:
-                d = _r.get('https://finnhub.io/api/v1/quote', params={'symbol': symbol, 'token': _fk}, timeout=8).json()
+                d = requests.get('https://finnhub.io/api/v1/quote', params={'symbol': symbol, 'token': _fk}, timeout=8).json()
                 if d.get('c', 0) > 0:
                     info = {'currentPrice': d['c'], 'regularMarketPrice': d['c'], 'previousClose': d.get('pc', d['c']), 'open': d.get('o', d['c']), 'dayHigh': d.get('h', d['c']), 'dayLow': d.get('l', d['c'])}
             self._ticker_info_cache[symbol] = info
@@ -223,14 +295,24 @@ class MarketDataCache:
         symbols_to_fetch = []
         
         for symbol in symbols:
-            # Check cache first
-            if not force_refresh and symbol in self._price_cache:
-                if symbol in self._price_timestamps:
-                    if now - self._price_timestamps[symbol] < self.cache_duration:
-                        prices[symbol] = self._price_cache[symbol]
+            sym = str(symbol or '').upper().strip()
+            if not sym:
+                continue
+            # Cycle-wide cache (ingest / prior fetch this run)
+            cycle_price = get_cycle_price(sym)
+            if cycle_price and cycle_price > 0:
+                prices[sym] = cycle_price
+                self._price_cache[sym] = cycle_price
+                self._price_timestamps[sym] = now
+                continue
+            # Instance cache
+            if not force_refresh and sym in self._price_cache:
+                if sym in self._price_timestamps:
+                    if now - self._price_timestamps[sym] < self.cache_duration:
+                        prices[sym] = self._price_cache[sym]
                         continue
-            
-            symbols_to_fetch.append(symbol)
+
+            symbols_to_fetch.append(sym)
         
         # Fetch missing prices
         if symbols_to_fetch:
@@ -250,6 +332,8 @@ class MarketDataCache:
                     if symbol in self._price_cache:
                         prices[symbol] = self._price_cache[symbol]
         
+        if prices:
+            register_cycle_prices(prices)
         return prices
     
     def fetch_history(self, symbol: str, period: str = '1mo', force_refresh: bool = False):
@@ -282,68 +366,40 @@ class MarketDataCache:
     def refresh_cache(self, symbols: Optional[List[str]] = None):
         """
         Refresh the cache by clearing and optionally pre-fetching data.
-        This method was missing and causing crashes in main.py
+        Macro indicators are fetched once via fetch_macro_data().
         """
         self.logger.info("Refreshing market data cache...")
         
-        # Clear all caches
         self._price_cache.clear()
         self._price_timestamps.clear()
         self._history_cache.clear()
         self._history_timestamps.clear()
         self._ticker_info_cache.clear()
         self._info_timestamps.clear()
-        self._macro_cache.clear()
-        self._macro_timestamps.clear()
+        self._macro_data = None
+        self._macro_timestamp = None
         
-        # If symbols provided, pre-fetch them
         if symbols:
             self.logger.info(f"Pre-fetching data for {len(symbols)} symbols...")
             self.fetch_prices(symbols)
             
-            # Also fetch some history for commonly used periods
-            for symbol in symbols[:20]:  # Limit to first 20 to avoid rate limits
+            for symbol in symbols[:self._prefetch_symbol_cap]:
                 try:
                     self.fetch_history(symbol, '1mo')
-                except:
+                except Exception:
                     pass
         
-        # Always refresh macro data
-        self._fetch_macro_data()
-        
+        self.fetch_macro_data(force_refresh=True)
         self.logger.info("Cache refresh complete")
-    
-    def _fetch_macro_data(self):
-        """Fetch macroeconomic indicators via Finnhub"""
-        try:
-            import requests as _r
-            _fk = os.getenv('FINNHUB_API_KEY')
-            syms = {'TVC:VIX': 'volatility_index', 'TVC:US10Y': '10y_treasury_yield', 'TVC:DXY': 'dollar_index', 'SPY': 'sp500_etf', 'QQQ': 'nasdaq_etf'}
-            defaults = {'volatility_index': 20.0, '10y_treasury_yield': 4.35, 'dollar_index': 103.5, 'sp500_etf': 520.0, 'nasdaq_etf': 440.0}
-            macro_data = {}
-            for sym, name in syms.items():
-                val = defaults.get(name)
-                if _fk:
-                    try:
-                        d = _r.get('https://finnhub.io/api/v1/quote', params={'symbol': sym, 'token': _fk}, timeout=6).json()
-                        if d.get('c', 0) > 0:
-                            val = float(d['c'])
-                    except Exception:
-                        pass
-                macro_data[name] = {'current': val, 'change': 0.0, 'symbol': sym}
-            self._macro_cache.update(macro_data)
-            self._macro_timestamps['macro'] = datetime.now()
-        except Exception as e:
-            self.logger.error(f"Error fetching macro data: {e}")
     
     def clear_cache(self):
         """Clear all cached data (useful for testing or forced refresh)."""
         self._macro_data = None
+        self._macro_timestamp = None
         self._ticker_info_cache.clear()
         self._price_cache.clear()
         self._history_cache.clear()
         
-        self._macro_timestamp = None
         self._ticker_timestamps.clear()
         self._price_timestamps.clear()
         self._history_timestamps.clear()

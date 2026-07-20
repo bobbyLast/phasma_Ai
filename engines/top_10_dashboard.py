@@ -22,6 +22,8 @@ import os
 import math
 from collections import defaultdict
 
+from core.runtime_paths import engine_state_path
+
 try:
     from engines.kalshi_engine import KalshiPredictionEngine
     from engines.scenario_graph_engine import ScenarioGraphEngine
@@ -125,6 +127,7 @@ class UniverseOpportunity:
 
 
 class Top10OpportunitiesDashboard:
+    """DEMO DATA dashboard — sample opportunities, not live production signals."""
     """
     📊 Real-Time Top 10 Opportunities Dashboard Brain
 
@@ -143,7 +146,7 @@ class Top10OpportunitiesDashboard:
         self.top_10_cache: List[UniverseOpportunity] = []
         self.last_refresh: datetime = datetime.min
         self.refresh_interval = timedelta(minutes=5)  # Refresh every 5 minutes
-        self.dashboard_file = "top_10_dashboard.json"
+        self.dashboard_file = engine_state_path("top_10_dashboard.json")
 
         # Initialize with sample data
         self._initialize_sample_opportunities()
@@ -370,13 +373,17 @@ class Top10OpportunitiesDashboard:
         return True
 
     def _update_opportunity_scores(self):
-        """Update opportunity scores based on current conditions."""
-        # Simulate dynamic scoring updates
+        """Update opportunity scores based on current conditions (DEMO DATA — not production signals)."""
+        import os
+        demo_mode = os.getenv("DEMO_MODE", "").lower() in ("1", "true", "yes")
         for opp in self.opportunities.values():
-            # Add some randomness to simulate changing market conditions
-            import random
-            noise = random.uniform(-0.05, 0.05)
-            opp.score.edge_size = min(1.0, max(0.0, opp.score.edge_size + noise))
+            age_hours = (datetime.now() - opp.last_updated).total_seconds() / 3600
+            # Deterministic time-decay adjustment (no random noise in production)
+            decay_adj = max(-0.05, min(0.05, -age_hours / 480.0))
+            if demo_mode:
+                import random
+                decay_adj += random.uniform(-0.05, 0.05)
+            opp.score.edge_size = min(1.0, max(0.0, opp.score.edge_size + decay_adj))
 
             # Time decay for older opportunities
             age_hours = (datetime.now() - opp.last_updated).total_seconds() / 3600

@@ -27,6 +27,8 @@ import statistics
 from collections import defaultdict
 import numpy as np
 
+from core.runtime_paths import engine_state_path
+
 try:
     from engines.kalshi_engine import KalshiPredictionEngine
 except ImportError:
@@ -173,8 +175,8 @@ class ImpliedRealizedVolatilityEdgeEngine:
         self.volatility_data: Dict[str, VolatilityData] = {}
         self.edge_signals: List[VolatilityEdgeSignal] = []
 
-        self.data_file = "volatility_edge_data.json"
-        self.signals_file = "volatility_edge_signals.json"
+        self.data_file = engine_state_path("volatility_edge_data.json")
+        self.signals_file = engine_state_path("volatility_edge_signals.json")
 
         # Default tickers to monitor (expandable)
         self.monitored_tickers = {

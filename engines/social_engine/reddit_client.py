@@ -2,11 +2,25 @@ import os
 import re
 import json
 import asyncio
+import logging
 import asyncpraw
 from collections import Counter
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional
 from .trader_reputation import TraderReputation
+
+logger = logging.getLogger(__name__)
+
+
+def _social_debug_enabled(config: dict) -> bool:
+    if not config:
+        return False
+    return bool(config.get("debug_mode") or config.get("debug"))
+
+
+def _social_debug(config: dict, msg: str) -> None:
+    if _social_debug_enabled(config):
+        logger.debug(msg)
 
 class RedditTrendingTracker:
     """
@@ -56,7 +70,7 @@ class RedditTrendingTracker:
                     for symbol, data in cache.items():
                         if data.get('is_valid', False):
                             dynamic_symbols.add(symbol)
-                    print(f"SOCIAL DEBUG: Loaded {len(dynamic_symbols)} symbols from validation cache")
+                    _social_debug(self.config, f"Loaded {len(dynamic_symbols)} symbols from validation cache")
         except Exception as e:
             print(f"Error loading dynamic whitelist: {e}")
         
@@ -65,7 +79,7 @@ class RedditTrendingTracker:
     async def _initialize_client(self):
         """Initialize Reddit client with environment variables"""
         try:
-            print(f"SOCIAL DEBUG: Initializing Reddit client with credentials")
+            _social_debug(self.config, "Initializing Reddit client with credentials")
             self.reddit = asyncpraw.Reddit(
                 client_id=os.getenv('REDDIT_CLIENT_ID'),
                 client_secret=os.getenv('REDDIT_SECRET'),
@@ -73,7 +87,7 @@ class RedditTrendingTracker:
             )
             # Test connection
             await self.reddit.user.me()
-            print(f"SOCIAL DEBUG: Reddit client initialized and connected successfully")
+            _social_debug(self.config, "Reddit client initialized and connected successfully")
         except Exception as e:
             print(f"[ERROR] Failed to initialize Reddit client: {e}")
             self.reddit = None
@@ -225,7 +239,6 @@ class RedditTrendingTracker:
             
             # Skip symbols with bad trader reputation
             if self.trader_reputation.should_avoid_symbol(symbol):
-                print(f"SOCIAL DEBUG: Skipping {symbol} - bad trader pattern detected")
                 continue
             
             # Validate symbol is a real stock ticker
@@ -246,7 +259,6 @@ class RedditTrendingTracker:
                     if letters in common_tickers or len(letters) >= 2:
                         filtered.append(symbol)
         
-        print(f"SOCIAL DEBUG: Filtered to {len(filtered)} potential tickers: {filtered[:15]}")
         return filtered
     
     def _detect_sentiment(self, text: str) -> str:
@@ -271,19 +283,18 @@ class RedditTrendingTracker:
         Get trending symbols from monitored subreddits
         Returns: Dictionary of {symbol: mention_count}
         """
-        print(f"SOCIAL DEBUG: Getting trending symbols from Reddit")
         if not self.reddit:
-            print(f"SOCIAL DEBUG: Reddit client not initialized, attempting to initialize")
             await self._initialize_client()
             if not self.reddit:
-                print(f"SOCIAL DEBUG: Failed to initialize Reddit client")
+                _social_debug(self.config, "Failed to initialize Reddit client")
                 return {}
         
         self.symbols.clear()
+        subreddits_scanned = 0
         
         for subreddit_name in self.subreddits:
             try:
-                print(f"SOCIAL DEBUG: Scanning r/{subreddit_name}")
+                subreddits_scanned += 1
                 # Add timeout for each subreddit scan (asyncio.timeout not available in some envs)
                 async def _scan_subreddit():
                     subreddit = await self.reddit.subreddit(subreddit_name)
@@ -295,7 +306,6 @@ class RedditTrendingTracker:
                         content = f"{submission.title} {getattr(submission, 'selftext', '')}"
                         extracted = self.extract_symbols(content)
                         if extracted:
-                            print(f"SOCIAL DEBUG: Found symbols in post: {extracted}")
                             self.symbols.update(extracted)
                             symbols_found += len(extracted)
                             
@@ -323,7 +333,6 @@ class RedditTrendingTracker:
                         content = f"{submission.title} {getattr(submission, 'selftext', '')}"
                         extracted = self.extract_symbols(content)
                         if extracted:
-                            print(f"SOCIAL DEBUG: Found symbols in new post: {extracted}")
                             self.symbols.update(extracted)
                             symbols_found += len(extracted)
                         post_count += 1
@@ -331,8 +340,6 @@ class RedditTrendingTracker:
                             break
                         await asyncio.sleep(0.1)
                     
-                    print(f"SOCIAL DEBUG: r/{subreddit_name} found {symbols_found} symbols")
-
                 await asyncio.wait_for(_scan_subreddit(), timeout=15)
 
             except asyncio.TimeoutError:
@@ -343,7 +350,13 @@ class RedditTrendingTracker:
                 continue
         
         self.last_update = datetime.now()
-        return dict(self.symbols.most_common(limit))
+        result = dict(self.symbols.most_common(limit))
+        _social_debug(
+            self.config,
+            f"Reddit scan done: {len(result)} trending symbols from "
+            f"{subreddits_scanned} subreddits ({sum(self.symbols.values())} mentions)",
+        )
+        return result
     
     def get_status(self) -> dict:
         """Get current status of the tracker"""

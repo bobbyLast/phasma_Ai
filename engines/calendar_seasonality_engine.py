@@ -24,6 +24,8 @@ import math
 import statistics
 from collections import defaultdict
 
+from core.runtime_paths import engine_state_path
+
 try:
     from engines.kalshi_engine import KalshiPredictionEngine
     from engines.scenario_graph_engine import ScenarioGraphEngine
@@ -158,8 +160,8 @@ class CalendarSeasonalityEngine:
         self.calendar_analyses: Dict[str, CalendarSeasonalityAnalysis] = {}
 
         # Data files
-        self.patterns_file = "calendar_patterns.json"
-        self.analyses_file = "calendar_analyses.json"
+        self.patterns_file = engine_state_path("calendar_patterns.json")
+        self.analyses_file = engine_state_path("calendar_analyses.json")
 
         # Initialize with known patterns
         self._initialize_calendar_patterns()

@@ -53,6 +53,13 @@ def phasma_state_file() -> str:
     return runtime_path("phasma_state.json")
 
 
+def logs_dir() -> str:
+    """Persistent main process logs (session + latest mirror)."""
+    d = os.path.join(runtime_dir(), "logs")
+    os.makedirs(d, exist_ok=True)
+    return d
+
+
 def _migrate_legacy_into_runtime(rd: str) -> None:
     root = project_root()
 

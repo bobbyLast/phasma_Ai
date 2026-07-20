@@ -32,6 +32,7 @@ class PartnershipEngine:
         # State for deduplication
         self.processed_event_ids: Set[str] = set()
         self.seen_hashes: Set[int] = set()
+        self.state_path = os.path.join("data", "partnership_engine", "state.json")
         
         # Load state if it exists
         self._load_state()
@@ -39,8 +40,8 @@ class PartnershipEngine:
     def _load_state(self):
         """Load processed event IDs from disk"""
         try:
-            if os.path.exists('partnership_engine_state.json'):
-                with open('partnership_engine_state.json', 'r') as f:
+            if os.path.exists(self.state_path):
+                with open(self.state_path, 'r') as f:
                     state = json.load(f)
                     self.processed_event_ids = set(state.get('processed_event_ids', []))
                     self.seen_hashes = set(state.get('seen_hashes', []))
@@ -50,12 +51,13 @@ class PartnershipEngine:
     def _save_state(self):
         """Save processed event IDs to disk"""
         try:
+            os.makedirs(os.path.dirname(self.state_path), exist_ok=True)
             state = {
                 'processed_event_ids': list(self.processed_event_ids),
                 'seen_hashes': list(self.seen_hashes),
                 'last_updated': datetime.utcnow().isoformat()
             }
-            with open('partnership_engine_state.json', 'w') as f:
+            with open(self.state_path, 'w') as f:
                 json.dump(state, f)
         except Exception as e:
             self.logger.error(f"Failed to save state: {e}")
@@ -128,38 +130,12 @@ class PartnershipEngine:
         """Scan SEC EDGAR for partnership events"""
         self.logger.info(f"Scanning EDGAR for {ticker}...")
         try:
-            # Get recent filings
-            filings = await self.edgar_client.get_company_filings(ticker)
-            
-            # Filter for relevant forms (8-K, 10-K, 10-Q, etc.)
-            relevant_forms = ['8-K', '10-K', '10-Q', '6-K']
-            filings = [f for f in filings if f.get('form') in relevant_forms]
-            
-            # Process filings to extract events
-            events = []
-            for filing in filings:
-                try:
-                    # Extract text and look for partnership/contract patterns
-                    filing_text = await self.edgar_client.get_filing_text(filing['accession_number'])
-                    
-                    # Here you would add logic to parse the filing text and extract events
-                    # This is a simplified example
-                    if 'strategic partnership' in filing_text.lower():
-                        event = PartnershipEvent(
-                            event_type=EventType.PARTNERSHIP,
-                            source="EDGAR",
-                            source_id=f"edgar_{filing['accession_number']}",
-                            primary_company=ticker,
-                            announced_date=datetime.strptime(filing['filing_date'], '%Y-%m-%d'),
-                            description=f"Strategic partnership mentioned in {filing['form']} filing",
-                            url=f"https://www.sec.gov/Archives/edgar/data/{filing['cik']}/{filing['accession_number'].replace('-', '')}/{filing['primary_document']}",
-                            confidence=0.8
-                        )
-                        events.append(event)
-                        
-                except Exception as e:
-                    self.logger.error(f"Error processing EDGAR filing {filing.get('accession_number')}: {e}")
-            
+            if not str(ticker).isdigit():
+                return []
+
+            events = await asyncio.to_thread(self.edgar_client.search_partnerships, ticker, 30)
+            for event in events:
+                event.primary_company = ticker
             return events
             
         except Exception as e:
@@ -170,38 +146,14 @@ class PartnershipEngine:
         """Scan USAspending for government contracts"""
         self.logger.info(f"Scanning USAspending for {ticker}...")
         try:
-            # Get recent awards
-            awards = await self.usaspending_client.get_contract_awards(ticker)
-            
-            # Convert to PartnershipEvent objects
-            events = []
-            for award in awards:
-                try:
-                    event = PartnershipEvent(
-                        event_type=EventType.GOV_CONTRACT,
-                        source="USAspending",
-                        source_id=award.get('award_id', ''),
-                        primary_company=ticker,
-                        announced_date=datetime.strptime(award['signed_date'], '%Y-%m-%d'),
-                        title=f"Government Contract: {award.get('description', '')}",
-                        description=award.get('description', ''),
-                        financials={
-                            'amount': float(award.get('total_obligation', 0)),
-                            'currency': 'USD',
-                            'term_years': (datetime.strptime(award['end_date'], '%Y-%m-%d').year - 
-                                          datetime.strptime(award['start_date'], '%Y-%m-%d').year) if 'start_date' in award and 'end_date' in award else None
-                        },
-                        contract={
-                            'contract_number': award.get('award_id'),
-                            'agency': award.get('awarding_agency', {}).get('name'),
-                            'naics': award.get('naics')
-                        },
-                        confidence=0.9
-                    )
-                    events.append(event)
-                except Exception as e:
-                    self.logger.error(f"Error processing USAspending award {award.get('award_id')}: {e}")
-            
+            if str(ticker).isupper() and len(str(ticker)) <= 5:
+                return []
+
+            events = await asyncio.to_thread(
+                self.usaspending_client.get_contract_events,
+                recipient_name=ticker,
+                lookback_days=30,
+            )
             return events
             
         except Exception as e:

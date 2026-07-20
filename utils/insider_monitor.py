@@ -22,6 +22,13 @@ class InsiderMonitor:
 
     def __init__(self, config: Dict):
         self.config = config or {}
+        from utils.price_filter_config import resolve_price_filter
+        self.price_filter_enabled, cap = resolve_price_filter(self.config)
+        integrator = self.config.get("insider_integrator", {})
+        self.max_share_price = cap if self.price_filter_enabled else float(
+            integrator.get("max_price", 10000.0)
+        )
+        self.min_share_price = float(integrator.get("min_price", 1.0))
         self.enabled = bool(self.config.get("insider_monitor", {}).get("enabled", False))
         self.penny_only = bool(self.config.get("insider_monitor", {}).get("penny_only", True))
         self.min_value = float(self.config.get("insider_monitor", {}).get("min_value", 20000))
@@ -479,6 +486,10 @@ class InsiderMonitor:
                 return []
             
             return clustered_signals
+
+    def fetch_recent_buys(self) -> List[Dict]:
+        """Backward-compatible alias for get_recent_signals."""
+        return self.get_recent_signals()
     
     def _apply_clustering(self, transactions: List[Dict]) -> List[Dict]:
         """Apply clustering logic to identify strong signals."""
@@ -653,9 +664,8 @@ class InsiderMonitor:
         
     def _is_actionable_transaction(self, tx: Dict) -> bool:
         """Check if transaction meets our criteria."""
-        # Check price range ($1-$50 for our tier)
         price = tx.get("price", 0)
-        if price < 1.00 or price > 50.00:
+        if price < self.min_share_price or price > self.max_share_price:
             return False
         
         # Check minimum transaction value (lowered to $50,000 for moonshot hunting)
@@ -704,19 +714,6 @@ class InsiderMonitor:
             "Biotechnology", "Energy", "Financial Services"
         ]
         return sector in hot_sectors
-    
-    def _is_actionable_transaction(self, tx: Dict) -> bool:
-        """Check if transaction meets our criteria."""
-        # Check price range ($1-$50 for our tier)
-        price = tx.get("price", 0)
-        if price < 1.00 or price > 50.00:
-            return False
-        
-        # Check minimum transaction value (lowered to $50,000 for moonshot hunting)
-        if tx.get("total_value", 0) < 50000:
-            return False
-        
-        return True
     
     def _calculate_opportunity_score(self, tx: Dict) -> int:
         """Calculate opportunity score based on transaction details."""

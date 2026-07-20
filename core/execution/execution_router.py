@@ -290,6 +290,24 @@ class ExecutionRouter:
             self.trade_memory.add_trade(symbol)
 
         s = self.system
+        # Performance ledger — open on real paper fill
+        try:
+            from utils.trade_performance_ledger import get_trade_performance_ledger
+            ledger = getattr(s, "trade_performance_ledger", None) or get_trade_performance_ledger()
+            trade_id = ledger.record_open(signal_dict, fill=fill, virtual=False)
+            fill["ledger_trade_id"] = trade_id
+            # Track in risk manager only on actual fills
+            rm = getattr(getattr(s, "meta_brain", None), "risk_manager", None)
+            if rm and hasattr(rm, "add_position"):
+                rm.add_position(symbol, {
+                    "signal": signal_dict,
+                    "entry_time": datetime.now(timezone.utc),
+                    "fill": fill,
+                    "ledger_trade_id": trade_id,
+                })
+        except Exception as exc:
+            logger.debug("ledger open failed: %s", exc)
+
         if hasattr(s, "daily_learning_tracker") and s.daily_learning_tracker:
             try:
                 s.daily_learning_tracker.record_trade({
@@ -311,6 +329,31 @@ class ExecutionRouter:
                     outcome="filled",
                     outcome_details=fill,
                 )
+            except Exception:
+                pass
+
+        # Refresh pattern learner when we have fills (winners come later on close)
+        learner = getattr(s, "pattern_transfer_learner", None)
+        if learner is not None:
+            try:
+                learner.refresh_from_ledger()
+            except Exception:
+                pass
+
+        # Telegram honesty for paper fills
+        bot = getattr(s, "telegram_bot", None)
+        if bot and fill.get("price"):
+            try:
+                from utils.trade_performance_ledger import get_trade_performance_ledger
+                wr = get_trade_performance_ledger().win_rate()
+                qty = fill.get("quantity") or 1
+                msg = (
+                    f"PAPER FILL (Alpaca)\n"
+                    f"{signal_dict.get('action', 'BUY')} {symbol} x{qty} @ ${float(fill['price']):.2f}\n"
+                    f"Source: {signal_dict.get('source', 'n/a')}\n"
+                    f"Rolling win-rate: {wr.get('label', 'n/a')}"
+                )
+                bot.send_message(msg)
             except Exception:
                 pass
 
@@ -344,7 +387,7 @@ class ExecutionRouter:
                 symbol=symbol,
                 success=True,
                 fill=result,
-                alert_label="PAPER TRADE (Alpaca)" if not live else "LIVE TRADE",
+                alert_label="PAPER FILL (Alpaca)" if not live else "LIVE TRADE",
                 metadata={"platform": "Alpaca", "paper": not live},
             )
 
@@ -417,4 +460,23 @@ class ExecutionRouter:
         enriched["risk_gate"] = "passed" if result.decision != ExecutionDecision.SKIPPED or "risk" not in result.reason else "blocked"
         if result.decision in (ExecutionDecision.SKIPPED, ExecutionDecision.REJECTED):
             enriched["skip_reason"] = result.reason
+        if result.decision in (ExecutionDecision.FILLED, ExecutionDecision.SUBMITTED) and result.mode == ExecutionMode.PAPER_ALPACA:
+            enriched["execution_alert_label"] = "PAPER FILL (Alpaca)"
+            if result.fill:
+                enriched["fill_price"] = result.fill.get("price")
+                enriched["fill_quantity"] = result.fill.get("quantity")
+        try:
+            from utils.trade_performance_ledger import (
+                ASSET_DAY_TRADE,
+                ASSET_KALSHI,
+                ASSET_STOCK,
+                get_trade_performance_ledger,
+            )
+            ledger = get_trade_performance_ledger()
+            enriched["win_rate_overall"] = ledger.win_rate().get("label")
+            enriched["win_rate_stocks"] = ledger.win_rate(asset_class=ASSET_STOCK).get("label")
+            enriched["win_rate_day_trade"] = ledger.win_rate(asset_class=ASSET_DAY_TRADE).get("label")
+            enriched["win_rate_kalshi"] = ledger.win_rate(asset_class=ASSET_KALSHI).get("label")
+        except Exception:
+            pass
         return enriched

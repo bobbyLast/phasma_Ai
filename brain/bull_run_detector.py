@@ -13,21 +13,28 @@ if _root not in sys.path:
 
 from datetime import datetime, timedelta
 import re
-from typing import List, Dict, Tuple
+from typing import List, Dict, Tuple, Optional, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from utils.cycle_data_context import CycleDataContext
 
 class BullRunDetector:
     """Detects real bull runs confirmed by multiple sources"""
     
-    def __init__(self, config):
+    def __init__(self, config, news_sources=None):
         self.config = config
-        self.price_threshold = 50.0
+        from utils.price_filter_config import apply_price_threshold
+        apply_price_threshold(config, self)
         
         # Import necessary modules
         from utils.price_fetcher import get_price_fetcher
         self.price_fetcher = get_price_fetcher()
         
-        from engines.news_engine_integrated import IntegratedNewsSources
-        self.news_sources = IntegratedNewsSources(config)
+        if news_sources is None:
+            from engines.news_engine_integrated import IntegratedNewsSources
+            self.news_sources = IntegratedNewsSources(config)
+        else:
+            self.news_sources = news_sources
         
         # Real bull run indicators (not just hype)
         self.bull_run_indicators = {
@@ -76,7 +83,7 @@ class BullRunDetector:
             'market_events': 'Market will be up on {date}?'
         }
     
-    async def detect_bull_runs(self) -> List[Dict]:
+    async def detect_bull_runs(self, cycle_context: Optional["CycleDataContext"] = None) -> List[Dict]:
         """Find real bull runs with multi-source confirmation"""
         
         print("=" * 80)
@@ -85,9 +92,14 @@ class BullRunDetector:
         print("Finding REAL bull runs confirmed by multiple sources...")
         print("=" * 80)
         
-        # 1. Get all news from multiple sources
-        print("\n📰 Fetching news from 20+ sources...")
-        all_news = await self.news_sources.fetch_all_integrated_sources()
+        from engines.news_engine_utils import NewsUtils
+        if cycle_context is not None:
+            print("\n📰 Using cycle ingest snapshot (no re-fetch)...")
+            all_news = cycle_context.ingested_news
+        else:
+            print("\n📰 Fetching news from 20+ sources...")
+            all_news = await self.news_sources.fetch_all_integrated_sources()
+            NewsUtils.propagate_prices(all_news)
         print(f"   Total news items: {len(all_news)}")
         
         # 2. Analyze each stock for bull run signals
@@ -96,7 +108,7 @@ class BullRunDetector:
         
         for item in all_news:
             text = f"{item.get('title', '')} {item.get('summary', '')}".upper()
-            symbol = self._extract_symbol(text)
+            symbol = item.get('symbol') or self._extract_symbol(text)
             
             if not symbol:
                 continue
@@ -116,8 +128,12 @@ class BullRunDetector:
                     'indicators': set(),
                     'sources': [],
                     'evidence': [],
-                    'confirmation_count': 0
+                    'confirmation_count': 0,
+                    'price': None
                 }
+
+            if item.get('price') or item.get('current_price'):
+                stock_signals[symbol]['price'] = item.get('price') or item.get('current_price')
             
             # Add signals
             for indicator_type, strength in signals.items():
@@ -137,7 +153,7 @@ class BullRunDetector:
         print(f"   Found {len(stock_signals)} stocks with bull run signals")
         
         # 3. Filter by price and multi-source confirmation
-        print("\n💰 Filtering for affordable stocks with multi-source confirmation...")
+        print("\n💰 Filtering bull runs (price cap + multi-source confirmation)...")
         confirmed_bull_runs = []
         
         for symbol, data in stock_signals.items():
@@ -145,9 +161,12 @@ class BullRunDetector:
             if data['confirmation_count'] < 2:
                 continue
             
-            # Get current price
-            price = self.price_fetcher.get_real_price(symbol)
-            
+            price = data.get('price')
+            if not price:
+                try:
+                    price = self.price_fetcher.get_real_price(symbol)
+                except Exception:
+                    price = None
             if not price:
                 continue
             
@@ -156,8 +175,11 @@ class BullRunDetector:
             except:
                 continue
             
-            # Must be under $50
-            if price > self.price_threshold:
+            if (
+                self.price_filter_enabled
+                and self.price_threshold is not None
+                and price > self.price_threshold
+            ):
                 continue
             
             # Calculate final score
@@ -181,7 +203,8 @@ class BullRunDetector:
         # Sort by score
         confirmed_bull_runs.sort(key=lambda x: x['score'], reverse=True)
         
-        print(f"   Found {len(confirmed_bull_runs)} confirmed bull runs under ${self.price_threshold}")
+        cap = f"under ${self.price_threshold}" if self.price_filter_enabled else "(no price cap)"
+        print(f"   Found {len(confirmed_bull_runs)} confirmed bull runs {cap}")
         
         # 4. Display results
         print("\n" + "=" * 80)
@@ -241,38 +264,8 @@ class BullRunDetector:
             return 1.0  # Default confidence
     
     def _extract_symbol(self, text: str) -> str:
-        """Extract stock symbols from text"""
-        symbols = []
-        
-        # $SYMBOL pattern
-        symbols.extend(re.findall(r'\$([A-Z]{1,5})\b', text))
-        
-        # Common stock names
-        stock_names = {
-            'TESLA': 'TSLA', 'APPLE': 'AAPL', 'AMAZON': 'AMZN', 'MICROSOFT': 'MSFT',
-            'GOOGLE': 'GOOGL', 'META': 'META', 'NETFLIX': 'NFLX', 'NVIDIA': 'NVDA',
-            'AMD': 'AMD', 'INTEL': 'INTC', 'DISNEY': 'DIS', 'NIKE': 'NKE',
-            'COINBASE': 'COIN', 'ROBINHOOD': 'HOOD', 'PALANTIR': 'PLTR',
-            'GAMESTOP': 'GME', 'AMC': 'AMC', 'BLACKBERRY': 'BB', 'NOKIA': 'NOK',
-            'SILVER': 'SLV', 'GOLD': 'GOLD', 'BITCOIN': 'BTC', 'ETHEREUM': 'ETH'
-        }
-        
-        for name, symbol in stock_names.items():
-            if name in text:
-                symbols.append(symbol)
-        
-        # Standalone caps (1-5 letters)
-        candidates = re.findall(r'\b([A-Z]{1,5})\b', text)
-        for candidate in candidates:
-            if candidate not in ['A', 'I', 'OK', 'US', 'UK', 'CEO', 'CFO', 'COO', 'NYC', 'LA', 'TV', 'AI', 'IT', 'HR', 'PR']:
-                symbols.append(candidate)
-        
-        # Return first valid symbol
-        for symbol in symbols[:5]:
-            if len(symbol) <= 5 and symbol.isalpha():
-                return symbol
-        
-        return ''
+        """Extract stock symbols from text using integrated engine rules."""
+        return self.news_sources._extract_symbol(text)
     
     def _determine_trade_type(self, indicators: List[str]) -> str:
         """Determine best trade type based on indicators"""

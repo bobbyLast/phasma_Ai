@@ -24,6 +24,8 @@ import math
 import statistics
 from collections import defaultdict
 
+from core.runtime_paths import engine_state_path
+
 try:
     from engines.kalshi_engine import KalshiPredictionEngine
     from engines.scenario_graph_engine import ScenarioGraphEngine
@@ -187,8 +189,8 @@ class MacroCalendarEngine:
         self.event_analyses: Dict[str, MacroCalendarAnalysis] = {}
 
         # Data files
-        self.indicators_file = "macro_indicators.json"
-        self.analyses_file = "macro_analyses.json"
+        self.indicators_file = engine_state_path("macro_indicators.json")
+        self.analyses_file = engine_state_path("macro_analyses.json")
 
         # Initialize with known economic indicators
         self._initialize_economic_indicators()

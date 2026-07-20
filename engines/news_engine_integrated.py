@@ -45,6 +45,8 @@ class IntegratedNewsSources:
         self._news_symbol_limit = discovery_limit(config, "news_symbol_limit", 25)
         self._prediction_market_limit = discovery_limit(config, "prediction_market_limit", 25)
         self._news_cache_minutes = discovery_limit(config, "news_cache_minutes", 5)
+        self._articles_per_api = int(discovery_limit(config, "news_articles_per_api", 10) or 10)
+        self._entries_per_rss = int(discovery_limit(config, "news_entries_per_rss", 5) or 5)
         self.headers = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
         }
@@ -156,14 +158,11 @@ class IntegratedNewsSources:
                 all_news.extend(sec_news)
                 print(f"[INTEGRATED] SEC Filings: {len(sec_news)} items")
             elif step == 'market':
+                # Prices come from MarketDataWorker / market_snapshot — not news ingest
                 news_symbols = self._extract_news_symbols(all_news)
-                market_data = await self._fetch_market_data(news_symbols)
-                all_news.extend(market_data)
-                NewsUtils.propagate_prices(all_news)
-                valid_market_symbols = {item.get('symbol') for item in market_data if item.get('symbol')}
-                valid_market_symbols.update(news_symbols)
+                valid_market_symbols = set(news_symbols)
                 valid_market_symbols.update({'BTC', 'ETH', 'SOL'})
-                print(f"[INTEGRATED] Market Data: {len(market_data)} tickers")
+                print(f"[INTEGRATED] Market step: {len(news_symbols)} event symbols (prices deferred to MarketDataWorker)")
             elif step == 'sentiment':
                 sentiment_news = await self._fetch_sentiment_data()
                 all_news.extend(sentiment_news)
@@ -172,7 +171,13 @@ class IntegratedNewsSources:
                 if not news_symbols:
                     news_symbols = self._extract_news_symbols(all_news)
                 news_keywords = self._extract_news_keywords(all_news, news_symbols)
-                prediction_market_data = await self._fetch_prediction_markets(news_symbols, news_keywords)
+                # Prefer cycle-shared Kalshi snapshot when provided
+                shared = getattr(self, "_shared_kalshi_markets", None)
+                prediction_market_data = await self._fetch_prediction_markets(
+                    news_symbols, news_keywords, shared_kalshi_markets=shared
+                )
+                # Keep prediction rows out of ordinary news scoring path —
+                # attach as tagged intel only for downstream digests
                 all_news.extend(prediction_market_data)
                 matched = sum(
                     1 for item in prediction_market_data
@@ -220,6 +225,18 @@ class IntegratedNewsSources:
         )
         # endregion
 
+        # Drop clearly stale headlines before any enrich work
+        try:
+            from utils.news_cycle_helpers import filter_fresh_news, news_pipeline_config
+            pipe = news_pipeline_config(self.config)
+            max_age = int(pipe.get("max_news_age_days", 7) or 7)
+            before = len(all_news)
+            all_news = filter_fresh_news(all_news, max_age_days=max_age)
+            if len(all_news) < before:
+                print(f"[INTEGRATED] Freshness filter: {before} → {len(all_news)} items")
+        except Exception as exc:
+            print(f"[INTEGRATED] Freshness filter skipped: {exc}")
+
         # Hot path: local CSV stamp only — do NOT yfinance/DuckDuckGo every headline.
         # Top-N coalition resolve happens later in the cycle.
         resolver = get_resolver()
@@ -251,7 +268,7 @@ class IntegratedNewsSources:
                 response = requests.get(url, timeout=10)
                 if response.status_code == 200:
                     data = response.json()
-                    for article in data.get('news', [])[:10]:
+                    for article in data.get('news', [])[:self._articles_per_api]:
                         news.append({
                             'title': article.get('title', ''),
                             'source': 'World News API',
@@ -278,7 +295,7 @@ class IntegratedNewsSources:
                 response = requests.get(url, params=params, timeout=10)
                 if response.status_code == 200:
                     data = response.json()
-                    for article in data.get('articles', [])[:10]:
+                    for article in data.get('articles', [])[:self._articles_per_api]:
                         news.append({
                             'title': article.get('title', ''),
                             'source': 'GNews API',
@@ -304,7 +321,7 @@ class IntegratedNewsSources:
                 response = requests.get(url, params=params, timeout=10)
                 if response.status_code == 200:
                     data = response.json()
-                    for article in data.get('data', [])[:10]:
+                    for article in data.get('data', [])[:self._articles_per_api]:
                         news.append({
                             'title': article.get('title', ''),
                             'source': 'MediaStack API',
@@ -324,7 +341,7 @@ class IntegratedNewsSources:
                 response = requests.get(url, timeout=10)
                 if response.status_code == 200:
                     data = response.json()
-                    for article in data.get('news', [])[:10]:
+                    for article in data.get('news', [])[:self._articles_per_api]:
                         news.append({
                             'title': article.get('title', ''),
                             'source': 'Currents API',
@@ -361,7 +378,7 @@ class IntegratedNewsSources:
                 response = requests.get(url, headers=self.headers, timeout=10)
                 if response.status_code == 200:
                     feed = feedparser.parse(response.content)
-                    for entry in feed.entries[:5]:  # Limit to 5 per feed
+                    for entry in feed.entries[:self._entries_per_rss]:  # Limit to 5 per feed
                         news.append({
                             'title': entry.get('title', ''),
                             'source': name,
@@ -388,7 +405,7 @@ class IntegratedNewsSources:
                 soup = BeautifulSoup(response.text, 'html.parser')
                 links = soup.find_all('a', href=True)
                 
-                for link in links[:10]:
+                for link in links[:self._articles_per_api]:
                     if '/Archives/edgar/data/' in link.get('href', ''):
                         # Extract symbol from link text
                         text = link.get_text(strip=True)
@@ -689,8 +706,9 @@ class IntegratedNewsSources:
         self,
         news_symbols: Optional[List[str]] = None,
         news_keywords: Optional[List[str]] = None,
+        shared_kalshi_markets: Optional[List[Dict[str, Any]]] = None,
     ) -> List[Dict[str, Any]]:
-        """Fetch Kalshi/Polymarket markets; prioritize news symbol/keyword overlap."""
+        """Score Kalshi/Polymarket against news; reuse shared Kalshi snapshot when available."""
         data: List[Dict[str, Any]] = []
         news_symbols = news_symbols or []
         news_keywords = news_keywords or []
@@ -698,7 +716,10 @@ class IntegratedNewsSources:
 
         try:
             kalshi_rows = self._fetch_kalshi_markets_for_news(
-                news_symbols, news_keywords, bulk_limit
+                news_symbols,
+                news_keywords,
+                bulk_limit,
+                shared_markets=shared_kalshi_markets,
             )
             for match_score, market, title in kalshi_rows[: self._prediction_market_limit]:
                 row = {
@@ -768,115 +789,112 @@ class IntegratedNewsSources:
         news_symbols: List[str],
         news_keywords: List[str],
         bulk_limit: int,
+        shared_markets: Optional[List[Dict[str, Any]]] = None,
     ) -> List[tuple]:
-        """Pull Kalshi markets via series discovery (bulk feed is sports-heavy)."""
+        """Score Kalshi markets from shared snapshot or one rate-limited bulk pull."""
+        from utils.kalshi_rate_limiter import get_kalshi_rate_limiter, kalshi_get_json
+
+        limiter = get_kalshi_rate_limiter(self.config)
         base = "https://api.elections.kalshi.com/trade-api/v2"
         macro_terms = {k.lower() for k in self._MACRO_KEYWORDS}
         match_terms = {sym.lower() for sym in news_symbols}
         match_terms.update(k for k in news_keywords if k in macro_terms or len(k) >= 5)
-        series_hits: List[Dict[str, Any]] = []
-        seen_series: set = set()
-
-        series_resp = requests.get(f"{base}/series", headers=self.headers, timeout=12)
-        if series_resp.status_code == 200:
-            for series in series_resp.json().get('series', []):
-                title = (series.get('title') or '').lower()
-                ticker = (series.get('ticker') or '').lower()
-                if any(term in title or term in ticker for term in match_terms):
-                    key = series.get('ticker')
-                    if key and key not in seen_series:
-                        seen_series.add(key)
-                        series_hits.append(series)
-
-        if len(series_hits) < 15:
-            for series in series_resp.json().get('series', []) if series_resp.status_code == 200 else []:
-                title = (series.get('title') or '').lower()
-                if any(term in title for term in self._MACRO_KEYWORDS):
-                    key = series.get('ticker')
-                    if key and key not in seen_series:
-                        seen_series.add(key)
-                        series_hits.append(series)
-                if len(series_hits) >= 30:
-                    break
 
         candidates: List[Dict[str, Any]] = []
-        for series in series_hits[:25]:
-            st = series.get('ticker')
-            if not st:
-                continue
-            try:
-                mresp = requests.get(
-                    f"{base}/markets",
-                    params={"status": "open", "series_ticker": st, "limit": 15},
-                    headers=self.headers,
-                    timeout=10,
-                )
-                if mresp.status_code == 200:
-                    for market in mresp.json().get('markets', []):
-                        title = market.get('title') or market.get('subtitle') or ''
-                        if is_stale_prediction_market(market, title):
-                            continue
-                        candidates.append(market)
-            except Exception:
-                continue
+        series_boost_tickers: set = set()
 
-        if len(candidates) < bulk_limit // 2:
+        if shared_markets:
+            for market in shared_markets:
+                title = market.get("title") or market.get("subtitle") or ""
+                if self._is_kalshi_sports_noise(title):
+                    continue
+                if is_stale_prediction_market(market, title):
+                    continue
+                candidates.append(market)
+                if len(candidates) >= bulk_limit:
+                    break
+            print(f"   Kalshi news match: reusing shared snapshot ({len(candidates)} candidates)")
+        else:
             cursor = None
             pages = 0
-            while pages < 4 and len(candidates) < bulk_limit:
+            max_pages = 3
+            session = requests.Session()
+            while pages < max_pages and len(candidates) < bulk_limit:
                 params: Dict[str, Any] = {"status": "open", "limit": 100}
                 if cursor:
                     params["cursor"] = cursor
-                mresp = requests.get(f"{base}/markets", params=params, headers=self.headers, timeout=10)
-                if mresp.status_code != 200:
+                payload = kalshi_get_json(
+                    session,
+                    f"{base}/markets",
+                    params=params,
+                    headers=self.headers,
+                    timeout=12,
+                    config=self.config,
+                    cache_ttl=180,
+                )
+                if not payload:
                     break
-                payload = mresp.json()
-                for market in payload.get('markets', []):
-                    title = market.get('title') or market.get('subtitle') or ''
+                for market in payload.get("markets", []):
+                    title = market.get("title") or market.get("subtitle") or ""
                     if self._is_kalshi_sports_noise(title):
                         continue
                     if is_stale_prediction_market(market, title):
                         continue
                     candidates.append(market)
-                cursor = payload.get('next_cursor')
+                cursor = payload.get("next_cursor")
                 pages += 1
                 if not cursor:
                     break
 
+            series_payload = kalshi_get_json(
+                session,
+                f"{base}/series",
+                headers=self.headers,
+                timeout=12,
+                config=self.config,
+                cache_ttl=300,
+            )
+            if series_payload:
+                for series in series_payload.get("series", [])[:80]:
+                    title = (series.get("title") or "").lower()
+                    ticker = (series.get("ticker") or "").lower()
+                    if any(term in title or term in ticker for term in match_terms):
+                        key = series.get("ticker")
+                        if key:
+                            series_boost_tickers.add(str(key).upper())
+
         scored: List[tuple] = []
         seen_tickers: set = set()
         for market in candidates:
-            ticker = market.get('ticker')
+            ticker = market.get("ticker")
             if not ticker or ticker in seen_tickers:
                 continue
-            title = market.get('title') or market.get('subtitle') or ''
+            title = market.get("title") or market.get("subtitle") or ""
             if is_stale_prediction_market(market, title):
                 continue
             seen_tickers.add(ticker)
             match_score = self._score_prediction_market(title, news_symbols, news_keywords)
+            series_t = str(market.get("series_ticker") or "").upper()
+            if series_t in series_boost_tickers:
+                match_score = max(match_score, 1) + 2
             scored.append((match_score, market, title))
         scored.sort(key=lambda row: row[0], reverse=True)
 
         positive = [row for row in scored if row[0] > 0]
         selected = positive[: self._prediction_market_limit]
         if len(selected) < self._prediction_market_limit:
-            seen = {row[1].get('ticker') for row in selected}
+            seen = {row[1].get("ticker") for row in selected}
             for row in scored:
                 if len(selected) >= self._prediction_market_limit:
                     break
-                if row[0] <= 0:
-                    continue
-                if row[1].get('ticker') not in seen:
+                t = row[1].get("ticker")
+                if t and t not in seen:
                     selected.append(row)
-                    seen.add(row[1].get('ticker'))
-        if len(selected) < self._prediction_market_limit:
-            seen = {row[1].get('ticker') for row in selected}
-            for row in scored:
-                if len(selected) >= self._prediction_market_limit:
-                    break
-                if row[1].get('ticker') not in seen:
-                    selected.append(row)
-                    seen.add(row[1].get('ticker'))
+                    seen.add(t)
+        print(
+            f"   Kalshi news match: {len(candidates)} candidates, "
+            f"kept {len(selected)} (HTTP reqs={limiter.cycle_requests})"
+        )
         return selected
     
     async def _fetch_sentiment_data(self) -> List[Dict[str, Any]]:
@@ -890,7 +908,7 @@ class IntegratedNewsSources:
                 
                 if response.status_code == 200:
                     data = response.json()
-                    for article in data.get('feed', [])[:10]:
+                    for article in data.get('feed', [])[:self._articles_per_api]:
                         news.append({
                             'title': article.get('title', ''),
                             'source': 'Alpha Vantage',
@@ -904,65 +922,16 @@ class IntegratedNewsSources:
                 print(f"[INTEGRATED] Alpha Vantage error: {e}")
         
         return news
-    
+
     async def _fetch_social_data(self) -> List[Dict[str, Any]]:
-        """Fetch social media data"""
-        data = []
-        
-        # Reddit status
-        if hasattr(self.config, 'reddit_client_id'):
-            data.append({
-                'title': 'Reddit API Status',
-                'source': 'Reddit',
-                'symbol': '',
-                'timestamp': datetime.now().isoformat(),
-                'url': '',
-                'summary': 'Reddit API configured for sentiment analysis',
-                'sentiment': 0.5
-            })
-        
-        # Twitter status
-        if hasattr(self.config, 'twitter_api_key'):
-            data.append({
-                'title': 'Twitter API Status',
-                'source': 'Twitter',
-                'symbol': '',
-                'timestamp': datetime.now().isoformat(),
-                'url': '',
-                'summary': 'Twitter API configured for influencer monitoring',
-                'sentiment': 0.5
-            })
-        
-        return data
-    
+        """Fetch social media data (status-only — never contributes confidence)."""
+        # Status placeholders intentionally return empty — real social via SocialWorker
+        return []
+
     async def _fetch_github_data(self) -> List[Dict[str, Any]]:
-        """Fetch GitHub integration data"""
-        data = []
-        
-        # FeedBin API status
-        data.append({
-            'title': 'FeedBin API Ready',
-            'source': 'FeedBin',
-            'symbol': '',
-            'timestamp': datetime.now().isoformat(),
-            'url': '',
-            'summary': 'RSS aggregation framework ready',
-            'sentiment': 0.5
-        })
-        
-        # Elon Musk scraper
-        data.append({
-            'title': 'Elon Musk Scraper Active',
-            'source': 'Twitter',
-            'symbol': 'TSLA',
-            'timestamp': datetime.now().isoformat(),
-            'url': '',
-            'summary': 'Monitoring Elon Musk tweets for Tesla/crypto sentiment',
-            'sentiment': 0.5
-        })
-        
-        return data
-    
+        """Placeholder integrations — do not emit status rows into the news stream."""
+        return []
+
     def _extract_symbol(self, text: str) -> str:
         """Extract stock symbol from text"""
         import re

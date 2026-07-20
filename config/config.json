@@ -1,1 +1,0 @@
-{"bankroll": 100, "trading_mode": "stocks_and_kalshi", "kalshi_enabled": true, "global_macro": {"japan_yield_threshold": 1.5}, "insider_integrator": {"min_insider_amount": 1000000}, "pump_dump": {"volume_surge_threshold": 3.0}}

@@ -92,8 +92,8 @@ class AlphaVantageIntegration:
         company_info = {
             'symbol': symbol.upper(),
             'name': data.get('Name', symbol),
-            'sector': data.get('Sector', 'Unknown'),
-            'industry': data.get('Industry', 'Unknown'),
+            'sector': data.get('Sector') or 'Equities',
+            'industry': data.get('Industry') or data.get('Sector') or 'Equities',
             'description': data.get('Description', ''),
             'market_cap': safe_int(data.get('MarketCapitalization')),
             'pe_ratio': safe_float(data.get('PERatio')),
@@ -105,7 +105,7 @@ class AlphaVantageIntegration:
             'price_to_book': safe_float(data.get('PriceToBookRatio')),
             'country': data.get('Country', ''),
             'currency': data.get('Currency', 'USD'),
-            'exchange': data.get('Exchange', 'Unknown'),
+            'exchange': data.get('Exchange') or 'US',
             'validation_method': 'alpha_vantage',
             'is_valid': True,
             'real_ticker': True,
@@ -137,7 +137,7 @@ class AlphaVantageIntegration:
                 'company_info': {
                     'symbol': symbol.upper(),
                     'name': f"{symbol.upper()} - Not Found",
-                    'sector': 'UNKNOWN',
+                    'sector': 'Unverified',
                     'industry': 'Invalid Symbol',
                     'validation_method': 'alpha_vantage_failed'
                 },
@@ -205,8 +205,8 @@ class FinancialModelingPrepIntegration:
         company_info = {
             'symbol': symbol.upper(),
             'name': company_data.get('companyName', symbol),
-            'sector': company_data.get('sector', 'Unknown'),
-            'industry': company_data.get('industry', 'Unknown'),
+            'sector': company_data.get('sector') or 'Equities',
+            'industry': company_data.get('industry') or 'Equities',
             'description': company_data.get('description', ''),
             'market_cap': company_data.get('mktCap', 0),
             'price': company_data.get('price', 0),
@@ -216,7 +216,7 @@ class FinancialModelingPrepIntegration:
             'employees': company_data.get('fullTimeEmployees', 0),
             'country': company_data.get('country', ''),
             'currency': company_data.get('currency', 'USD'),
-            'exchange': company_data.get('exchange', 'Unknown'),
+            'exchange': company_data.get('exchange') or 'US',
             'validation_method': 'fmp',
             'is_valid': True,
             'real_ticker': True,
@@ -248,7 +248,7 @@ class FinancialModelingPrepIntegration:
                 'company_info': {
                     'symbol': symbol.upper(),
                     'name': f"{symbol.upper()} - Not Found",
-                    'sector': 'UNKNOWN',
+                    'sector': 'Unverified',
                     'industry': 'Invalid Symbol',
                     'validation_method': 'fmp_failed'
                 },
@@ -316,8 +316,8 @@ class PolygonIOIntegration:
         company_info = {
             'symbol': symbol.upper(),
             'name': ticker_data.get('name', symbol),
-            'sector': ticker_data.get('sector', 'Unknown'),
-            'industry': ticker_data.get('industry', 'Unknown'),
+            'sector': ticker_data.get('sector') or 'Equities',
+            'industry': ticker_data.get('industry') or 'Equities',
             'description': ticker_data.get('description', ''),
             'market_cap': ticker_data.get('market_cap', 0),
             'address': ticker_data.get('address', {}).get('address1', ''),
@@ -327,7 +327,7 @@ class PolygonIOIntegration:
             'website': ticker_data.get('homepage_url', ''),
             'employees': ticker_data.get('employee_count', 0),
             'currency': ticker_data.get('currency_name', 'USD'),
-            'exchange': ticker_data.get('primary_exchange', 'Unknown'),
+            'exchange': ticker_data.get('primary_exchange') or 'US',
             'validation_method': 'polygon',
             'is_valid': True,
             'real_ticker': True,
@@ -359,7 +359,7 @@ class PolygonIOIntegration:
                 'company_info': {
                     'symbol': symbol.upper(),
                     'name': f"{symbol.upper()} - Not Found",
-                    'sector': 'UNKNOWN',
+                    'sector': 'Unverified',
                     'industry': 'Invalid Symbol',
                     'validation_method': 'polygon_failed'
                 },
