@@ -23,6 +23,8 @@ import math
 import statistics
 from collections import defaultdict
 
+from core.runtime_paths import engine_state_path
+
 try:
     from engines.kalshi_engine import KalshiPredictionEngine
     from engines.scenario_graph_engine import ScenarioGraphEngine
@@ -236,8 +238,8 @@ class RangeBarrierEngine:
         self.range_barrier_analyses: Dict[str, RangeBarrierAnalysis] = {}
 
         # Data files
-        self.profiles_file = "volatility_profiles.json"
-        self.analyses_file = "range_barrier_analyses.json"
+        self.profiles_file = engine_state_path("volatility_profiles.json")
+        self.analyses_file = engine_state_path("range_barrier_analyses.json")
 
         # Initialize with known volatility profiles
         self._initialize_volatility_profiles()

@@ -26,6 +26,8 @@ import math
 import copy
 from collections import defaultdict
 
+from core.runtime_paths import engine_state_path
+
 try:
     from engines.scenario_graph_engine import ScenarioGraphEngine, GraphNode, GraphEdge
     from engines.kalshi_engine import KalshiPredictionEngine
@@ -130,165 +132,65 @@ class CausalCounterfactualEngine:
         self.counterfactual_scenarios: Dict[str, CounterfactualScenario] = {}
         self.baseline_states: Dict[str, Any] = {}  # Current market state
 
-        self.causal_graph_file = "causal_graph.json"
-        self.counterfactuals_file = "counterfactual_scenarios.json"
+        self.causal_graph_file = engine_state_path("causal_graph.json")
+        self.counterfactuals_file = engine_state_path("counterfactual_scenarios.json")
 
         # Initialize with base causal relationships
         self._initialize_base_causal_relationships()
         self._load_data()
 
+    # Seed edges are HYPOTHESES only — never trade facts. Prefer utils.causal_hypotheses
+    # for event-driven generation. trade_control is always False on this path.
+    HYPOTHESIS_ONLY = True
+    TRADE_CONTROL = False
+
     def _initialize_base_causal_relationships(self):
-        """Initialize fundamental causal relationships in financial markets."""
+        """Seed prior hypotheses for scenario simulation — not executable trade facts."""
         relationships = [
-            # Fed rate decisions
             CausalRelationship(
                 cause_variable="FED_RATE_DECISION",
                 effect_variable="SPY",
-                relationship_type="direct",
-                strength=-0.6,  # Rate cuts boost stocks
-                confidence=0.8,
+                relationship_type="hypothesis",
+                strength=-0.4,
+                confidence=0.45,
                 time_lag=1,
-                conditions={"rate_direction": "cut"},
-                evidence=["Historical Fed cut impacts", "Market reaction data"]
+                conditions={"rate_direction": "cut", "status": "probable_secondary", "trade_control": False},
+                evidence=["Prior hypothesis seed — requires live confirmation"],
             ),
-            CausalRelationship(
-                cause_variable="FED_RATE_DECISION",
-                effect_variable="QQQ",
-                relationship_type="direct",
-                strength=-0.7,  # Tech more sensitive to rates
-                confidence=0.8,
-                time_lag=1,
-                conditions={"rate_direction": "cut"},
-                evidence=["Tech sector rate sensitivity studies"]
-            ),
-            CausalRelationship(
-                cause_variable="FED_RATE_DECISION",
-                effect_variable="BTC-USD",
-                relationship_type="direct",
-                strength=-0.5,  # Crypto as risk asset
-                confidence=0.6,
-                time_lag=1,
-                conditions={"rate_direction": "cut"},
-                evidence=["Crypto rate correlation analysis"]
-            ),
-
-            # Inflation impacts
             CausalRelationship(
                 cause_variable="CPI_INFLATION",
                 effect_variable="FED_RATE_DECISION",
-                relationship_type="direct",
-                strength=0.8,  # High inflation -> higher rates
-                confidence=0.9,
-                time_lag=30,  # Fed reacts to inflation data
-                evidence=["Fed reaction function studies"]
-            ),
-            CausalRelationship(
-                cause_variable="CPI_INFLATION",
-                effect_variable="SPY",
-                relationship_type="mediated",
-                strength=-0.4,  # Inflation -> Fed -> stocks
-                confidence=0.7,
-                time_lag=45,
-                evidence=["Inflation-stock correlation data"]
-            ),
-
-            # Election outcomes
-            CausalRelationship(
-                cause_variable="ELECTION_OUTCOME",
-                effect_variable="NVDA",
-                relationship_type="direct",
-                strength=0.5,  # Tech benefits from certain policies
-                confidence=0.6,
-                time_lag=30,
-                conditions={"outcome": "democrat"},
-                evidence=["Sector rotation by administration"]
-            ),
-            CausalRelationship(
-                cause_variable="ELECTION_OUTCOME",
-                effect_variable="XOM",
-                relationship_type="direct",
-                strength=-0.3,  # Energy policies vary by party
+                relationship_type="hypothesis",
+                strength=0.5,
                 confidence=0.5,
                 time_lag=30,
-                conditions={"outcome": "democrat"},
-                evidence=["Energy policy historical data"]
+                conditions={"status": "probable_secondary", "trade_control": False},
+                evidence=["Prior hypothesis seed — Fed reaction function varies"],
             ),
-
-            # AI breakthroughs
-            CausalRelationship(
-                cause_variable="AI_BREAKTHROUGH",
-                effect_variable="NVDA",
-                relationship_type="direct",
-                strength=0.8,  # Direct AI hardware beneficiary
-                confidence=0.8,
-                time_lag=7,
-                evidence=["AI hype cycles", "Chip demand data"]
-            ),
-            CausalRelationship(
-                cause_variable="AI_BREAKTHROUGH",
-                effect_variable="MSFT",
-                relationship_type="direct",
-                strength=0.7,  # Cloud/AI software leader
-                confidence=0.8,
-                time_lag=7,
-                evidence=["AI adoption metrics"]
-            ),
-
-            # Oil price impacts
             CausalRelationship(
                 cause_variable="OIL_PRICE_SHOCK",
                 effect_variable="XOM",
-                relationship_type="direct",
-                strength=0.7,  # Oil companies benefit
-                confidence=0.8,
+                relationship_type="hypothesis",
+                strength=0.45,
+                confidence=0.45,
                 time_lag=1,
-                evidence=["Oil company earnings sensitivity"]
-            ),
-            CausalRelationship(
-                cause_variable="OIL_PRICE_SHOCK",
-                effect_variable="BTC-USD",
-                relationship_type="direct",
-                strength=-0.4,  # Risk-off reduces crypto demand
-                confidence=0.6,
-                time_lag=1,
-                evidence=["Crypto-oil correlation studies"]
-            ),
-
-            # BTC price targets
-            CausalRelationship(
-                cause_variable="BTC_PRICE_TARGET",
-                effect_variable="BTC-USD",
-                relationship_type="direct",
-                strength=0.9,  # Direct price prediction
-                confidence=0.9,
-                time_lag=0,
-                evidence=["Self-evident - direct price target"]
-            ),
-            CausalRelationship(
-                cause_variable="BTC_PRICE_TARGET",
-                effect_variable="SPY",
-                relationship_type="correlation",
-                strength=0.3,  # BTC as risk asset proxy
-                confidence=0.4,
-                time_lag=30,
-                evidence=["Risk asset correlation data"]
-            ),
-
-            # FDA approvals
-            CausalRelationship(
-                cause_variable="FDA_AI_DRUG_APPROVAL",
-                effect_variable="NVDA",
-                relationship_type="direct",
-                strength=0.6,  # AI drug approval boosts AI sector
-                confidence=0.7,
-                time_lag=30,
-                evidence=["Sector spillover effects"]
+                conditions={"status": "probable_secondary", "trade_control": False},
+                evidence=["Prior hypothesis seed — earnings sensitivity varies"],
             ),
         ]
 
         for rel in relationships:
             key = (rel.cause_variable, rel.effect_variable)
             self.causal_relationships[key] = rel
+
+    def as_trade_fact(self, cause: str, effect: str) -> bool:
+        """Hard rule: seed graph never controls trades."""
+        return False
+
+    def generate_event_hypotheses(self, event: Dict[str, Any], **kwargs) -> Dict[str, Any]:
+        """Delegate to evidence-backed hypothesis generator (preferred path)."""
+        from utils.causal_hypotheses import generate_causal_hypotheses
+        return generate_causal_hypotheses(event, **kwargs)
 
     def _load_data(self):
         """Load existing causal graph and counterfactuals."""

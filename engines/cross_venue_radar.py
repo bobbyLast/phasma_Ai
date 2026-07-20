@@ -19,6 +19,8 @@ import os
 import math
 from collections import defaultdict
 
+from core.runtime_paths import engine_state_path
+
 try:
     from engines.kalshi_engine import KalshiPredictionEngine
     from engines.scenario_graph_engine import ScenarioGraphEngine
@@ -104,7 +106,7 @@ class CrossVenueMispricingRadar:
         self.venue_probabilities: Dict[str, List[VenueProbability]] = defaultdict(list)
         self.mispricing_opportunities: Dict[str, MispricingOpportunity] = {}
         self.arbitrage_threshold = 0.15  # Minimum edge size to consider arbitrage
-        self.data_file = "mispricing_radar.json"
+        self.data_file = engine_state_path("mispricing_radar.json")
 
         # Load production data
         self._load_data()

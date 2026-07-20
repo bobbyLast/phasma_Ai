@@ -10,7 +10,7 @@ from core.signals.signal_decision import (
     SignalDecision,
 )
 from core.signals.strategy_router import StrategyRouter, classify_asset_type, has_option_contract_fields
-from core.source_status import block_demo_signal, is_demo_source
+from core.source_status import block_demo_geo_from_decision, block_demo_signal, is_demo_source
 from utils.confidence_utils import normalize_confidence_to_pct
 from utils.signal_data_quality import (
     SignalDataQuality,
@@ -49,6 +49,13 @@ class DecisionPipeline:
         if block_demo_signal(sig_dict, self.config) or is_demo_source(decision.source):
             decision.fail_gate("demo_firewall", "demo/sample source blocked from trade pipeline")
             decision.set_status(DecisionStatus.WATCHLIST_ONLY, "demo source — diagnostics only")
+            self.summary.record(decision)
+            decision.apply_to_signal()
+            return decision
+        geo_event = sig_dict.get("geopolitical_event")
+        if isinstance(geo_event, dict) and block_demo_geo_from_decision(geo_event, self.config):
+            decision.fail_gate("demo_firewall", "demo geopolitical event blocked from DecisionGroup")
+            decision.set_status(DecisionStatus.WATCHLIST_ONLY, "demo geo — diagnostics only")
             self.summary.record(decision)
             decision.apply_to_signal()
             return decision
@@ -99,6 +106,165 @@ class DecisionPipeline:
             decision.apply_to_signal()
             return decision
         decision.pass_gate("data_quality")
+
+        # Gate: cycle context mode — empty/stale market cannot approve trades
+        cycle_data = None
+        try:
+            cycle_data = (self.config or {}).get("_cycle_data") if isinstance(self.config, dict) else None
+        except Exception:
+            cycle_data = None
+        ctx_mode = str(sig_dict.get("context_mode") or "")
+        if not ctx_mode and cycle_data is not None:
+            ctx_mode = str(getattr(cycle_data, "context_mode", "") or "")
+        if ctx_mode in ("EXECUTION_BLOCKED", "STALE_CONTEXT"):
+            decision.fail_gate("context_mode", f"context_mode={ctx_mode}")
+            decision.set_status(DecisionStatus.WATCHLIST_ONLY, f"context {ctx_mode} — no trade approval")
+            self.summary.record(decision)
+            decision.apply_to_signal()
+            return decision
+        if ctx_mode == "DEGRADED_RESEARCH":
+            decision.warnings.append("DEGRADED_RESEARCH — alerts only")
+            decision.can_paper_trade = False
+        # Empty market snapshot / prices block stock paper eligibility
+        try:
+            px = float(decision.current_price or 0)
+        except (TypeError, ValueError):
+            px = 0.0
+        if px <= 0 and decision.asset_type == "STOCK":
+            decision.fail_gate("context_mode", "missing market price")
+            decision.set_status(DecisionStatus.REJECTED, "missing market price")
+            self.summary.record(decision)
+            decision.apply_to_signal()
+            return decision
+        decision.pass_gate("context_mode")
+
+        # Gate: stock minimum 5:1 reward-to-risk
+        from utils.stock_reward_risk import apply_stock_rr_targets, passes_stock_rr_gate
+        if isinstance(signal, dict):
+            apply_stock_rr_targets(signal, config=self.config, invent_target=False)
+        elif hasattr(signal, "__dict__"):
+            apply_stock_rr_targets(vars(signal), config=self.config, invent_target=False)
+        rr_ok, rr_reason = passes_stock_rr_gate(
+            signal if isinstance(signal, dict) else sig_dict,
+            config=self.config,
+        )
+        if not rr_ok:
+            decision.fail_gate("reward_risk", rr_reason)
+            decision.set_status(DecisionStatus.WATCHLIST_ONLY, f"R:R gate — {rr_reason}")
+            self.summary.record(decision)
+            decision.apply_to_signal()
+            return decision
+        decision.pass_gate("reward_risk")
+        decision.warnings.append(f"reward:risk {rr_reason}")
+
+        # Gate: forecast contract (horizon + calibrated probability)
+        from utils.forecast_contract import (
+            apply_forecast_to_signal,
+            apply_freshness_to_day_trade_confidence,
+            forecast_gate_ok,
+        )
+        from utils.pattern_families import attach_pattern_features
+
+        work = signal if isinstance(signal, dict) else sig_dict
+        if isinstance(signal, dict):
+            apply_freshness_to_day_trade_confidence(signal)
+            attach_pattern_features(signal)
+            apply_forecast_to_signal(signal)
+        else:
+            apply_freshness_to_day_trade_confidence(work)
+            attach_pattern_features(work)
+            apply_forecast_to_signal(work)
+
+        if work.get("day_trade_blocked_by_freshness"):
+            decision.fail_gate("freshness", "BACKGROUND/STALE cannot inflate day-trade confidence")
+            decision.set_status(DecisionStatus.WATCHLIST_ONLY, "freshness blocks day-trade")
+            self.summary.record(decision)
+            decision.apply_to_signal()
+            return decision
+        decision.pass_gate("freshness")
+
+        if decision.asset_type == "STOCK":
+            fok, freason = forecast_gate_ok(work, require_probability=True)
+            if not fok:
+                decision.fail_gate("forecast", freason)
+                decision.set_status(DecisionStatus.WATCHLIST_ONLY, f"forecast — {freason}")
+                self.summary.record(decision)
+                decision.apply_to_signal()
+                return decision
+        decision.pass_gate("forecast")
+
+        # Gate: regime compatibility (soft — watchlist when incompatible)
+        regime = str(work.get("market_regime") or work.get("regime") or "")
+        if not regime:
+            try:
+                from engines.market_regime import PhasmaMarketRegimeDetector
+                det = PhasmaMarketRegimeDetector(self.config or {})
+                regime = str(det.detect_current_regime() or "")
+                if isinstance(signal, dict):
+                    signal["market_regime"] = regime
+            except Exception:
+                regime = ""
+        incompatible = set((self.config or {}).get("regime_incompatible_strategies") or [])
+        if regime.lower() in ("bear", "crisis", "high_volatility") and decision.strategy in (
+            "penny_moonshot", "scalp",
+        ):
+            decision.fail_gate("regime", f"strategy {decision.strategy} incompatible with {regime}")
+            decision.set_status(DecisionStatus.WATCHLIST_ONLY, f"regime {regime}")
+            self.summary.record(decision)
+            decision.apply_to_signal()
+            return decision
+        if decision.strategy in incompatible:
+            decision.fail_gate("regime", f"strategy listed incompatible: {decision.strategy}")
+            decision.set_status(DecisionStatus.WATCHLIST_ONLY, "regime strategy block")
+            self.summary.record(decision)
+            decision.apply_to_signal()
+            return decision
+        decision.pass_gate("regime")
+
+        # Gate: portfolio exposure (sector / event cluster)
+        try:
+            from utils.portfolio_exposure import portfolio_exposure_gate
+            positions = []
+            if isinstance(self.config, dict):
+                positions = list(self.config.get("_open_positions") or [])
+            exp_ok, exp_reason = portfolio_exposure_gate(work, open_positions=positions, config=self.config)
+            if not exp_ok:
+                decision.fail_gate("portfolio_exposure", exp_reason)
+                decision.set_status(DecisionStatus.WATCHLIST_ONLY, f"exposure — {exp_reason}")
+                self.summary.record(decision)
+                decision.apply_to_signal()
+                return decision
+            decision.pass_gate("portfolio_exposure")
+        except Exception as exp_err:
+            decision.warnings.append(f"exposure check skipped: {exp_err}")
+
+        # Related opportunities marked research_only cannot paper-trade
+        if work.get("research_only"):
+            decision.can_paper_trade = False
+            decision.warnings.append("related opportunity research_only")
+
+        # Microstructure: limited quotes degrade size / block aggressive
+        try:
+            from engines.microstructure_engine import MicrostructureEngine
+            ms = MicrostructureEngine(None, None)  # type: ignore
+            ms_result = ms.assess_entry_permission({
+                "symbol": work.get("symbol") or work.get("ticker"),
+                "bid": work.get("bid") or work.get("bid_price"),
+                "ask": work.get("ask") or work.get("ask_price"),
+                "spread_bps": work.get("spread_bps"),
+                "capability": "limited_quote_microstructure",
+            })
+            if isinstance(signal, dict):
+                signal["microstructure"] = ms_result
+            if ms_result.get("block_aggressive") and str(work.get("entry_style") or "").lower() == "aggressive":
+                decision.fail_gate("microstructure", ms_result.get("rationale") or "aggressive blocked")
+                decision.set_status(DecisionStatus.WATCHLIST_ONLY, "microstructure block")
+                self.summary.record(decision)
+                decision.apply_to_signal()
+                return decision
+            decision.pass_gate("microstructure")
+        except Exception:
+            decision.pass_gate("microstructure")
 
         # Gate: position size
         if decision.position_size <= 0:

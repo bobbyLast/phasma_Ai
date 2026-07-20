@@ -160,7 +160,7 @@ class NewsAPIIntegration:
             avg_volume = company_info.get('avg_volume', 0)
             sector = company_info.get('sector', '')
             industry = company_info.get('industry', '')
-            symbol = item.get('symbol', 'UNKNOWN')
+            symbol = item.get('symbol') or ''
             
             # Fundamental gates: require sector/industry, sufficient volume, market cap
             if not sector and not industry:

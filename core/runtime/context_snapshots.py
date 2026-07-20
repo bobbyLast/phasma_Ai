@@ -15,6 +15,7 @@ class ContextSnapshotStore:
 
     SNAPSHOT_FILES = {
         "ingest": "latest_ingest.json",
+        "news": "latest_news.json",
         "market": "latest_market.json",
         "risk": "latest_risk.json",
         "candidates": "latest_candidates.json",

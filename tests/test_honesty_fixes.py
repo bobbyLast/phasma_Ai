@@ -24,9 +24,12 @@ from core.system_health import aggregate_system_health, format_system_health_rep
 from utils.signal_data_quality import (
     SignalDataQuality,
     apply_fetched_price,
+    apply_fetched_volume,
     assess_signal_data_quality,
     is_alert_only_eligible,
+    is_display_eligible,
     is_paper_trade_eligible,
+    resolve_pop_pct,
 )
 from core.execution.paper_readiness_guard import PaperReadinessGuard
 from engines.kalshi_engine import KalshiPredictionEngine
@@ -181,6 +184,43 @@ class TestSignalDataQuality(unittest.TestCase):
         q = SignalDataQuality.PARTIAL_PRICE_ONLY
         self.assertTrue(is_alert_only_eligible(q))
         self.assertFalse(is_paper_trade_eligible(q))
+
+    def test_complete_signal_display_eligible(self):
+        sig = {
+            "symbol": "AAPL",
+            "company_name": "Apple Inc",
+            "current_price": 100,
+            "confidence": 0.65,
+            "fact_check": {
+                "is_valid": True,
+                "company_info": {"name": "Apple Inc", "avg_volume": 50_000_000},
+            },
+            "avg_volume": 50_000_000,
+        }
+        self.assertEqual(assess_signal_data_quality(sig), SignalDataQuality.COMPLETE)
+        self.assertTrue(is_display_eligible(sig))
+
+    def test_display_blocked_without_volume(self):
+        sig = {
+            "symbol": "AAPL",
+            "company_name": "Apple Inc",
+            "current_price": 100,
+            "confidence": 0.65,
+            "fact_check": {"is_valid": True, "company_info": {"name": "Apple Inc"}},
+        }
+        self.assertFalse(is_display_eligible(sig))
+
+    def test_apply_fetched_volume(self):
+        sig = {"symbol": "AAPL", "fact_check": {"company_info": {}}}
+        apply_fetched_volume(sig, 1_250_000)
+        self.assertEqual(sig["avg_volume"], 1_250_000)
+        self.assertEqual(sig["fact_check"]["company_info"]["avg_volume"], 1_250_000)
+
+    def test_resolve_pop_pct_no_default(self):
+        self.assertIsNone(resolve_pop_pct({"symbol": "AAPL"}))
+        self.assertIsNone(resolve_pop_pct({"symbol": "AAPL", "pop_from_sim": 0}))
+        self.assertEqual(resolve_pop_pct({"symbol": "AAPL", "pop_from_sim": 0.62}), 62.0)
+        self.assertEqual(resolve_pop_pct({"symbol": "AAPL", "pop_from_sim": 72}), 72.0)
 
     def test_paper_guard_blocks_partial_signal(self):
         guard = PaperReadinessGuard()

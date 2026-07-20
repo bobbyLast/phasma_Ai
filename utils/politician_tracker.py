@@ -18,6 +18,10 @@ load_dotenv()
 
 logger = logging.getLogger(__name__)
 
+# Module-level: skip Finnhub after first 401 to avoid log spam
+_finnhub_auth_failed = False
+
+
 class PoliticianTracker:
     """
     Tracks trading activity of US politicians (Congress, Senate, etc.)
@@ -30,6 +34,7 @@ class PoliticianTracker:
         self.lookback_days = self.config.get('lookback_days', 30)
         self.min_value = self.config.get('min_value', 1000)  # Minimum trade value to track
         self.focus_tickers = self.config.get('tickers', [])  # Specific tickers to monitor
+        self.use_live = bool(self.config.get('politician_trades_use_live', False))
         
         # Data sources (web scraping since APIs are failing)
         self.capitol_trades_url = "https://www.capitoltrades.com/trades"
@@ -39,10 +44,12 @@ class PoliticianTracker:
         # Cache for recent trades
         self.recent_trades = []
         self.last_fetch = None
+        self.using_live_data = False
         
         print("🏛️ Politician Trading Tracker initialized")
         print(f"   - Monitoring trades over last {self.lookback_days} days")
         print(f"   - Minimum trade value: ${self.min_value:,}")
+        print(f"   - Live API: {'enabled' if self.use_live else 'disabled (demo/sample only)'}")
         if self.focus_tickers:
             print(f"   - Focused tickers: {', '.join(self.focus_tickers)}")
     
@@ -51,7 +58,7 @@ class PoliticianTracker:
         Get sample politician trades for demonstration
         Returns: List of sample trade dictionaries
         """
-        print("🏛️ Using sample politician trades for demonstration...")
+        logger.info("Using sample politician trades for demonstration")
         
         sample_trades = [
             {
@@ -120,7 +127,7 @@ class PoliticianTracker:
             }
         ]
         
-        print(f"✅ Generated {len(sample_trades)} sample politician trades")
+        print(f"✅ Generated {len(sample_trades)} sample politician trades (DEMO DATA)")
         return sample_trades
     
     def _parse_trade_element(self, element) -> Optional[Dict]:
@@ -187,13 +194,13 @@ class PoliticianTracker:
         Fetch congressional trades from Finnhub API
         Returns: List of trade dictionaries
         """
+        global _finnhub_auth_failed
+        if _finnhub_auth_failed:
+            return []
         if not self.finnhub_api_key:
-            print("⚠️ Finnhub API key not configured")
             return []
             
         try:
-            print("🏛️ Fetching trades from Finnhub...")
-            
             # Calculate date range
             end_date = datetime.now()
             start_date = end_date - timedelta(days=self.lookback_days)
@@ -209,14 +216,17 @@ class PoliticianTracker:
             if response.status_code == 200:
                 data = response.json()
                 trades = data.get('data', [])
-                print(f"✅ Finnhub: Retrieved {len(trades)} congressional trades")
+                logger.info("Finnhub: retrieved %s congressional trades", len(trades))
                 return trades
-            else:
-                print(f"❌ Finnhub API error: {response.status_code}")
+            if response.status_code in (401, 403):
+                _finnhub_auth_failed = True
+                logger.debug("Finnhub congressional API unauthorized — skipping for this session")
                 return []
+            logger.debug("Finnhub congressional API status %s", response.status_code)
+            return []
                 
         except Exception as e:
-            print(f"❌ Error fetching Finnhub trades: {str(e)}")
+            logger.debug("Finnhub congressional fetch failed: %s", e)
             return []
     
     def normalize_trade_data(self, raw_trades: List[Dict], source: str) -> List[Dict]:
@@ -240,7 +250,8 @@ class PoliticianTracker:
                         'date': trade.get('date', 'Unknown'),
                         'source': 'Capitol Trades (Sample Data)' if source == 'sample_data' else 'Capitol Trades',
                         'description': trade.get('raw_text', ''),
-                        'raw_data': trade
+                        'raw_data': trade,
+                        'is_demo': source == 'sample_data',
                     }
                 elif source == 'finnhub':
                     normalized_trade = {
@@ -255,7 +266,8 @@ class PoliticianTracker:
                         'date': trade.get('transactionDate', 'Unknown'),
                         'source': 'Finnhub',
                         'description': trade.get('comment', ''),
-                        'raw_data': trade
+                        'raw_data': trade,
+                        'is_demo': False,
                     }
                 else:
                     continue
@@ -265,7 +277,7 @@ class PoliticianTracker:
                     normalized.append(normalized_trade)
                     
             except Exception as e:
-                print(f"⚠️ Error normalizing trade: {str(e)}")
+                logger.debug("Error normalizing trade: %s", e)
                 continue
         
         return normalized
@@ -321,19 +333,17 @@ class PoliticianTracker:
         print(f"🏛️ Fetching politician trades from all sources...")
         
         all_trades = []
+        self.using_live_data = False
         
-        # Use sample data for demonstration (live APIs broken)
-        sample_trades = self.get_sample_politician_trades()
-        if sample_trades:
-            normalized = self.normalize_trade_data(sample_trades, 'sample_data')
-            all_trades.extend(normalized)
-            print("⚠️ Note: Using sample data - live politician trading API integration pending")
-        
-        # Fetch from Finnhub
-        finnhub_trades = self.fetch_finnhub_trades()
-        if finnhub_trades:
-            normalized = self.normalize_trade_data(finnhub_trades, 'finnhub')
-            all_trades.extend(normalized)
+        if self.use_live:
+            finnhub_trades = self.fetch_finnhub_trades()
+            if finnhub_trades:
+                normalized = self.normalize_trade_data(finnhub_trades, 'finnhub')
+                all_trades.extend(normalized)
+                self.using_live_data = True
+        else:
+            print("🏛️ Politician tracker: live API disabled — skipping (no demo/sample trades)")
+            return []
         
         # Sort by date (most recent first)
         all_trades.sort(key=lambda x: x['date'], reverse=True)
@@ -420,8 +430,10 @@ class PoliticianTracker:
         Format a trade for Telegram notification
         """
         emoji = "🟢" if trade['action'].upper() in ['BUY', 'PURCHASE'] else "🔴"
+        demo_banner = "⚠️ **DEMO DATA**\n\n" if trade.get('is_demo') else ""
         
         return (
+            f"{demo_banner}"
             f"{emoji} **Politician Trade Alert**\n\n"
             f"👤 **Politician:** {trade['politician']} ({trade['party']}-{trade['state']})\n"
             f"🏛️ **Chamber:** {trade['chamber']}\n"

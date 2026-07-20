@@ -1,0 +1,6726 @@
+{
+  "version": 1,
+  "edges": [
+    {
+      "a": "AAPL",
+      "b": "MSFT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "TECHNOLOGY"
+    },
+    {
+      "a": "MSFT",
+      "b": "AAPL",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "TECHNOLOGY"
+    },
+    {
+      "a": "AAPL",
+      "b": "GOOGL",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "TECHNOLOGY"
+    },
+    {
+      "a": "GOOGL",
+      "b": "AAPL",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "TECHNOLOGY"
+    },
+    {
+      "a": "AAPL",
+      "b": "META",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "TECHNOLOGY"
+    },
+    {
+      "a": "META",
+      "b": "AAPL",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "TECHNOLOGY"
+    },
+    {
+      "a": "AAPL",
+      "b": "NVDA",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "TECHNOLOGY"
+    },
+    {
+      "a": "NVDA",
+      "b": "AAPL",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "TECHNOLOGY"
+    },
+    {
+      "a": "AAPL",
+      "b": "AMD",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "TECHNOLOGY"
+    },
+    {
+      "a": "AMD",
+      "b": "AAPL",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "TECHNOLOGY"
+    },
+    {
+      "a": "AAPL",
+      "b": "INTC",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "TECHNOLOGY"
+    },
+    {
+      "a": "INTC",
+      "b": "AAPL",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "TECHNOLOGY"
+    },
+    {
+      "a": "AAPL",
+      "b": "CSCO",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "TECHNOLOGY"
+    },
+    {
+      "a": "CSCO",
+      "b": "AAPL",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "TECHNOLOGY"
+    },
+    {
+      "a": "AAPL",
+      "b": "ORCL",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "TECHNOLOGY"
+    },
+    {
+      "a": "ORCL",
+      "b": "AAPL",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "TECHNOLOGY"
+    },
+    {
+      "a": "AAPL",
+      "b": "CRM",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "TECHNOLOGY"
+    },
+    {
+      "a": "CRM",
+      "b": "AAPL",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "TECHNOLOGY"
+    },
+    {
+      "a": "MSFT",
+      "b": "GOOGL",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "TECHNOLOGY"
+    },
+    {
+      "a": "GOOGL",
+      "b": "MSFT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "TECHNOLOGY"
+    },
+    {
+      "a": "MSFT",
+      "b": "META",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "TECHNOLOGY"
+    },
+    {
+      "a": "META",
+      "b": "MSFT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "TECHNOLOGY"
+    },
+    {
+      "a": "MSFT",
+      "b": "NVDA",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "TECHNOLOGY"
+    },
+    {
+      "a": "NVDA",
+      "b": "MSFT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "TECHNOLOGY"
+    },
+    {
+      "a": "MSFT",
+      "b": "AMD",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "TECHNOLOGY"
+    },
+    {
+      "a": "AMD",
+      "b": "MSFT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "TECHNOLOGY"
+    },
+    {
+      "a": "MSFT",
+      "b": "INTC",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "TECHNOLOGY"
+    },
+    {
+      "a": "INTC",
+      "b": "MSFT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "TECHNOLOGY"
+    },
+    {
+      "a": "MSFT",
+      "b": "CSCO",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "TECHNOLOGY"
+    },
+    {
+      "a": "CSCO",
+      "b": "MSFT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "TECHNOLOGY"
+    },
+    {
+      "a": "MSFT",
+      "b": "ORCL",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "TECHNOLOGY"
+    },
+    {
+      "a": "ORCL",
+      "b": "MSFT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "TECHNOLOGY"
+    },
+    {
+      "a": "MSFT",
+      "b": "CRM",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "TECHNOLOGY"
+    },
+    {
+      "a": "CRM",
+      "b": "MSFT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "TECHNOLOGY"
+    },
+    {
+      "a": "GOOGL",
+      "b": "META",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "TECHNOLOGY"
+    },
+    {
+      "a": "META",
+      "b": "GOOGL",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "TECHNOLOGY"
+    },
+    {
+      "a": "GOOGL",
+      "b": "NVDA",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "TECHNOLOGY"
+    },
+    {
+      "a": "NVDA",
+      "b": "GOOGL",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "TECHNOLOGY"
+    },
+    {
+      "a": "GOOGL",
+      "b": "AMD",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "TECHNOLOGY"
+    },
+    {
+      "a": "AMD",
+      "b": "GOOGL",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "TECHNOLOGY"
+    },
+    {
+      "a": "GOOGL",
+      "b": "INTC",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "TECHNOLOGY"
+    },
+    {
+      "a": "INTC",
+      "b": "GOOGL",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "TECHNOLOGY"
+    },
+    {
+      "a": "GOOGL",
+      "b": "CSCO",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "TECHNOLOGY"
+    },
+    {
+      "a": "CSCO",
+      "b": "GOOGL",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "TECHNOLOGY"
+    },
+    {
+      "a": "GOOGL",
+      "b": "ORCL",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "TECHNOLOGY"
+    },
+    {
+      "a": "ORCL",
+      "b": "GOOGL",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "TECHNOLOGY"
+    },
+    {
+      "a": "GOOGL",
+      "b": "CRM",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "TECHNOLOGY"
+    },
+    {
+      "a": "CRM",
+      "b": "GOOGL",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "TECHNOLOGY"
+    },
+    {
+      "a": "META",
+      "b": "NVDA",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "TECHNOLOGY"
+    },
+    {
+      "a": "NVDA",
+      "b": "META",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "TECHNOLOGY"
+    },
+    {
+      "a": "META",
+      "b": "AMD",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "TECHNOLOGY"
+    },
+    {
+      "a": "AMD",
+      "b": "META",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "TECHNOLOGY"
+    },
+    {
+      "a": "META",
+      "b": "INTC",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "TECHNOLOGY"
+    },
+    {
+      "a": "INTC",
+      "b": "META",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "TECHNOLOGY"
+    },
+    {
+      "a": "META",
+      "b": "CSCO",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "TECHNOLOGY"
+    },
+    {
+      "a": "CSCO",
+      "b": "META",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "TECHNOLOGY"
+    },
+    {
+      "a": "META",
+      "b": "ORCL",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "TECHNOLOGY"
+    },
+    {
+      "a": "ORCL",
+      "b": "META",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "TECHNOLOGY"
+    },
+    {
+      "a": "META",
+      "b": "CRM",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "TECHNOLOGY"
+    },
+    {
+      "a": "CRM",
+      "b": "META",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "TECHNOLOGY"
+    },
+    {
+      "a": "NVDA",
+      "b": "AMD",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "TECHNOLOGY"
+    },
+    {
+      "a": "AMD",
+      "b": "NVDA",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "TECHNOLOGY"
+    },
+    {
+      "a": "NVDA",
+      "b": "INTC",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "TECHNOLOGY"
+    },
+    {
+      "a": "INTC",
+      "b": "NVDA",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "TECHNOLOGY"
+    },
+    {
+      "a": "NVDA",
+      "b": "CSCO",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "TECHNOLOGY"
+    },
+    {
+      "a": "CSCO",
+      "b": "NVDA",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "TECHNOLOGY"
+    },
+    {
+      "a": "NVDA",
+      "b": "ORCL",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "TECHNOLOGY"
+    },
+    {
+      "a": "ORCL",
+      "b": "NVDA",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "TECHNOLOGY"
+    },
+    {
+      "a": "NVDA",
+      "b": "CRM",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "TECHNOLOGY"
+    },
+    {
+      "a": "CRM",
+      "b": "NVDA",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "TECHNOLOGY"
+    },
+    {
+      "a": "AMD",
+      "b": "INTC",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "TECHNOLOGY"
+    },
+    {
+      "a": "INTC",
+      "b": "AMD",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "TECHNOLOGY"
+    },
+    {
+      "a": "AMD",
+      "b": "CSCO",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "TECHNOLOGY"
+    },
+    {
+      "a": "CSCO",
+      "b": "AMD",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "TECHNOLOGY"
+    },
+    {
+      "a": "AMD",
+      "b": "ORCL",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "TECHNOLOGY"
+    },
+    {
+      "a": "ORCL",
+      "b": "AMD",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "TECHNOLOGY"
+    },
+    {
+      "a": "AMD",
+      "b": "CRM",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "TECHNOLOGY"
+    },
+    {
+      "a": "CRM",
+      "b": "AMD",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "TECHNOLOGY"
+    },
+    {
+      "a": "INTC",
+      "b": "CSCO",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "TECHNOLOGY"
+    },
+    {
+      "a": "CSCO",
+      "b": "INTC",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "TECHNOLOGY"
+    },
+    {
+      "a": "INTC",
+      "b": "ORCL",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "TECHNOLOGY"
+    },
+    {
+      "a": "ORCL",
+      "b": "INTC",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "TECHNOLOGY"
+    },
+    {
+      "a": "INTC",
+      "b": "CRM",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "TECHNOLOGY"
+    },
+    {
+      "a": "CRM",
+      "b": "INTC",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "TECHNOLOGY"
+    },
+    {
+      "a": "CSCO",
+      "b": "ORCL",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "TECHNOLOGY"
+    },
+    {
+      "a": "ORCL",
+      "b": "CSCO",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "TECHNOLOGY"
+    },
+    {
+      "a": "CSCO",
+      "b": "CRM",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "TECHNOLOGY"
+    },
+    {
+      "a": "CRM",
+      "b": "CSCO",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "TECHNOLOGY"
+    },
+    {
+      "a": "ORCL",
+      "b": "CRM",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "TECHNOLOGY"
+    },
+    {
+      "a": "CRM",
+      "b": "ORCL",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "TECHNOLOGY"
+    },
+    {
+      "a": "LMT",
+      "b": "BA",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "DEFENSE/MILITARY"
+    },
+    {
+      "a": "BA",
+      "b": "LMT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "DEFENSE/MILITARY"
+    },
+    {
+      "a": "LMT",
+      "b": "RTX",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "DEFENSE/MILITARY"
+    },
+    {
+      "a": "RTX",
+      "b": "LMT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "DEFENSE/MILITARY"
+    },
+    {
+      "a": "LMT",
+      "b": "NOC",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "DEFENSE/MILITARY"
+    },
+    {
+      "a": "NOC",
+      "b": "LMT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "DEFENSE/MILITARY"
+    },
+    {
+      "a": "LMT",
+      "b": "GD",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "DEFENSE/MILITARY"
+    },
+    {
+      "a": "GD",
+      "b": "LMT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "DEFENSE/MILITARY"
+    },
+    {
+      "a": "LMT",
+      "b": "HII",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "DEFENSE/MILITARY"
+    },
+    {
+      "a": "HII",
+      "b": "LMT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "DEFENSE/MILITARY"
+    },
+    {
+      "a": "LMT",
+      "b": "LDOS",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "DEFENSE/MILITARY"
+    },
+    {
+      "a": "LDOS",
+      "b": "LMT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "DEFENSE/MILITARY"
+    },
+    {
+      "a": "LMT",
+      "b": "TXT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "DEFENSE/MILITARY"
+    },
+    {
+      "a": "TXT",
+      "b": "LMT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "DEFENSE/MILITARY"
+    },
+    {
+      "a": "LMT",
+      "b": "BWXT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "DEFENSE/MILITARY"
+    },
+    {
+      "a": "BWXT",
+      "b": "LMT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "DEFENSE/MILITARY"
+    },
+    {
+      "a": "LMT",
+      "b": "AJRD",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "DEFENSE/MILITARY"
+    },
+    {
+      "a": "AJRD",
+      "b": "LMT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "DEFENSE/MILITARY"
+    },
+    {
+      "a": "BA",
+      "b": "RTX",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "DEFENSE/MILITARY"
+    },
+    {
+      "a": "RTX",
+      "b": "BA",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "DEFENSE/MILITARY"
+    },
+    {
+      "a": "BA",
+      "b": "NOC",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "DEFENSE/MILITARY"
+    },
+    {
+      "a": "NOC",
+      "b": "BA",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "DEFENSE/MILITARY"
+    },
+    {
+      "a": "BA",
+      "b": "GD",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "DEFENSE/MILITARY"
+    },
+    {
+      "a": "GD",
+      "b": "BA",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "DEFENSE/MILITARY"
+    },
+    {
+      "a": "BA",
+      "b": "HII",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "DEFENSE/MILITARY"
+    },
+    {
+      "a": "HII",
+      "b": "BA",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "DEFENSE/MILITARY"
+    },
+    {
+      "a": "BA",
+      "b": "LDOS",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "DEFENSE/MILITARY"
+    },
+    {
+      "a": "LDOS",
+      "b": "BA",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "DEFENSE/MILITARY"
+    },
+    {
+      "a": "BA",
+      "b": "TXT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "DEFENSE/MILITARY"
+    },
+    {
+      "a": "TXT",
+      "b": "BA",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "DEFENSE/MILITARY"
+    },
+    {
+      "a": "BA",
+      "b": "BWXT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "DEFENSE/MILITARY"
+    },
+    {
+      "a": "BWXT",
+      "b": "BA",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "DEFENSE/MILITARY"
+    },
+    {
+      "a": "BA",
+      "b": "AJRD",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "DEFENSE/MILITARY"
+    },
+    {
+      "a": "AJRD",
+      "b": "BA",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "DEFENSE/MILITARY"
+    },
+    {
+      "a": "RTX",
+      "b": "NOC",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "DEFENSE/MILITARY"
+    },
+    {
+      "a": "NOC",
+      "b": "RTX",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "DEFENSE/MILITARY"
+    },
+    {
+      "a": "RTX",
+      "b": "GD",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "DEFENSE/MILITARY"
+    },
+    {
+      "a": "GD",
+      "b": "RTX",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "DEFENSE/MILITARY"
+    },
+    {
+      "a": "RTX",
+      "b": "HII",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "DEFENSE/MILITARY"
+    },
+    {
+      "a": "HII",
+      "b": "RTX",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "DEFENSE/MILITARY"
+    },
+    {
+      "a": "RTX",
+      "b": "LDOS",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "DEFENSE/MILITARY"
+    },
+    {
+      "a": "LDOS",
+      "b": "RTX",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "DEFENSE/MILITARY"
+    },
+    {
+      "a": "RTX",
+      "b": "TXT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "DEFENSE/MILITARY"
+    },
+    {
+      "a": "TXT",
+      "b": "RTX",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "DEFENSE/MILITARY"
+    },
+    {
+      "a": "RTX",
+      "b": "BWXT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "DEFENSE/MILITARY"
+    },
+    {
+      "a": "BWXT",
+      "b": "RTX",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "DEFENSE/MILITARY"
+    },
+    {
+      "a": "RTX",
+      "b": "AJRD",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "DEFENSE/MILITARY"
+    },
+    {
+      "a": "AJRD",
+      "b": "RTX",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "DEFENSE/MILITARY"
+    },
+    {
+      "a": "NOC",
+      "b": "GD",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "DEFENSE/MILITARY"
+    },
+    {
+      "a": "GD",
+      "b": "NOC",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "DEFENSE/MILITARY"
+    },
+    {
+      "a": "NOC",
+      "b": "HII",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "DEFENSE/MILITARY"
+    },
+    {
+      "a": "HII",
+      "b": "NOC",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "DEFENSE/MILITARY"
+    },
+    {
+      "a": "NOC",
+      "b": "LDOS",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "DEFENSE/MILITARY"
+    },
+    {
+      "a": "LDOS",
+      "b": "NOC",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "DEFENSE/MILITARY"
+    },
+    {
+      "a": "NOC",
+      "b": "TXT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "DEFENSE/MILITARY"
+    },
+    {
+      "a": "TXT",
+      "b": "NOC",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "DEFENSE/MILITARY"
+    },
+    {
+      "a": "NOC",
+      "b": "BWXT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "DEFENSE/MILITARY"
+    },
+    {
+      "a": "BWXT",
+      "b": "NOC",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "DEFENSE/MILITARY"
+    },
+    {
+      "a": "NOC",
+      "b": "AJRD",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "DEFENSE/MILITARY"
+    },
+    {
+      "a": "AJRD",
+      "b": "NOC",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "DEFENSE/MILITARY"
+    },
+    {
+      "a": "GD",
+      "b": "HII",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "DEFENSE/MILITARY"
+    },
+    {
+      "a": "HII",
+      "b": "GD",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "DEFENSE/MILITARY"
+    },
+    {
+      "a": "GD",
+      "b": "LDOS",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "DEFENSE/MILITARY"
+    },
+    {
+      "a": "LDOS",
+      "b": "GD",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "DEFENSE/MILITARY"
+    },
+    {
+      "a": "GD",
+      "b": "TXT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "DEFENSE/MILITARY"
+    },
+    {
+      "a": "TXT",
+      "b": "GD",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "DEFENSE/MILITARY"
+    },
+    {
+      "a": "GD",
+      "b": "BWXT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "DEFENSE/MILITARY"
+    },
+    {
+      "a": "BWXT",
+      "b": "GD",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "DEFENSE/MILITARY"
+    },
+    {
+      "a": "GD",
+      "b": "AJRD",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "DEFENSE/MILITARY"
+    },
+    {
+      "a": "AJRD",
+      "b": "GD",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "DEFENSE/MILITARY"
+    },
+    {
+      "a": "HII",
+      "b": "LDOS",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "DEFENSE/MILITARY"
+    },
+    {
+      "a": "LDOS",
+      "b": "HII",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "DEFENSE/MILITARY"
+    },
+    {
+      "a": "HII",
+      "b": "TXT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "DEFENSE/MILITARY"
+    },
+    {
+      "a": "TXT",
+      "b": "HII",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "DEFENSE/MILITARY"
+    },
+    {
+      "a": "HII",
+      "b": "BWXT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "DEFENSE/MILITARY"
+    },
+    {
+      "a": "BWXT",
+      "b": "HII",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "DEFENSE/MILITARY"
+    },
+    {
+      "a": "HII",
+      "b": "AJRD",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "DEFENSE/MILITARY"
+    },
+    {
+      "a": "AJRD",
+      "b": "HII",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "DEFENSE/MILITARY"
+    },
+    {
+      "a": "LDOS",
+      "b": "TXT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "DEFENSE/MILITARY"
+    },
+    {
+      "a": "TXT",
+      "b": "LDOS",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "DEFENSE/MILITARY"
+    },
+    {
+      "a": "LDOS",
+      "b": "BWXT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "DEFENSE/MILITARY"
+    },
+    {
+      "a": "BWXT",
+      "b": "LDOS",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "DEFENSE/MILITARY"
+    },
+    {
+      "a": "LDOS",
+      "b": "AJRD",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "DEFENSE/MILITARY"
+    },
+    {
+      "a": "AJRD",
+      "b": "LDOS",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "DEFENSE/MILITARY"
+    },
+    {
+      "a": "TXT",
+      "b": "BWXT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "DEFENSE/MILITARY"
+    },
+    {
+      "a": "BWXT",
+      "b": "TXT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "DEFENSE/MILITARY"
+    },
+    {
+      "a": "TXT",
+      "b": "AJRD",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "DEFENSE/MILITARY"
+    },
+    {
+      "a": "AJRD",
+      "b": "TXT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "DEFENSE/MILITARY"
+    },
+    {
+      "a": "BWXT",
+      "b": "AJRD",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "DEFENSE/MILITARY"
+    },
+    {
+      "a": "AJRD",
+      "b": "BWXT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "DEFENSE/MILITARY"
+    },
+    {
+      "a": "XOM",
+      "b": "CVX",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "ENERGY/OIL"
+    },
+    {
+      "a": "CVX",
+      "b": "XOM",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "ENERGY/OIL"
+    },
+    {
+      "a": "XOM",
+      "b": "COP",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "ENERGY/OIL"
+    },
+    {
+      "a": "COP",
+      "b": "XOM",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "ENERGY/OIL"
+    },
+    {
+      "a": "XOM",
+      "b": "BP",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "ENERGY/OIL"
+    },
+    {
+      "a": "BP",
+      "b": "XOM",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "ENERGY/OIL"
+    },
+    {
+      "a": "XOM",
+      "b": "SHEL",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "ENERGY/OIL"
+    },
+    {
+      "a": "SHEL",
+      "b": "XOM",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "ENERGY/OIL"
+    },
+    {
+      "a": "XOM",
+      "b": "TOT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "ENERGY/OIL"
+    },
+    {
+      "a": "TOT",
+      "b": "XOM",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "ENERGY/OIL"
+    },
+    {
+      "a": "XOM",
+      "b": "ENB",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "ENERGY/OIL"
+    },
+    {
+      "a": "ENB",
+      "b": "XOM",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "ENERGY/OIL"
+    },
+    {
+      "a": "XOM",
+      "b": "KMI",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "ENERGY/OIL"
+    },
+    {
+      "a": "KMI",
+      "b": "XOM",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "ENERGY/OIL"
+    },
+    {
+      "a": "XOM",
+      "b": "OXY",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "ENERGY/OIL"
+    },
+    {
+      "a": "OXY",
+      "b": "XOM",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "ENERGY/OIL"
+    },
+    {
+      "a": "XOM",
+      "b": "EOG",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "ENERGY/OIL"
+    },
+    {
+      "a": "EOG",
+      "b": "XOM",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "ENERGY/OIL"
+    },
+    {
+      "a": "CVX",
+      "b": "COP",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "ENERGY/OIL"
+    },
+    {
+      "a": "COP",
+      "b": "CVX",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "ENERGY/OIL"
+    },
+    {
+      "a": "CVX",
+      "b": "BP",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "ENERGY/OIL"
+    },
+    {
+      "a": "BP",
+      "b": "CVX",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "ENERGY/OIL"
+    },
+    {
+      "a": "CVX",
+      "b": "SHEL",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "ENERGY/OIL"
+    },
+    {
+      "a": "SHEL",
+      "b": "CVX",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "ENERGY/OIL"
+    },
+    {
+      "a": "CVX",
+      "b": "TOT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "ENERGY/OIL"
+    },
+    {
+      "a": "TOT",
+      "b": "CVX",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "ENERGY/OIL"
+    },
+    {
+      "a": "CVX",
+      "b": "ENB",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "ENERGY/OIL"
+    },
+    {
+      "a": "ENB",
+      "b": "CVX",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "ENERGY/OIL"
+    },
+    {
+      "a": "CVX",
+      "b": "KMI",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "ENERGY/OIL"
+    },
+    {
+      "a": "KMI",
+      "b": "CVX",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "ENERGY/OIL"
+    },
+    {
+      "a": "CVX",
+      "b": "OXY",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "ENERGY/OIL"
+    },
+    {
+      "a": "OXY",
+      "b": "CVX",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "ENERGY/OIL"
+    },
+    {
+      "a": "CVX",
+      "b": "EOG",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "ENERGY/OIL"
+    },
+    {
+      "a": "EOG",
+      "b": "CVX",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "ENERGY/OIL"
+    },
+    {
+      "a": "COP",
+      "b": "BP",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "ENERGY/OIL"
+    },
+    {
+      "a": "BP",
+      "b": "COP",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "ENERGY/OIL"
+    },
+    {
+      "a": "COP",
+      "b": "SHEL",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "ENERGY/OIL"
+    },
+    {
+      "a": "SHEL",
+      "b": "COP",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "ENERGY/OIL"
+    },
+    {
+      "a": "COP",
+      "b": "TOT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "ENERGY/OIL"
+    },
+    {
+      "a": "TOT",
+      "b": "COP",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "ENERGY/OIL"
+    },
+    {
+      "a": "COP",
+      "b": "ENB",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "ENERGY/OIL"
+    },
+    {
+      "a": "ENB",
+      "b": "COP",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "ENERGY/OIL"
+    },
+    {
+      "a": "COP",
+      "b": "KMI",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "ENERGY/OIL"
+    },
+    {
+      "a": "KMI",
+      "b": "COP",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "ENERGY/OIL"
+    },
+    {
+      "a": "COP",
+      "b": "OXY",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "ENERGY/OIL"
+    },
+    {
+      "a": "OXY",
+      "b": "COP",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "ENERGY/OIL"
+    },
+    {
+      "a": "COP",
+      "b": "EOG",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "ENERGY/OIL"
+    },
+    {
+      "a": "EOG",
+      "b": "COP",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "ENERGY/OIL"
+    },
+    {
+      "a": "BP",
+      "b": "SHEL",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "ENERGY/OIL"
+    },
+    {
+      "a": "SHEL",
+      "b": "BP",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "ENERGY/OIL"
+    },
+    {
+      "a": "BP",
+      "b": "TOT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "ENERGY/OIL"
+    },
+    {
+      "a": "TOT",
+      "b": "BP",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "ENERGY/OIL"
+    },
+    {
+      "a": "BP",
+      "b": "ENB",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "ENERGY/OIL"
+    },
+    {
+      "a": "ENB",
+      "b": "BP",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "ENERGY/OIL"
+    },
+    {
+      "a": "BP",
+      "b": "KMI",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "ENERGY/OIL"
+    },
+    {
+      "a": "KMI",
+      "b": "BP",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "ENERGY/OIL"
+    },
+    {
+      "a": "BP",
+      "b": "OXY",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "ENERGY/OIL"
+    },
+    {
+      "a": "OXY",
+      "b": "BP",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "ENERGY/OIL"
+    },
+    {
+      "a": "BP",
+      "b": "EOG",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "ENERGY/OIL"
+    },
+    {
+      "a": "EOG",
+      "b": "BP",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "ENERGY/OIL"
+    },
+    {
+      "a": "SHEL",
+      "b": "TOT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "ENERGY/OIL"
+    },
+    {
+      "a": "TOT",
+      "b": "SHEL",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "ENERGY/OIL"
+    },
+    {
+      "a": "SHEL",
+      "b": "ENB",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "ENERGY/OIL"
+    },
+    {
+      "a": "ENB",
+      "b": "SHEL",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "ENERGY/OIL"
+    },
+    {
+      "a": "SHEL",
+      "b": "KMI",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "ENERGY/OIL"
+    },
+    {
+      "a": "KMI",
+      "b": "SHEL",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "ENERGY/OIL"
+    },
+    {
+      "a": "SHEL",
+      "b": "OXY",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "ENERGY/OIL"
+    },
+    {
+      "a": "OXY",
+      "b": "SHEL",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "ENERGY/OIL"
+    },
+    {
+      "a": "SHEL",
+      "b": "EOG",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "ENERGY/OIL"
+    },
+    {
+      "a": "EOG",
+      "b": "SHEL",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "ENERGY/OIL"
+    },
+    {
+      "a": "TOT",
+      "b": "ENB",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "ENERGY/OIL"
+    },
+    {
+      "a": "ENB",
+      "b": "TOT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "ENERGY/OIL"
+    },
+    {
+      "a": "TOT",
+      "b": "KMI",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "ENERGY/OIL"
+    },
+    {
+      "a": "KMI",
+      "b": "TOT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "ENERGY/OIL"
+    },
+    {
+      "a": "TOT",
+      "b": "OXY",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "ENERGY/OIL"
+    },
+    {
+      "a": "OXY",
+      "b": "TOT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "ENERGY/OIL"
+    },
+    {
+      "a": "TOT",
+      "b": "EOG",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "ENERGY/OIL"
+    },
+    {
+      "a": "EOG",
+      "b": "TOT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "ENERGY/OIL"
+    },
+    {
+      "a": "ENB",
+      "b": "KMI",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "ENERGY/OIL"
+    },
+    {
+      "a": "KMI",
+      "b": "ENB",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "ENERGY/OIL"
+    },
+    {
+      "a": "ENB",
+      "b": "OXY",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "ENERGY/OIL"
+    },
+    {
+      "a": "OXY",
+      "b": "ENB",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "ENERGY/OIL"
+    },
+    {
+      "a": "ENB",
+      "b": "EOG",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "ENERGY/OIL"
+    },
+    {
+      "a": "EOG",
+      "b": "ENB",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "ENERGY/OIL"
+    },
+    {
+      "a": "KMI",
+      "b": "OXY",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "ENERGY/OIL"
+    },
+    {
+      "a": "OXY",
+      "b": "KMI",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "ENERGY/OIL"
+    },
+    {
+      "a": "KMI",
+      "b": "EOG",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "ENERGY/OIL"
+    },
+    {
+      "a": "EOG",
+      "b": "KMI",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "ENERGY/OIL"
+    },
+    {
+      "a": "OXY",
+      "b": "EOG",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "ENERGY/OIL"
+    },
+    {
+      "a": "EOG",
+      "b": "OXY",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "ENERGY/OIL"
+    },
+    {
+      "a": "JPM",
+      "b": "BAC",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "FINANCE"
+    },
+    {
+      "a": "BAC",
+      "b": "JPM",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "FINANCE"
+    },
+    {
+      "a": "JPM",
+      "b": "WFC",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "FINANCE"
+    },
+    {
+      "a": "WFC",
+      "b": "JPM",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "FINANCE"
+    },
+    {
+      "a": "JPM",
+      "b": "C",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "FINANCE"
+    },
+    {
+      "a": "C",
+      "b": "JPM",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "FINANCE"
+    },
+    {
+      "a": "JPM",
+      "b": "GS",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "FINANCE"
+    },
+    {
+      "a": "GS",
+      "b": "JPM",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "FINANCE"
+    },
+    {
+      "a": "JPM",
+      "b": "MS",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "FINANCE"
+    },
+    {
+      "a": "MS",
+      "b": "JPM",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "FINANCE"
+    },
+    {
+      "a": "JPM",
+      "b": "BLK",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "FINANCE"
+    },
+    {
+      "a": "BLK",
+      "b": "JPM",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "FINANCE"
+    },
+    {
+      "a": "JPM",
+      "b": "AXP",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "FINANCE"
+    },
+    {
+      "a": "AXP",
+      "b": "JPM",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "FINANCE"
+    },
+    {
+      "a": "JPM",
+      "b": "COF",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "FINANCE"
+    },
+    {
+      "a": "COF",
+      "b": "JPM",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "FINANCE"
+    },
+    {
+      "a": "JPM",
+      "b": "USB",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "FINANCE"
+    },
+    {
+      "a": "USB",
+      "b": "JPM",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "FINANCE"
+    },
+    {
+      "a": "BAC",
+      "b": "WFC",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "FINANCE"
+    },
+    {
+      "a": "WFC",
+      "b": "BAC",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "FINANCE"
+    },
+    {
+      "a": "BAC",
+      "b": "C",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "FINANCE"
+    },
+    {
+      "a": "C",
+      "b": "BAC",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "FINANCE"
+    },
+    {
+      "a": "BAC",
+      "b": "GS",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "FINANCE"
+    },
+    {
+      "a": "GS",
+      "b": "BAC",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "FINANCE"
+    },
+    {
+      "a": "BAC",
+      "b": "MS",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "FINANCE"
+    },
+    {
+      "a": "MS",
+      "b": "BAC",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "FINANCE"
+    },
+    {
+      "a": "BAC",
+      "b": "BLK",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "FINANCE"
+    },
+    {
+      "a": "BLK",
+      "b": "BAC",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "FINANCE"
+    },
+    {
+      "a": "BAC",
+      "b": "AXP",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "FINANCE"
+    },
+    {
+      "a": "AXP",
+      "b": "BAC",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "FINANCE"
+    },
+    {
+      "a": "BAC",
+      "b": "COF",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "FINANCE"
+    },
+    {
+      "a": "COF",
+      "b": "BAC",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "FINANCE"
+    },
+    {
+      "a": "BAC",
+      "b": "USB",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "FINANCE"
+    },
+    {
+      "a": "USB",
+      "b": "BAC",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "FINANCE"
+    },
+    {
+      "a": "WFC",
+      "b": "C",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "FINANCE"
+    },
+    {
+      "a": "C",
+      "b": "WFC",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "FINANCE"
+    },
+    {
+      "a": "WFC",
+      "b": "GS",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "FINANCE"
+    },
+    {
+      "a": "GS",
+      "b": "WFC",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "FINANCE"
+    },
+    {
+      "a": "WFC",
+      "b": "MS",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "FINANCE"
+    },
+    {
+      "a": "MS",
+      "b": "WFC",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "FINANCE"
+    },
+    {
+      "a": "WFC",
+      "b": "BLK",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "FINANCE"
+    },
+    {
+      "a": "BLK",
+      "b": "WFC",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "FINANCE"
+    },
+    {
+      "a": "WFC",
+      "b": "AXP",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "FINANCE"
+    },
+    {
+      "a": "AXP",
+      "b": "WFC",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "FINANCE"
+    },
+    {
+      "a": "WFC",
+      "b": "COF",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "FINANCE"
+    },
+    {
+      "a": "COF",
+      "b": "WFC",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "FINANCE"
+    },
+    {
+      "a": "WFC",
+      "b": "USB",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "FINANCE"
+    },
+    {
+      "a": "USB",
+      "b": "WFC",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "FINANCE"
+    },
+    {
+      "a": "C",
+      "b": "GS",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "FINANCE"
+    },
+    {
+      "a": "GS",
+      "b": "C",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "FINANCE"
+    },
+    {
+      "a": "C",
+      "b": "MS",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "FINANCE"
+    },
+    {
+      "a": "MS",
+      "b": "C",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "FINANCE"
+    },
+    {
+      "a": "C",
+      "b": "BLK",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "FINANCE"
+    },
+    {
+      "a": "BLK",
+      "b": "C",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "FINANCE"
+    },
+    {
+      "a": "C",
+      "b": "AXP",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "FINANCE"
+    },
+    {
+      "a": "AXP",
+      "b": "C",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "FINANCE"
+    },
+    {
+      "a": "C",
+      "b": "COF",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "FINANCE"
+    },
+    {
+      "a": "COF",
+      "b": "C",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "FINANCE"
+    },
+    {
+      "a": "C",
+      "b": "USB",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "FINANCE"
+    },
+    {
+      "a": "USB",
+      "b": "C",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "FINANCE"
+    },
+    {
+      "a": "GS",
+      "b": "MS",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "FINANCE"
+    },
+    {
+      "a": "MS",
+      "b": "GS",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "FINANCE"
+    },
+    {
+      "a": "GS",
+      "b": "BLK",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "FINANCE"
+    },
+    {
+      "a": "BLK",
+      "b": "GS",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "FINANCE"
+    },
+    {
+      "a": "GS",
+      "b": "AXP",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "FINANCE"
+    },
+    {
+      "a": "AXP",
+      "b": "GS",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "FINANCE"
+    },
+    {
+      "a": "GS",
+      "b": "COF",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "FINANCE"
+    },
+    {
+      "a": "COF",
+      "b": "GS",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "FINANCE"
+    },
+    {
+      "a": "GS",
+      "b": "USB",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "FINANCE"
+    },
+    {
+      "a": "USB",
+      "b": "GS",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "FINANCE"
+    },
+    {
+      "a": "MS",
+      "b": "BLK",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "FINANCE"
+    },
+    {
+      "a": "BLK",
+      "b": "MS",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "FINANCE"
+    },
+    {
+      "a": "MS",
+      "b": "AXP",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "FINANCE"
+    },
+    {
+      "a": "AXP",
+      "b": "MS",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "FINANCE"
+    },
+    {
+      "a": "MS",
+      "b": "COF",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "FINANCE"
+    },
+    {
+      "a": "COF",
+      "b": "MS",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "FINANCE"
+    },
+    {
+      "a": "MS",
+      "b": "USB",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "FINANCE"
+    },
+    {
+      "a": "USB",
+      "b": "MS",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "FINANCE"
+    },
+    {
+      "a": "BLK",
+      "b": "AXP",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "FINANCE"
+    },
+    {
+      "a": "AXP",
+      "b": "BLK",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "FINANCE"
+    },
+    {
+      "a": "BLK",
+      "b": "COF",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "FINANCE"
+    },
+    {
+      "a": "COF",
+      "b": "BLK",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "FINANCE"
+    },
+    {
+      "a": "BLK",
+      "b": "USB",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "FINANCE"
+    },
+    {
+      "a": "USB",
+      "b": "BLK",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "FINANCE"
+    },
+    {
+      "a": "AXP",
+      "b": "COF",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "FINANCE"
+    },
+    {
+      "a": "COF",
+      "b": "AXP",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "FINANCE"
+    },
+    {
+      "a": "AXP",
+      "b": "USB",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "FINANCE"
+    },
+    {
+      "a": "USB",
+      "b": "AXP",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "FINANCE"
+    },
+    {
+      "a": "COF",
+      "b": "USB",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "FINANCE"
+    },
+    {
+      "a": "USB",
+      "b": "COF",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "FINANCE"
+    },
+    {
+      "a": "JNJ",
+      "b": "UNH",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "HEALTHCARE"
+    },
+    {
+      "a": "UNH",
+      "b": "JNJ",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "HEALTHCARE"
+    },
+    {
+      "a": "JNJ",
+      "b": "PFE",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "HEALTHCARE"
+    },
+    {
+      "a": "PFE",
+      "b": "JNJ",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "HEALTHCARE"
+    },
+    {
+      "a": "JNJ",
+      "b": "ABBV",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "HEALTHCARE"
+    },
+    {
+      "a": "ABBV",
+      "b": "JNJ",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "HEALTHCARE"
+    },
+    {
+      "a": "JNJ",
+      "b": "TMO",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "HEALTHCARE"
+    },
+    {
+      "a": "TMO",
+      "b": "JNJ",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "HEALTHCARE"
+    },
+    {
+      "a": "JNJ",
+      "b": "ABT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "HEALTHCARE"
+    },
+    {
+      "a": "ABT",
+      "b": "JNJ",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "HEALTHCARE"
+    },
+    {
+      "a": "JNJ",
+      "b": "MRK",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "HEALTHCARE"
+    },
+    {
+      "a": "MRK",
+      "b": "JNJ",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "HEALTHCARE"
+    },
+    {
+      "a": "JNJ",
+      "b": "MDT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "HEALTHCARE"
+    },
+    {
+      "a": "MDT",
+      "b": "JNJ",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "HEALTHCARE"
+    },
+    {
+      "a": "JNJ",
+      "b": "ISRG",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "HEALTHCARE"
+    },
+    {
+      "a": "ISRG",
+      "b": "JNJ",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "HEALTHCARE"
+    },
+    {
+      "a": "JNJ",
+      "b": "BIIB",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "HEALTHCARE"
+    },
+    {
+      "a": "BIIB",
+      "b": "JNJ",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "HEALTHCARE"
+    },
+    {
+      "a": "UNH",
+      "b": "PFE",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "HEALTHCARE"
+    },
+    {
+      "a": "PFE",
+      "b": "UNH",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "HEALTHCARE"
+    },
+    {
+      "a": "UNH",
+      "b": "ABBV",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "HEALTHCARE"
+    },
+    {
+      "a": "ABBV",
+      "b": "UNH",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "HEALTHCARE"
+    },
+    {
+      "a": "UNH",
+      "b": "TMO",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "HEALTHCARE"
+    },
+    {
+      "a": "TMO",
+      "b": "UNH",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "HEALTHCARE"
+    },
+    {
+      "a": "UNH",
+      "b": "ABT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "HEALTHCARE"
+    },
+    {
+      "a": "ABT",
+      "b": "UNH",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "HEALTHCARE"
+    },
+    {
+      "a": "UNH",
+      "b": "MRK",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "HEALTHCARE"
+    },
+    {
+      "a": "MRK",
+      "b": "UNH",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "HEALTHCARE"
+    },
+    {
+      "a": "UNH",
+      "b": "MDT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "HEALTHCARE"
+    },
+    {
+      "a": "MDT",
+      "b": "UNH",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "HEALTHCARE"
+    },
+    {
+      "a": "UNH",
+      "b": "ISRG",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "HEALTHCARE"
+    },
+    {
+      "a": "ISRG",
+      "b": "UNH",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "HEALTHCARE"
+    },
+    {
+      "a": "UNH",
+      "b": "BIIB",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "HEALTHCARE"
+    },
+    {
+      "a": "BIIB",
+      "b": "UNH",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "HEALTHCARE"
+    },
+    {
+      "a": "PFE",
+      "b": "ABBV",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "HEALTHCARE"
+    },
+    {
+      "a": "ABBV",
+      "b": "PFE",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "HEALTHCARE"
+    },
+    {
+      "a": "PFE",
+      "b": "TMO",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "HEALTHCARE"
+    },
+    {
+      "a": "TMO",
+      "b": "PFE",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "HEALTHCARE"
+    },
+    {
+      "a": "PFE",
+      "b": "ABT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "HEALTHCARE"
+    },
+    {
+      "a": "ABT",
+      "b": "PFE",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "HEALTHCARE"
+    },
+    {
+      "a": "PFE",
+      "b": "MRK",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "HEALTHCARE"
+    },
+    {
+      "a": "MRK",
+      "b": "PFE",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "HEALTHCARE"
+    },
+    {
+      "a": "PFE",
+      "b": "MDT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "HEALTHCARE"
+    },
+    {
+      "a": "MDT",
+      "b": "PFE",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "HEALTHCARE"
+    },
+    {
+      "a": "PFE",
+      "b": "ISRG",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "HEALTHCARE"
+    },
+    {
+      "a": "ISRG",
+      "b": "PFE",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "HEALTHCARE"
+    },
+    {
+      "a": "PFE",
+      "b": "BIIB",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "HEALTHCARE"
+    },
+    {
+      "a": "BIIB",
+      "b": "PFE",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "HEALTHCARE"
+    },
+    {
+      "a": "ABBV",
+      "b": "TMO",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "HEALTHCARE"
+    },
+    {
+      "a": "TMO",
+      "b": "ABBV",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "HEALTHCARE"
+    },
+    {
+      "a": "ABBV",
+      "b": "ABT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "HEALTHCARE"
+    },
+    {
+      "a": "ABT",
+      "b": "ABBV",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "HEALTHCARE"
+    },
+    {
+      "a": "ABBV",
+      "b": "MRK",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "HEALTHCARE"
+    },
+    {
+      "a": "MRK",
+      "b": "ABBV",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "HEALTHCARE"
+    },
+    {
+      "a": "ABBV",
+      "b": "MDT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "HEALTHCARE"
+    },
+    {
+      "a": "MDT",
+      "b": "ABBV",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "HEALTHCARE"
+    },
+    {
+      "a": "ABBV",
+      "b": "ISRG",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "HEALTHCARE"
+    },
+    {
+      "a": "ISRG",
+      "b": "ABBV",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "HEALTHCARE"
+    },
+    {
+      "a": "ABBV",
+      "b": "BIIB",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "HEALTHCARE"
+    },
+    {
+      "a": "BIIB",
+      "b": "ABBV",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "HEALTHCARE"
+    },
+    {
+      "a": "TMO",
+      "b": "ABT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "HEALTHCARE"
+    },
+    {
+      "a": "ABT",
+      "b": "TMO",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "HEALTHCARE"
+    },
+    {
+      "a": "TMO",
+      "b": "MRK",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "HEALTHCARE"
+    },
+    {
+      "a": "MRK",
+      "b": "TMO",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "HEALTHCARE"
+    },
+    {
+      "a": "TMO",
+      "b": "MDT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "HEALTHCARE"
+    },
+    {
+      "a": "MDT",
+      "b": "TMO",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "HEALTHCARE"
+    },
+    {
+      "a": "TMO",
+      "b": "ISRG",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "HEALTHCARE"
+    },
+    {
+      "a": "ISRG",
+      "b": "TMO",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "HEALTHCARE"
+    },
+    {
+      "a": "TMO",
+      "b": "BIIB",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "HEALTHCARE"
+    },
+    {
+      "a": "BIIB",
+      "b": "TMO",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "HEALTHCARE"
+    },
+    {
+      "a": "ABT",
+      "b": "MRK",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "HEALTHCARE"
+    },
+    {
+      "a": "MRK",
+      "b": "ABT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "HEALTHCARE"
+    },
+    {
+      "a": "ABT",
+      "b": "MDT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "HEALTHCARE"
+    },
+    {
+      "a": "MDT",
+      "b": "ABT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "HEALTHCARE"
+    },
+    {
+      "a": "ABT",
+      "b": "ISRG",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "HEALTHCARE"
+    },
+    {
+      "a": "ISRG",
+      "b": "ABT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "HEALTHCARE"
+    },
+    {
+      "a": "ABT",
+      "b": "BIIB",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "HEALTHCARE"
+    },
+    {
+      "a": "BIIB",
+      "b": "ABT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "HEALTHCARE"
+    },
+    {
+      "a": "MRK",
+      "b": "MDT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "HEALTHCARE"
+    },
+    {
+      "a": "MDT",
+      "b": "MRK",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "HEALTHCARE"
+    },
+    {
+      "a": "MRK",
+      "b": "ISRG",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "HEALTHCARE"
+    },
+    {
+      "a": "ISRG",
+      "b": "MRK",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "HEALTHCARE"
+    },
+    {
+      "a": "MRK",
+      "b": "BIIB",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "HEALTHCARE"
+    },
+    {
+      "a": "BIIB",
+      "b": "MRK",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "HEALTHCARE"
+    },
+    {
+      "a": "MDT",
+      "b": "ISRG",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "HEALTHCARE"
+    },
+    {
+      "a": "ISRG",
+      "b": "MDT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "HEALTHCARE"
+    },
+    {
+      "a": "MDT",
+      "b": "BIIB",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "HEALTHCARE"
+    },
+    {
+      "a": "BIIB",
+      "b": "MDT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "HEALTHCARE"
+    },
+    {
+      "a": "ISRG",
+      "b": "BIIB",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "HEALTHCARE"
+    },
+    {
+      "a": "BIIB",
+      "b": "ISRG",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "HEALTHCARE"
+    },
+    {
+      "a": "AMZN",
+      "b": "WMT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CONSUMER"
+    },
+    {
+      "a": "WMT",
+      "b": "AMZN",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CONSUMER"
+    },
+    {
+      "a": "AMZN",
+      "b": "TGT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CONSUMER"
+    },
+    {
+      "a": "TGT",
+      "b": "AMZN",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CONSUMER"
+    },
+    {
+      "a": "AMZN",
+      "b": "HD",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CONSUMER"
+    },
+    {
+      "a": "HD",
+      "b": "AMZN",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CONSUMER"
+    },
+    {
+      "a": "AMZN",
+      "b": "MCD",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CONSUMER"
+    },
+    {
+      "a": "MCD",
+      "b": "AMZN",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CONSUMER"
+    },
+    {
+      "a": "AMZN",
+      "b": "NKE",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CONSUMER"
+    },
+    {
+      "a": "NKE",
+      "b": "AMZN",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CONSUMER"
+    },
+    {
+      "a": "AMZN",
+      "b": "COST",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CONSUMER"
+    },
+    {
+      "a": "COST",
+      "b": "AMZN",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CONSUMER"
+    },
+    {
+      "a": "AMZN",
+      "b": "SBUX",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CONSUMER"
+    },
+    {
+      "a": "SBUX",
+      "b": "AMZN",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CONSUMER"
+    },
+    {
+      "a": "AMZN",
+      "b": "LOW",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CONSUMER"
+    },
+    {
+      "a": "LOW",
+      "b": "AMZN",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CONSUMER"
+    },
+    {
+      "a": "AMZN",
+      "b": "TJX",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CONSUMER"
+    },
+    {
+      "a": "TJX",
+      "b": "AMZN",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CONSUMER"
+    },
+    {
+      "a": "WMT",
+      "b": "TGT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CONSUMER"
+    },
+    {
+      "a": "TGT",
+      "b": "WMT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CONSUMER"
+    },
+    {
+      "a": "WMT",
+      "b": "HD",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CONSUMER"
+    },
+    {
+      "a": "HD",
+      "b": "WMT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CONSUMER"
+    },
+    {
+      "a": "WMT",
+      "b": "MCD",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CONSUMER"
+    },
+    {
+      "a": "MCD",
+      "b": "WMT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CONSUMER"
+    },
+    {
+      "a": "WMT",
+      "b": "NKE",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CONSUMER"
+    },
+    {
+      "a": "NKE",
+      "b": "WMT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CONSUMER"
+    },
+    {
+      "a": "WMT",
+      "b": "COST",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CONSUMER"
+    },
+    {
+      "a": "COST",
+      "b": "WMT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CONSUMER"
+    },
+    {
+      "a": "WMT",
+      "b": "SBUX",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CONSUMER"
+    },
+    {
+      "a": "SBUX",
+      "b": "WMT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CONSUMER"
+    },
+    {
+      "a": "WMT",
+      "b": "LOW",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CONSUMER"
+    },
+    {
+      "a": "LOW",
+      "b": "WMT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CONSUMER"
+    },
+    {
+      "a": "WMT",
+      "b": "TJX",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CONSUMER"
+    },
+    {
+      "a": "TJX",
+      "b": "WMT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CONSUMER"
+    },
+    {
+      "a": "TGT",
+      "b": "HD",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CONSUMER"
+    },
+    {
+      "a": "HD",
+      "b": "TGT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CONSUMER"
+    },
+    {
+      "a": "TGT",
+      "b": "MCD",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CONSUMER"
+    },
+    {
+      "a": "MCD",
+      "b": "TGT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CONSUMER"
+    },
+    {
+      "a": "TGT",
+      "b": "NKE",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CONSUMER"
+    },
+    {
+      "a": "NKE",
+      "b": "TGT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CONSUMER"
+    },
+    {
+      "a": "TGT",
+      "b": "COST",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CONSUMER"
+    },
+    {
+      "a": "COST",
+      "b": "TGT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CONSUMER"
+    },
+    {
+      "a": "TGT",
+      "b": "SBUX",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CONSUMER"
+    },
+    {
+      "a": "SBUX",
+      "b": "TGT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CONSUMER"
+    },
+    {
+      "a": "TGT",
+      "b": "LOW",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CONSUMER"
+    },
+    {
+      "a": "LOW",
+      "b": "TGT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CONSUMER"
+    },
+    {
+      "a": "TGT",
+      "b": "TJX",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CONSUMER"
+    },
+    {
+      "a": "TJX",
+      "b": "TGT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CONSUMER"
+    },
+    {
+      "a": "HD",
+      "b": "MCD",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CONSUMER"
+    },
+    {
+      "a": "MCD",
+      "b": "HD",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CONSUMER"
+    },
+    {
+      "a": "HD",
+      "b": "NKE",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CONSUMER"
+    },
+    {
+      "a": "NKE",
+      "b": "HD",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CONSUMER"
+    },
+    {
+      "a": "HD",
+      "b": "COST",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CONSUMER"
+    },
+    {
+      "a": "COST",
+      "b": "HD",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CONSUMER"
+    },
+    {
+      "a": "HD",
+      "b": "SBUX",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CONSUMER"
+    },
+    {
+      "a": "SBUX",
+      "b": "HD",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CONSUMER"
+    },
+    {
+      "a": "HD",
+      "b": "LOW",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CONSUMER"
+    },
+    {
+      "a": "LOW",
+      "b": "HD",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CONSUMER"
+    },
+    {
+      "a": "HD",
+      "b": "TJX",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CONSUMER"
+    },
+    {
+      "a": "TJX",
+      "b": "HD",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CONSUMER"
+    },
+    {
+      "a": "MCD",
+      "b": "NKE",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CONSUMER"
+    },
+    {
+      "a": "NKE",
+      "b": "MCD",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CONSUMER"
+    },
+    {
+      "a": "MCD",
+      "b": "COST",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CONSUMER"
+    },
+    {
+      "a": "COST",
+      "b": "MCD",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CONSUMER"
+    },
+    {
+      "a": "MCD",
+      "b": "SBUX",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CONSUMER"
+    },
+    {
+      "a": "SBUX",
+      "b": "MCD",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CONSUMER"
+    },
+    {
+      "a": "MCD",
+      "b": "LOW",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CONSUMER"
+    },
+    {
+      "a": "LOW",
+      "b": "MCD",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CONSUMER"
+    },
+    {
+      "a": "MCD",
+      "b": "TJX",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CONSUMER"
+    },
+    {
+      "a": "TJX",
+      "b": "MCD",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CONSUMER"
+    },
+    {
+      "a": "NKE",
+      "b": "COST",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CONSUMER"
+    },
+    {
+      "a": "COST",
+      "b": "NKE",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CONSUMER"
+    },
+    {
+      "a": "NKE",
+      "b": "SBUX",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CONSUMER"
+    },
+    {
+      "a": "SBUX",
+      "b": "NKE",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CONSUMER"
+    },
+    {
+      "a": "NKE",
+      "b": "LOW",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CONSUMER"
+    },
+    {
+      "a": "LOW",
+      "b": "NKE",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CONSUMER"
+    },
+    {
+      "a": "NKE",
+      "b": "TJX",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CONSUMER"
+    },
+    {
+      "a": "TJX",
+      "b": "NKE",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CONSUMER"
+    },
+    {
+      "a": "COST",
+      "b": "SBUX",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CONSUMER"
+    },
+    {
+      "a": "SBUX",
+      "b": "COST",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CONSUMER"
+    },
+    {
+      "a": "COST",
+      "b": "LOW",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CONSUMER"
+    },
+    {
+      "a": "LOW",
+      "b": "COST",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CONSUMER"
+    },
+    {
+      "a": "COST",
+      "b": "TJX",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CONSUMER"
+    },
+    {
+      "a": "TJX",
+      "b": "COST",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CONSUMER"
+    },
+    {
+      "a": "SBUX",
+      "b": "LOW",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CONSUMER"
+    },
+    {
+      "a": "LOW",
+      "b": "SBUX",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CONSUMER"
+    },
+    {
+      "a": "SBUX",
+      "b": "TJX",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CONSUMER"
+    },
+    {
+      "a": "TJX",
+      "b": "SBUX",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CONSUMER"
+    },
+    {
+      "a": "LOW",
+      "b": "TJX",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CONSUMER"
+    },
+    {
+      "a": "TJX",
+      "b": "LOW",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CONSUMER"
+    },
+    {
+      "a": "CAT",
+      "b": "DE",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "INDUSTRIAL"
+    },
+    {
+      "a": "DE",
+      "b": "CAT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "INDUSTRIAL"
+    },
+    {
+      "a": "CAT",
+      "b": "MMM",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "INDUSTRIAL"
+    },
+    {
+      "a": "MMM",
+      "b": "CAT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "INDUSTRIAL"
+    },
+    {
+      "a": "CAT",
+      "b": "GE",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "INDUSTRIAL"
+    },
+    {
+      "a": "GE",
+      "b": "CAT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "INDUSTRIAL"
+    },
+    {
+      "a": "CAT",
+      "b": "HON",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "INDUSTRIAL"
+    },
+    {
+      "a": "HON",
+      "b": "CAT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "INDUSTRIAL"
+    },
+    {
+      "a": "CAT",
+      "b": "UPS",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "INDUSTRIAL"
+    },
+    {
+      "a": "UPS",
+      "b": "CAT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "INDUSTRIAL"
+    },
+    {
+      "a": "CAT",
+      "b": "BA",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "INDUSTRIAL"
+    },
+    {
+      "a": "BA",
+      "b": "CAT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "INDUSTRIAL"
+    },
+    {
+      "a": "CAT",
+      "b": "LMT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "INDUSTRIAL"
+    },
+    {
+      "a": "LMT",
+      "b": "CAT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "INDUSTRIAL"
+    },
+    {
+      "a": "CAT",
+      "b": "RTX",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "INDUSTRIAL"
+    },
+    {
+      "a": "RTX",
+      "b": "CAT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "INDUSTRIAL"
+    },
+    {
+      "a": "CAT",
+      "b": "NOC",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "INDUSTRIAL"
+    },
+    {
+      "a": "NOC",
+      "b": "CAT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "INDUSTRIAL"
+    },
+    {
+      "a": "DE",
+      "b": "MMM",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "INDUSTRIAL"
+    },
+    {
+      "a": "MMM",
+      "b": "DE",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "INDUSTRIAL"
+    },
+    {
+      "a": "DE",
+      "b": "GE",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "INDUSTRIAL"
+    },
+    {
+      "a": "GE",
+      "b": "DE",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "INDUSTRIAL"
+    },
+    {
+      "a": "DE",
+      "b": "HON",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "INDUSTRIAL"
+    },
+    {
+      "a": "HON",
+      "b": "DE",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "INDUSTRIAL"
+    },
+    {
+      "a": "DE",
+      "b": "UPS",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "INDUSTRIAL"
+    },
+    {
+      "a": "UPS",
+      "b": "DE",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "INDUSTRIAL"
+    },
+    {
+      "a": "DE",
+      "b": "BA",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "INDUSTRIAL"
+    },
+    {
+      "a": "BA",
+      "b": "DE",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "INDUSTRIAL"
+    },
+    {
+      "a": "DE",
+      "b": "LMT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "INDUSTRIAL"
+    },
+    {
+      "a": "LMT",
+      "b": "DE",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "INDUSTRIAL"
+    },
+    {
+      "a": "DE",
+      "b": "RTX",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "INDUSTRIAL"
+    },
+    {
+      "a": "RTX",
+      "b": "DE",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "INDUSTRIAL"
+    },
+    {
+      "a": "DE",
+      "b": "NOC",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "INDUSTRIAL"
+    },
+    {
+      "a": "NOC",
+      "b": "DE",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "INDUSTRIAL"
+    },
+    {
+      "a": "MMM",
+      "b": "GE",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "INDUSTRIAL"
+    },
+    {
+      "a": "GE",
+      "b": "MMM",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "INDUSTRIAL"
+    },
+    {
+      "a": "MMM",
+      "b": "HON",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "INDUSTRIAL"
+    },
+    {
+      "a": "HON",
+      "b": "MMM",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "INDUSTRIAL"
+    },
+    {
+      "a": "MMM",
+      "b": "UPS",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "INDUSTRIAL"
+    },
+    {
+      "a": "UPS",
+      "b": "MMM",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "INDUSTRIAL"
+    },
+    {
+      "a": "MMM",
+      "b": "BA",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "INDUSTRIAL"
+    },
+    {
+      "a": "BA",
+      "b": "MMM",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "INDUSTRIAL"
+    },
+    {
+      "a": "MMM",
+      "b": "LMT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "INDUSTRIAL"
+    },
+    {
+      "a": "LMT",
+      "b": "MMM",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "INDUSTRIAL"
+    },
+    {
+      "a": "MMM",
+      "b": "RTX",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "INDUSTRIAL"
+    },
+    {
+      "a": "RTX",
+      "b": "MMM",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "INDUSTRIAL"
+    },
+    {
+      "a": "MMM",
+      "b": "NOC",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "INDUSTRIAL"
+    },
+    {
+      "a": "NOC",
+      "b": "MMM",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "INDUSTRIAL"
+    },
+    {
+      "a": "GE",
+      "b": "HON",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "INDUSTRIAL"
+    },
+    {
+      "a": "HON",
+      "b": "GE",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "INDUSTRIAL"
+    },
+    {
+      "a": "GE",
+      "b": "UPS",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "INDUSTRIAL"
+    },
+    {
+      "a": "UPS",
+      "b": "GE",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "INDUSTRIAL"
+    },
+    {
+      "a": "GE",
+      "b": "BA",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "INDUSTRIAL"
+    },
+    {
+      "a": "BA",
+      "b": "GE",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "INDUSTRIAL"
+    },
+    {
+      "a": "GE",
+      "b": "LMT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "INDUSTRIAL"
+    },
+    {
+      "a": "LMT",
+      "b": "GE",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "INDUSTRIAL"
+    },
+    {
+      "a": "GE",
+      "b": "RTX",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "INDUSTRIAL"
+    },
+    {
+      "a": "RTX",
+      "b": "GE",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "INDUSTRIAL"
+    },
+    {
+      "a": "GE",
+      "b": "NOC",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "INDUSTRIAL"
+    },
+    {
+      "a": "NOC",
+      "b": "GE",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "INDUSTRIAL"
+    },
+    {
+      "a": "HON",
+      "b": "UPS",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "INDUSTRIAL"
+    },
+    {
+      "a": "UPS",
+      "b": "HON",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "INDUSTRIAL"
+    },
+    {
+      "a": "HON",
+      "b": "BA",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "INDUSTRIAL"
+    },
+    {
+      "a": "BA",
+      "b": "HON",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "INDUSTRIAL"
+    },
+    {
+      "a": "HON",
+      "b": "LMT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "INDUSTRIAL"
+    },
+    {
+      "a": "LMT",
+      "b": "HON",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "INDUSTRIAL"
+    },
+    {
+      "a": "HON",
+      "b": "RTX",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "INDUSTRIAL"
+    },
+    {
+      "a": "RTX",
+      "b": "HON",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "INDUSTRIAL"
+    },
+    {
+      "a": "HON",
+      "b": "NOC",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "INDUSTRIAL"
+    },
+    {
+      "a": "NOC",
+      "b": "HON",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "INDUSTRIAL"
+    },
+    {
+      "a": "UPS",
+      "b": "BA",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "INDUSTRIAL"
+    },
+    {
+      "a": "BA",
+      "b": "UPS",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "INDUSTRIAL"
+    },
+    {
+      "a": "UPS",
+      "b": "LMT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "INDUSTRIAL"
+    },
+    {
+      "a": "LMT",
+      "b": "UPS",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "INDUSTRIAL"
+    },
+    {
+      "a": "UPS",
+      "b": "RTX",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "INDUSTRIAL"
+    },
+    {
+      "a": "RTX",
+      "b": "UPS",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "INDUSTRIAL"
+    },
+    {
+      "a": "UPS",
+      "b": "NOC",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "INDUSTRIAL"
+    },
+    {
+      "a": "NOC",
+      "b": "UPS",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "INDUSTRIAL"
+    },
+    {
+      "a": "BA",
+      "b": "LMT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "INDUSTRIAL"
+    },
+    {
+      "a": "LMT",
+      "b": "BA",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "INDUSTRIAL"
+    },
+    {
+      "a": "BA",
+      "b": "RTX",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "INDUSTRIAL"
+    },
+    {
+      "a": "RTX",
+      "b": "BA",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "INDUSTRIAL"
+    },
+    {
+      "a": "BA",
+      "b": "NOC",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "INDUSTRIAL"
+    },
+    {
+      "a": "NOC",
+      "b": "BA",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "INDUSTRIAL"
+    },
+    {
+      "a": "LMT",
+      "b": "RTX",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "INDUSTRIAL"
+    },
+    {
+      "a": "RTX",
+      "b": "LMT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "INDUSTRIAL"
+    },
+    {
+      "a": "LMT",
+      "b": "NOC",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "INDUSTRIAL"
+    },
+    {
+      "a": "NOC",
+      "b": "LMT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "INDUSTRIAL"
+    },
+    {
+      "a": "RTX",
+      "b": "NOC",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "INDUSTRIAL"
+    },
+    {
+      "a": "NOC",
+      "b": "RTX",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "INDUSTRIAL"
+    },
+    {
+      "a": "BTC",
+      "b": "ETH",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CRYPTO/DIGITAL"
+    },
+    {
+      "a": "ETH",
+      "b": "BTC",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CRYPTO/DIGITAL"
+    },
+    {
+      "a": "BTC",
+      "b": "MSTR",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CRYPTO/DIGITAL"
+    },
+    {
+      "a": "MSTR",
+      "b": "BTC",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CRYPTO/DIGITAL"
+    },
+    {
+      "a": "BTC",
+      "b": "COIN",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CRYPTO/DIGITAL"
+    },
+    {
+      "a": "COIN",
+      "b": "BTC",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CRYPTO/DIGITAL"
+    },
+    {
+      "a": "BTC",
+      "b": "MARA",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CRYPTO/DIGITAL"
+    },
+    {
+      "a": "MARA",
+      "b": "BTC",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CRYPTO/DIGITAL"
+    },
+    {
+      "a": "BTC",
+      "b": "RIOT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CRYPTO/DIGITAL"
+    },
+    {
+      "a": "RIOT",
+      "b": "BTC",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CRYPTO/DIGITAL"
+    },
+    {
+      "a": "BTC",
+      "b": "SQ",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CRYPTO/DIGITAL"
+    },
+    {
+      "a": "SQ",
+      "b": "BTC",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CRYPTO/DIGITAL"
+    },
+    {
+      "a": "BTC",
+      "b": "PYPL",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CRYPTO/DIGITAL"
+    },
+    {
+      "a": "PYPL",
+      "b": "BTC",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CRYPTO/DIGITAL"
+    },
+    {
+      "a": "BTC",
+      "b": "HOOD",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CRYPTO/DIGITAL"
+    },
+    {
+      "a": "HOOD",
+      "b": "BTC",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CRYPTO/DIGITAL"
+    },
+    {
+      "a": "BTC",
+      "b": "BKKT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CRYPTO/DIGITAL"
+    },
+    {
+      "a": "BKKT",
+      "b": "BTC",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CRYPTO/DIGITAL"
+    },
+    {
+      "a": "ETH",
+      "b": "MSTR",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CRYPTO/DIGITAL"
+    },
+    {
+      "a": "MSTR",
+      "b": "ETH",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CRYPTO/DIGITAL"
+    },
+    {
+      "a": "ETH",
+      "b": "COIN",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CRYPTO/DIGITAL"
+    },
+    {
+      "a": "COIN",
+      "b": "ETH",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CRYPTO/DIGITAL"
+    },
+    {
+      "a": "ETH",
+      "b": "MARA",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CRYPTO/DIGITAL"
+    },
+    {
+      "a": "MARA",
+      "b": "ETH",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CRYPTO/DIGITAL"
+    },
+    {
+      "a": "ETH",
+      "b": "RIOT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CRYPTO/DIGITAL"
+    },
+    {
+      "a": "RIOT",
+      "b": "ETH",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CRYPTO/DIGITAL"
+    },
+    {
+      "a": "ETH",
+      "b": "SQ",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CRYPTO/DIGITAL"
+    },
+    {
+      "a": "SQ",
+      "b": "ETH",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CRYPTO/DIGITAL"
+    },
+    {
+      "a": "ETH",
+      "b": "PYPL",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CRYPTO/DIGITAL"
+    },
+    {
+      "a": "PYPL",
+      "b": "ETH",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CRYPTO/DIGITAL"
+    },
+    {
+      "a": "ETH",
+      "b": "HOOD",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CRYPTO/DIGITAL"
+    },
+    {
+      "a": "HOOD",
+      "b": "ETH",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CRYPTO/DIGITAL"
+    },
+    {
+      "a": "ETH",
+      "b": "BKKT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CRYPTO/DIGITAL"
+    },
+    {
+      "a": "BKKT",
+      "b": "ETH",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CRYPTO/DIGITAL"
+    },
+    {
+      "a": "MSTR",
+      "b": "COIN",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CRYPTO/DIGITAL"
+    },
+    {
+      "a": "COIN",
+      "b": "MSTR",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CRYPTO/DIGITAL"
+    },
+    {
+      "a": "MSTR",
+      "b": "MARA",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CRYPTO/DIGITAL"
+    },
+    {
+      "a": "MARA",
+      "b": "MSTR",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CRYPTO/DIGITAL"
+    },
+    {
+      "a": "MSTR",
+      "b": "RIOT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CRYPTO/DIGITAL"
+    },
+    {
+      "a": "RIOT",
+      "b": "MSTR",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CRYPTO/DIGITAL"
+    },
+    {
+      "a": "MSTR",
+      "b": "SQ",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CRYPTO/DIGITAL"
+    },
+    {
+      "a": "SQ",
+      "b": "MSTR",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CRYPTO/DIGITAL"
+    },
+    {
+      "a": "MSTR",
+      "b": "PYPL",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CRYPTO/DIGITAL"
+    },
+    {
+      "a": "PYPL",
+      "b": "MSTR",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CRYPTO/DIGITAL"
+    },
+    {
+      "a": "MSTR",
+      "b": "HOOD",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CRYPTO/DIGITAL"
+    },
+    {
+      "a": "HOOD",
+      "b": "MSTR",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CRYPTO/DIGITAL"
+    },
+    {
+      "a": "MSTR",
+      "b": "BKKT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CRYPTO/DIGITAL"
+    },
+    {
+      "a": "BKKT",
+      "b": "MSTR",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CRYPTO/DIGITAL"
+    },
+    {
+      "a": "COIN",
+      "b": "MARA",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CRYPTO/DIGITAL"
+    },
+    {
+      "a": "MARA",
+      "b": "COIN",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CRYPTO/DIGITAL"
+    },
+    {
+      "a": "COIN",
+      "b": "RIOT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CRYPTO/DIGITAL"
+    },
+    {
+      "a": "RIOT",
+      "b": "COIN",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CRYPTO/DIGITAL"
+    },
+    {
+      "a": "COIN",
+      "b": "SQ",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CRYPTO/DIGITAL"
+    },
+    {
+      "a": "SQ",
+      "b": "COIN",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CRYPTO/DIGITAL"
+    },
+    {
+      "a": "COIN",
+      "b": "PYPL",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CRYPTO/DIGITAL"
+    },
+    {
+      "a": "PYPL",
+      "b": "COIN",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CRYPTO/DIGITAL"
+    },
+    {
+      "a": "COIN",
+      "b": "HOOD",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CRYPTO/DIGITAL"
+    },
+    {
+      "a": "HOOD",
+      "b": "COIN",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CRYPTO/DIGITAL"
+    },
+    {
+      "a": "COIN",
+      "b": "BKKT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CRYPTO/DIGITAL"
+    },
+    {
+      "a": "BKKT",
+      "b": "COIN",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CRYPTO/DIGITAL"
+    },
+    {
+      "a": "MARA",
+      "b": "RIOT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CRYPTO/DIGITAL"
+    },
+    {
+      "a": "RIOT",
+      "b": "MARA",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CRYPTO/DIGITAL"
+    },
+    {
+      "a": "MARA",
+      "b": "SQ",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CRYPTO/DIGITAL"
+    },
+    {
+      "a": "SQ",
+      "b": "MARA",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CRYPTO/DIGITAL"
+    },
+    {
+      "a": "MARA",
+      "b": "PYPL",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CRYPTO/DIGITAL"
+    },
+    {
+      "a": "PYPL",
+      "b": "MARA",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CRYPTO/DIGITAL"
+    },
+    {
+      "a": "MARA",
+      "b": "HOOD",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CRYPTO/DIGITAL"
+    },
+    {
+      "a": "HOOD",
+      "b": "MARA",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CRYPTO/DIGITAL"
+    },
+    {
+      "a": "MARA",
+      "b": "BKKT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CRYPTO/DIGITAL"
+    },
+    {
+      "a": "BKKT",
+      "b": "MARA",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CRYPTO/DIGITAL"
+    },
+    {
+      "a": "RIOT",
+      "b": "SQ",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CRYPTO/DIGITAL"
+    },
+    {
+      "a": "SQ",
+      "b": "RIOT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CRYPTO/DIGITAL"
+    },
+    {
+      "a": "RIOT",
+      "b": "PYPL",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CRYPTO/DIGITAL"
+    },
+    {
+      "a": "PYPL",
+      "b": "RIOT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CRYPTO/DIGITAL"
+    },
+    {
+      "a": "RIOT",
+      "b": "HOOD",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CRYPTO/DIGITAL"
+    },
+    {
+      "a": "HOOD",
+      "b": "RIOT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CRYPTO/DIGITAL"
+    },
+    {
+      "a": "RIOT",
+      "b": "BKKT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CRYPTO/DIGITAL"
+    },
+    {
+      "a": "BKKT",
+      "b": "RIOT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CRYPTO/DIGITAL"
+    },
+    {
+      "a": "SQ",
+      "b": "PYPL",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CRYPTO/DIGITAL"
+    },
+    {
+      "a": "PYPL",
+      "b": "SQ",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CRYPTO/DIGITAL"
+    },
+    {
+      "a": "SQ",
+      "b": "HOOD",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CRYPTO/DIGITAL"
+    },
+    {
+      "a": "HOOD",
+      "b": "SQ",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CRYPTO/DIGITAL"
+    },
+    {
+      "a": "SQ",
+      "b": "BKKT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CRYPTO/DIGITAL"
+    },
+    {
+      "a": "BKKT",
+      "b": "SQ",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CRYPTO/DIGITAL"
+    },
+    {
+      "a": "PYPL",
+      "b": "HOOD",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CRYPTO/DIGITAL"
+    },
+    {
+      "a": "HOOD",
+      "b": "PYPL",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CRYPTO/DIGITAL"
+    },
+    {
+      "a": "PYPL",
+      "b": "BKKT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CRYPTO/DIGITAL"
+    },
+    {
+      "a": "BKKT",
+      "b": "PYPL",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CRYPTO/DIGITAL"
+    },
+    {
+      "a": "HOOD",
+      "b": "BKKT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CRYPTO/DIGITAL"
+    },
+    {
+      "a": "BKKT",
+      "b": "HOOD",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "CRYPTO/DIGITAL"
+    },
+    {
+      "a": "GOLD",
+      "b": "SLV",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "COMMODITIES"
+    },
+    {
+      "a": "SLV",
+      "b": "GOLD",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "COMMODITIES"
+    },
+    {
+      "a": "GOLD",
+      "b": "COPPER",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "COMMODITIES"
+    },
+    {
+      "a": "COPPER",
+      "b": "GOLD",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "COMMODITIES"
+    },
+    {
+      "a": "GOLD",
+      "b": "PLAT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "COMMODITIES"
+    },
+    {
+      "a": "PLAT",
+      "b": "GOLD",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "COMMODITIES"
+    },
+    {
+      "a": "GOLD",
+      "b": "PALL",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "COMMODITIES"
+    },
+    {
+      "a": "PALL",
+      "b": "GOLD",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "COMMODITIES"
+    },
+    {
+      "a": "GOLD",
+      "b": "DBA",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "COMMODITIES"
+    },
+    {
+      "a": "DBA",
+      "b": "GOLD",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "COMMODITIES"
+    },
+    {
+      "a": "GOLD",
+      "b": "USO",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "COMMODITIES"
+    },
+    {
+      "a": "USO",
+      "b": "GOLD",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "COMMODITIES"
+    },
+    {
+      "a": "GOLD",
+      "b": "UNG",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "COMMODITIES"
+    },
+    {
+      "a": "UNG",
+      "b": "GOLD",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "COMMODITIES"
+    },
+    {
+      "a": "GOLD",
+      "b": "WEAT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "COMMODITIES"
+    },
+    {
+      "a": "WEAT",
+      "b": "GOLD",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "COMMODITIES"
+    },
+    {
+      "a": "GOLD",
+      "b": "DBB",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "COMMODITIES"
+    },
+    {
+      "a": "DBB",
+      "b": "GOLD",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "COMMODITIES"
+    },
+    {
+      "a": "SLV",
+      "b": "COPPER",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "COMMODITIES"
+    },
+    {
+      "a": "COPPER",
+      "b": "SLV",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "COMMODITIES"
+    },
+    {
+      "a": "SLV",
+      "b": "PLAT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "COMMODITIES"
+    },
+    {
+      "a": "PLAT",
+      "b": "SLV",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "COMMODITIES"
+    },
+    {
+      "a": "SLV",
+      "b": "PALL",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "COMMODITIES"
+    },
+    {
+      "a": "PALL",
+      "b": "SLV",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "COMMODITIES"
+    },
+    {
+      "a": "SLV",
+      "b": "DBA",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "COMMODITIES"
+    },
+    {
+      "a": "DBA",
+      "b": "SLV",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "COMMODITIES"
+    },
+    {
+      "a": "SLV",
+      "b": "USO",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "COMMODITIES"
+    },
+    {
+      "a": "USO",
+      "b": "SLV",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "COMMODITIES"
+    },
+    {
+      "a": "SLV",
+      "b": "UNG",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "COMMODITIES"
+    },
+    {
+      "a": "UNG",
+      "b": "SLV",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "COMMODITIES"
+    },
+    {
+      "a": "SLV",
+      "b": "WEAT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "COMMODITIES"
+    },
+    {
+      "a": "WEAT",
+      "b": "SLV",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "COMMODITIES"
+    },
+    {
+      "a": "SLV",
+      "b": "DBB",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "COMMODITIES"
+    },
+    {
+      "a": "DBB",
+      "b": "SLV",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "COMMODITIES"
+    },
+    {
+      "a": "COPPER",
+      "b": "PLAT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "COMMODITIES"
+    },
+    {
+      "a": "PLAT",
+      "b": "COPPER",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "COMMODITIES"
+    },
+    {
+      "a": "COPPER",
+      "b": "PALL",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "COMMODITIES"
+    },
+    {
+      "a": "PALL",
+      "b": "COPPER",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "COMMODITIES"
+    },
+    {
+      "a": "COPPER",
+      "b": "DBA",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "COMMODITIES"
+    },
+    {
+      "a": "DBA",
+      "b": "COPPER",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "COMMODITIES"
+    },
+    {
+      "a": "COPPER",
+      "b": "USO",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "COMMODITIES"
+    },
+    {
+      "a": "USO",
+      "b": "COPPER",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "COMMODITIES"
+    },
+    {
+      "a": "COPPER",
+      "b": "UNG",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "COMMODITIES"
+    },
+    {
+      "a": "UNG",
+      "b": "COPPER",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "COMMODITIES"
+    },
+    {
+      "a": "COPPER",
+      "b": "WEAT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "COMMODITIES"
+    },
+    {
+      "a": "WEAT",
+      "b": "COPPER",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "COMMODITIES"
+    },
+    {
+      "a": "COPPER",
+      "b": "DBB",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "COMMODITIES"
+    },
+    {
+      "a": "DBB",
+      "b": "COPPER",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "COMMODITIES"
+    },
+    {
+      "a": "PLAT",
+      "b": "PALL",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "COMMODITIES"
+    },
+    {
+      "a": "PALL",
+      "b": "PLAT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "COMMODITIES"
+    },
+    {
+      "a": "PLAT",
+      "b": "DBA",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "COMMODITIES"
+    },
+    {
+      "a": "DBA",
+      "b": "PLAT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "COMMODITIES"
+    },
+    {
+      "a": "PLAT",
+      "b": "USO",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "COMMODITIES"
+    },
+    {
+      "a": "USO",
+      "b": "PLAT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "COMMODITIES"
+    },
+    {
+      "a": "PLAT",
+      "b": "UNG",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "COMMODITIES"
+    },
+    {
+      "a": "UNG",
+      "b": "PLAT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "COMMODITIES"
+    },
+    {
+      "a": "PLAT",
+      "b": "WEAT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "COMMODITIES"
+    },
+    {
+      "a": "WEAT",
+      "b": "PLAT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "COMMODITIES"
+    },
+    {
+      "a": "PLAT",
+      "b": "DBB",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "COMMODITIES"
+    },
+    {
+      "a": "DBB",
+      "b": "PLAT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "COMMODITIES"
+    },
+    {
+      "a": "PALL",
+      "b": "DBA",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "COMMODITIES"
+    },
+    {
+      "a": "DBA",
+      "b": "PALL",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "COMMODITIES"
+    },
+    {
+      "a": "PALL",
+      "b": "USO",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "COMMODITIES"
+    },
+    {
+      "a": "USO",
+      "b": "PALL",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "COMMODITIES"
+    },
+    {
+      "a": "PALL",
+      "b": "UNG",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "COMMODITIES"
+    },
+    {
+      "a": "UNG",
+      "b": "PALL",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "COMMODITIES"
+    },
+    {
+      "a": "PALL",
+      "b": "WEAT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "COMMODITIES"
+    },
+    {
+      "a": "WEAT",
+      "b": "PALL",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "COMMODITIES"
+    },
+    {
+      "a": "PALL",
+      "b": "DBB",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "COMMODITIES"
+    },
+    {
+      "a": "DBB",
+      "b": "PALL",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "COMMODITIES"
+    },
+    {
+      "a": "DBA",
+      "b": "USO",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "COMMODITIES"
+    },
+    {
+      "a": "USO",
+      "b": "DBA",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "COMMODITIES"
+    },
+    {
+      "a": "DBA",
+      "b": "UNG",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "COMMODITIES"
+    },
+    {
+      "a": "UNG",
+      "b": "DBA",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "COMMODITIES"
+    },
+    {
+      "a": "DBA",
+      "b": "WEAT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "COMMODITIES"
+    },
+    {
+      "a": "WEAT",
+      "b": "DBA",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "COMMODITIES"
+    },
+    {
+      "a": "DBA",
+      "b": "DBB",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "COMMODITIES"
+    },
+    {
+      "a": "DBB",
+      "b": "DBA",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "COMMODITIES"
+    },
+    {
+      "a": "USO",
+      "b": "UNG",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "COMMODITIES"
+    },
+    {
+      "a": "UNG",
+      "b": "USO",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "COMMODITIES"
+    },
+    {
+      "a": "USO",
+      "b": "WEAT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "COMMODITIES"
+    },
+    {
+      "a": "WEAT",
+      "b": "USO",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "COMMODITIES"
+    },
+    {
+      "a": "USO",
+      "b": "DBB",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "COMMODITIES"
+    },
+    {
+      "a": "DBB",
+      "b": "USO",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "COMMODITIES"
+    },
+    {
+      "a": "UNG",
+      "b": "WEAT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "COMMODITIES"
+    },
+    {
+      "a": "WEAT",
+      "b": "UNG",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "COMMODITIES"
+    },
+    {
+      "a": "UNG",
+      "b": "DBB",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "COMMODITIES"
+    },
+    {
+      "a": "DBB",
+      "b": "UNG",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "COMMODITIES"
+    },
+    {
+      "a": "WEAT",
+      "b": "DBB",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "COMMODITIES"
+    },
+    {
+      "a": "DBB",
+      "b": "WEAT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "COMMODITIES"
+    },
+    {
+      "a": "SPG",
+      "b": "AMT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "REAL ESTATE"
+    },
+    {
+      "a": "AMT",
+      "b": "SPG",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "REAL ESTATE"
+    },
+    {
+      "a": "SPG",
+      "b": "PLD",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "REAL ESTATE"
+    },
+    {
+      "a": "PLD",
+      "b": "SPG",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "REAL ESTATE"
+    },
+    {
+      "a": "SPG",
+      "b": "CCI",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "REAL ESTATE"
+    },
+    {
+      "a": "CCI",
+      "b": "SPG",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "REAL ESTATE"
+    },
+    {
+      "a": "SPG",
+      "b": "EQIX",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "REAL ESTATE"
+    },
+    {
+      "a": "EQIX",
+      "b": "SPG",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "REAL ESTATE"
+    },
+    {
+      "a": "SPG",
+      "b": "PRO",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "REAL ESTATE"
+    },
+    {
+      "a": "PRO",
+      "b": "SPG",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "REAL ESTATE"
+    },
+    {
+      "a": "SPG",
+      "b": "DLR",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "REAL ESTATE"
+    },
+    {
+      "a": "DLR",
+      "b": "SPG",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "REAL ESTATE"
+    },
+    {
+      "a": "SPG",
+      "b": "EXR",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "REAL ESTATE"
+    },
+    {
+      "a": "EXR",
+      "b": "SPG",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "REAL ESTATE"
+    },
+    {
+      "a": "SPG",
+      "b": "MAA",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "REAL ESTATE"
+    },
+    {
+      "a": "MAA",
+      "b": "SPG",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "REAL ESTATE"
+    },
+    {
+      "a": "SPG",
+      "b": "AVB",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "REAL ESTATE"
+    },
+    {
+      "a": "AVB",
+      "b": "SPG",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "REAL ESTATE"
+    },
+    {
+      "a": "AMT",
+      "b": "PLD",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "REAL ESTATE"
+    },
+    {
+      "a": "PLD",
+      "b": "AMT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "REAL ESTATE"
+    },
+    {
+      "a": "AMT",
+      "b": "CCI",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "REAL ESTATE"
+    },
+    {
+      "a": "CCI",
+      "b": "AMT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "REAL ESTATE"
+    },
+    {
+      "a": "AMT",
+      "b": "EQIX",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "REAL ESTATE"
+    },
+    {
+      "a": "EQIX",
+      "b": "AMT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "REAL ESTATE"
+    },
+    {
+      "a": "AMT",
+      "b": "PRO",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "REAL ESTATE"
+    },
+    {
+      "a": "PRO",
+      "b": "AMT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "REAL ESTATE"
+    },
+    {
+      "a": "AMT",
+      "b": "DLR",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "REAL ESTATE"
+    },
+    {
+      "a": "DLR",
+      "b": "AMT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "REAL ESTATE"
+    },
+    {
+      "a": "AMT",
+      "b": "EXR",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "REAL ESTATE"
+    },
+    {
+      "a": "EXR",
+      "b": "AMT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "REAL ESTATE"
+    },
+    {
+      "a": "AMT",
+      "b": "MAA",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "REAL ESTATE"
+    },
+    {
+      "a": "MAA",
+      "b": "AMT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "REAL ESTATE"
+    },
+    {
+      "a": "AMT",
+      "b": "AVB",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "REAL ESTATE"
+    },
+    {
+      "a": "AVB",
+      "b": "AMT",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "REAL ESTATE"
+    },
+    {
+      "a": "PLD",
+      "b": "CCI",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "REAL ESTATE"
+    },
+    {
+      "a": "CCI",
+      "b": "PLD",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "REAL ESTATE"
+    },
+    {
+      "a": "PLD",
+      "b": "EQIX",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "REAL ESTATE"
+    },
+    {
+      "a": "EQIX",
+      "b": "PLD",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "REAL ESTATE"
+    },
+    {
+      "a": "PLD",
+      "b": "PRO",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "REAL ESTATE"
+    },
+    {
+      "a": "PRO",
+      "b": "PLD",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "REAL ESTATE"
+    },
+    {
+      "a": "PLD",
+      "b": "DLR",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "REAL ESTATE"
+    },
+    {
+      "a": "DLR",
+      "b": "PLD",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "REAL ESTATE"
+    },
+    {
+      "a": "PLD",
+      "b": "EXR",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "REAL ESTATE"
+    },
+    {
+      "a": "EXR",
+      "b": "PLD",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "REAL ESTATE"
+    },
+    {
+      "a": "PLD",
+      "b": "MAA",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "REAL ESTATE"
+    },
+    {
+      "a": "MAA",
+      "b": "PLD",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "REAL ESTATE"
+    },
+    {
+      "a": "PLD",
+      "b": "AVB",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "REAL ESTATE"
+    },
+    {
+      "a": "AVB",
+      "b": "PLD",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "REAL ESTATE"
+    },
+    {
+      "a": "CCI",
+      "b": "EQIX",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "REAL ESTATE"
+    },
+    {
+      "a": "EQIX",
+      "b": "CCI",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "REAL ESTATE"
+    },
+    {
+      "a": "CCI",
+      "b": "PRO",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "REAL ESTATE"
+    },
+    {
+      "a": "PRO",
+      "b": "CCI",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "REAL ESTATE"
+    },
+    {
+      "a": "CCI",
+      "b": "DLR",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "REAL ESTATE"
+    },
+    {
+      "a": "DLR",
+      "b": "CCI",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "REAL ESTATE"
+    },
+    {
+      "a": "CCI",
+      "b": "EXR",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "REAL ESTATE"
+    },
+    {
+      "a": "EXR",
+      "b": "CCI",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "REAL ESTATE"
+    },
+    {
+      "a": "CCI",
+      "b": "MAA",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "REAL ESTATE"
+    },
+    {
+      "a": "MAA",
+      "b": "CCI",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "REAL ESTATE"
+    },
+    {
+      "a": "CCI",
+      "b": "AVB",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "REAL ESTATE"
+    },
+    {
+      "a": "AVB",
+      "b": "CCI",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "REAL ESTATE"
+    },
+    {
+      "a": "EQIX",
+      "b": "PRO",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "REAL ESTATE"
+    },
+    {
+      "a": "PRO",
+      "b": "EQIX",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "REAL ESTATE"
+    },
+    {
+      "a": "EQIX",
+      "b": "DLR",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "REAL ESTATE"
+    },
+    {
+      "a": "DLR",
+      "b": "EQIX",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "REAL ESTATE"
+    },
+    {
+      "a": "EQIX",
+      "b": "EXR",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "REAL ESTATE"
+    },
+    {
+      "a": "EXR",
+      "b": "EQIX",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "REAL ESTATE"
+    },
+    {
+      "a": "EQIX",
+      "b": "MAA",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "REAL ESTATE"
+    },
+    {
+      "a": "MAA",
+      "b": "EQIX",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "REAL ESTATE"
+    },
+    {
+      "a": "EQIX",
+      "b": "AVB",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "REAL ESTATE"
+    },
+    {
+      "a": "AVB",
+      "b": "EQIX",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "REAL ESTATE"
+    },
+    {
+      "a": "PRO",
+      "b": "DLR",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "REAL ESTATE"
+    },
+    {
+      "a": "DLR",
+      "b": "PRO",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "REAL ESTATE"
+    },
+    {
+      "a": "PRO",
+      "b": "EXR",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "REAL ESTATE"
+    },
+    {
+      "a": "EXR",
+      "b": "PRO",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "REAL ESTATE"
+    },
+    {
+      "a": "PRO",
+      "b": "MAA",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "REAL ESTATE"
+    },
+    {
+      "a": "MAA",
+      "b": "PRO",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "REAL ESTATE"
+    },
+    {
+      "a": "PRO",
+      "b": "AVB",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "REAL ESTATE"
+    },
+    {
+      "a": "AVB",
+      "b": "PRO",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "REAL ESTATE"
+    },
+    {
+      "a": "DLR",
+      "b": "EXR",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "REAL ESTATE"
+    },
+    {
+      "a": "EXR",
+      "b": "DLR",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "REAL ESTATE"
+    },
+    {
+      "a": "DLR",
+      "b": "MAA",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "REAL ESTATE"
+    },
+    {
+      "a": "MAA",
+      "b": "DLR",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "REAL ESTATE"
+    },
+    {
+      "a": "DLR",
+      "b": "AVB",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "REAL ESTATE"
+    },
+    {
+      "a": "AVB",
+      "b": "DLR",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "REAL ESTATE"
+    },
+    {
+      "a": "EXR",
+      "b": "MAA",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "REAL ESTATE"
+    },
+    {
+      "a": "MAA",
+      "b": "EXR",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "REAL ESTATE"
+    },
+    {
+      "a": "EXR",
+      "b": "AVB",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "REAL ESTATE"
+    },
+    {
+      "a": "AVB",
+      "b": "EXR",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "REAL ESTATE"
+    },
+    {
+      "a": "MAA",
+      "b": "AVB",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "REAL ESTATE"
+    },
+    {
+      "a": "AVB",
+      "b": "MAA",
+      "relationship": "direct_competitor",
+      "confidence": 0.7,
+      "sector": "REAL ESTATE"
+    },
+    {
+      "a": "NVDA",
+      "b": "AMD",
+      "relationship": "thematic_substitute",
+      "confidence": 0.65,
+      "sector": "AI_CHIPS"
+    },
+    {
+      "a": "AMD",
+      "b": "NVDA",
+      "relationship": "thematic_substitute",
+      "confidence": 0.65,
+      "sector": "AI_CHIPS"
+    },
+    {
+      "a": "NVDA",
+      "b": "AVGO",
+      "relationship": "thematic_substitute",
+      "confidence": 0.65,
+      "sector": "AI_CHIPS"
+    },
+    {
+      "a": "AVGO",
+      "b": "NVDA",
+      "relationship": "thematic_substitute",
+      "confidence": 0.65,
+      "sector": "AI_CHIPS"
+    },
+    {
+      "a": "NVDA",
+      "b": "TSM",
+      "relationship": "thematic_substitute",
+      "confidence": 0.65,
+      "sector": "AI_CHIPS"
+    },
+    {
+      "a": "TSM",
+      "b": "NVDA",
+      "relationship": "thematic_substitute",
+      "confidence": 0.65,
+      "sector": "AI_CHIPS"
+    },
+    {
+      "a": "NVDA",
+      "b": "ASML",
+      "relationship": "thematic_substitute",
+      "confidence": 0.65,
+      "sector": "AI_CHIPS"
+    },
+    {
+      "a": "ASML",
+      "b": "NVDA",
+      "relationship": "thematic_substitute",
+      "confidence": 0.65,
+      "sector": "AI_CHIPS"
+    },
+    {
+      "a": "AMD",
+      "b": "AVGO",
+      "relationship": "thematic_substitute",
+      "confidence": 0.65,
+      "sector": "AI_CHIPS"
+    },
+    {
+      "a": "AVGO",
+      "b": "AMD",
+      "relationship": "thematic_substitute",
+      "confidence": 0.65,
+      "sector": "AI_CHIPS"
+    },
+    {
+      "a": "AMD",
+      "b": "TSM",
+      "relationship": "thematic_substitute",
+      "confidence": 0.65,
+      "sector": "AI_CHIPS"
+    },
+    {
+      "a": "TSM",
+      "b": "AMD",
+      "relationship": "thematic_substitute",
+      "confidence": 0.65,
+      "sector": "AI_CHIPS"
+    },
+    {
+      "a": "AMD",
+      "b": "ASML",
+      "relationship": "thematic_substitute",
+      "confidence": 0.65,
+      "sector": "AI_CHIPS"
+    },
+    {
+      "a": "ASML",
+      "b": "AMD",
+      "relationship": "thematic_substitute",
+      "confidence": 0.65,
+      "sector": "AI_CHIPS"
+    },
+    {
+      "a": "AVGO",
+      "b": "TSM",
+      "relationship": "thematic_substitute",
+      "confidence": 0.65,
+      "sector": "AI_CHIPS"
+    },
+    {
+      "a": "TSM",
+      "b": "AVGO",
+      "relationship": "thematic_substitute",
+      "confidence": 0.65,
+      "sector": "AI_CHIPS"
+    },
+    {
+      "a": "AVGO",
+      "b": "ASML",
+      "relationship": "thematic_substitute",
+      "confidence": 0.65,
+      "sector": "AI_CHIPS"
+    },
+    {
+      "a": "ASML",
+      "b": "AVGO",
+      "relationship": "thematic_substitute",
+      "confidence": 0.65,
+      "sector": "AI_CHIPS"
+    },
+    {
+      "a": "TSM",
+      "b": "ASML",
+      "relationship": "thematic_substitute",
+      "confidence": 0.65,
+      "sector": "AI_CHIPS"
+    },
+    {
+      "a": "ASML",
+      "b": "TSM",
+      "relationship": "thematic_substitute",
+      "confidence": 0.65,
+      "sector": "AI_CHIPS"
+    },
+    {
+      "a": "TSLA",
+      "b": "RIVN",
+      "relationship": "thematic_substitute",
+      "confidence": 0.65,
+      "sector": "EV"
+    },
+    {
+      "a": "RIVN",
+      "b": "TSLA",
+      "relationship": "thematic_substitute",
+      "confidence": 0.65,
+      "sector": "EV"
+    },
+    {
+      "a": "TSLA",
+      "b": "LCID",
+      "relationship": "thematic_substitute",
+      "confidence": 0.65,
+      "sector": "EV"
+    },
+    {
+      "a": "LCID",
+      "b": "TSLA",
+      "relationship": "thematic_substitute",
+      "confidence": 0.65,
+      "sector": "EV"
+    },
+    {
+      "a": "TSLA",
+      "b": "GM",
+      "relationship": "thematic_substitute",
+      "confidence": 0.65,
+      "sector": "EV"
+    },
+    {
+      "a": "GM",
+      "b": "TSLA",
+      "relationship": "thematic_substitute",
+      "confidence": 0.65,
+      "sector": "EV"
+    },
+    {
+      "a": "TSLA",
+      "b": "F",
+      "relationship": "thematic_substitute",
+      "confidence": 0.65,
+      "sector": "EV"
+    },
+    {
+      "a": "F",
+      "b": "TSLA",
+      "relationship": "thematic_substitute",
+      "confidence": 0.65,
+      "sector": "EV"
+    },
+    {
+      "a": "RIVN",
+      "b": "LCID",
+      "relationship": "thematic_substitute",
+      "confidence": 0.65,
+      "sector": "EV"
+    },
+    {
+      "a": "LCID",
+      "b": "RIVN",
+      "relationship": "thematic_substitute",
+      "confidence": 0.65,
+      "sector": "EV"
+    },
+    {
+      "a": "RIVN",
+      "b": "GM",
+      "relationship": "thematic_substitute",
+      "confidence": 0.65,
+      "sector": "EV"
+    },
+    {
+      "a": "GM",
+      "b": "RIVN",
+      "relationship": "thematic_substitute",
+      "confidence": 0.65,
+      "sector": "EV"
+    },
+    {
+      "a": "RIVN",
+      "b": "F",
+      "relationship": "thematic_substitute",
+      "confidence": 0.65,
+      "sector": "EV"
+    },
+    {
+      "a": "F",
+      "b": "RIVN",
+      "relationship": "thematic_substitute",
+      "confidence": 0.65,
+      "sector": "EV"
+    },
+    {
+      "a": "LCID",
+      "b": "GM",
+      "relationship": "thematic_substitute",
+      "confidence": 0.65,
+      "sector": "EV"
+    },
+    {
+      "a": "GM",
+      "b": "LCID",
+      "relationship": "thematic_substitute",
+      "confidence": 0.65,
+      "sector": "EV"
+    },
+    {
+      "a": "LCID",
+      "b": "F",
+      "relationship": "thematic_substitute",
+      "confidence": 0.65,
+      "sector": "EV"
+    },
+    {
+      "a": "F",
+      "b": "LCID",
+      "relationship": "thematic_substitute",
+      "confidence": 0.65,
+      "sector": "EV"
+    },
+    {
+      "a": "GM",
+      "b": "F",
+      "relationship": "thematic_substitute",
+      "confidence": 0.65,
+      "sector": "EV"
+    },
+    {
+      "a": "F",
+      "b": "GM",
+      "relationship": "thematic_substitute",
+      "confidence": 0.65,
+      "sector": "EV"
+    },
+    {
+      "a": "MSFT",
+      "b": "AMZN",
+      "relationship": "thematic_substitute",
+      "confidence": 0.65,
+      "sector": "CLOUD"
+    },
+    {
+      "a": "AMZN",
+      "b": "MSFT",
+      "relationship": "thematic_substitute",
+      "confidence": 0.65,
+      "sector": "CLOUD"
+    },
+    {
+      "a": "MSFT",
+      "b": "GOOGL",
+      "relationship": "thematic_substitute",
+      "confidence": 0.65,
+      "sector": "CLOUD"
+    },
+    {
+      "a": "GOOGL",
+      "b": "MSFT",
+      "relationship": "thematic_substitute",
+      "confidence": 0.65,
+      "sector": "CLOUD"
+    },
+    {
+      "a": "MSFT",
+      "b": "ORCL",
+      "relationship": "thematic_substitute",
+      "confidence": 0.65,
+      "sector": "CLOUD"
+    },
+    {
+      "a": "ORCL",
+      "b": "MSFT",
+      "relationship": "thematic_substitute",
+      "confidence": 0.65,
+      "sector": "CLOUD"
+    },
+    {
+      "a": "MSFT",
+      "b": "CRM",
+      "relationship": "thematic_substitute",
+      "confidence": 0.65,
+      "sector": "CLOUD"
+    },
+    {
+      "a": "CRM",
+      "b": "MSFT",
+      "relationship": "thematic_substitute",
+      "confidence": 0.65,
+      "sector": "CLOUD"
+    },
+    {
+      "a": "AMZN",
+      "b": "GOOGL",
+      "relationship": "thematic_substitute",
+      "confidence": 0.65,
+      "sector": "CLOUD"
+    },
+    {
+      "a": "GOOGL",
+      "b": "AMZN",
+      "relationship": "thematic_substitute",
+      "confidence": 0.65,
+      "sector": "CLOUD"
+    },
+    {
+      "a": "AMZN",
+      "b": "ORCL",
+      "relationship": "thematic_substitute",
+      "confidence": 0.65,
+      "sector": "CLOUD"
+    },
+    {
+      "a": "ORCL",
+      "b": "AMZN",
+      "relationship": "thematic_substitute",
+      "confidence": 0.65,
+      "sector": "CLOUD"
+    },
+    {
+      "a": "AMZN",
+      "b": "CRM",
+      "relationship": "thematic_substitute",
+      "confidence": 0.65,
+      "sector": "CLOUD"
+    },
+    {
+      "a": "CRM",
+      "b": "AMZN",
+      "relationship": "thematic_substitute",
+      "confidence": 0.65,
+      "sector": "CLOUD"
+    },
+    {
+      "a": "GOOGL",
+      "b": "ORCL",
+      "relationship": "thematic_substitute",
+      "confidence": 0.65,
+      "sector": "CLOUD"
+    },
+    {
+      "a": "ORCL",
+      "b": "GOOGL",
+      "relationship": "thematic_substitute",
+      "confidence": 0.65,
+      "sector": "CLOUD"
+    },
+    {
+      "a": "GOOGL",
+      "b": "CRM",
+      "relationship": "thematic_substitute",
+      "confidence": 0.65,
+      "sector": "CLOUD"
+    },
+    {
+      "a": "CRM",
+      "b": "GOOGL",
+      "relationship": "thematic_substitute",
+      "confidence": 0.65,
+      "sector": "CLOUD"
+    },
+    {
+      "a": "ORCL",
+      "b": "CRM",
+      "relationship": "thematic_substitute",
+      "confidence": 0.65,
+      "sector": "CLOUD"
+    },
+    {
+      "a": "CRM",
+      "b": "ORCL",
+      "relationship": "thematic_substitute",
+      "confidence": 0.65,
+      "sector": "CLOUD"
+    }
+  ],
+  "edge_count": 960
+}

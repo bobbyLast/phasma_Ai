@@ -1,5 +1,5 @@
 {
-  "enabled": false,
+  "enabled": true,
   "scan_interval_minutes": 60,
   "min_impact_score": 7.0,
   "api_keys": {

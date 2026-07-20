@@ -29,6 +29,34 @@ class NewsUtils:
         'SOYBEANS', 'COTTON', 'SUGAR', 'COFFEE', 'COCOA', 'PLATINUM', 'PALLADIUM'
     }
 
+    # Words that look like tickers in headlines but are not tradeable symbols
+    EXTRACTION_STOPWORDS = {
+        'THE', 'AND', 'FOR', 'YOU', 'ARE', 'ALL', 'HAS', 'WAS', 'BUT', 'NOT', 'CAN',
+        'THIS', 'THAT', 'WITH', 'FROM', 'HAVE', 'BEEN', 'WILL', 'MORE', 'WHEN', 'MAKE',
+        'THAN', 'LIKE', 'TIME', 'JUST', 'KNOW', 'YEAR', 'COULD', 'THEM', 'SEE', 'OTHER',
+        'THEN', 'NOW', 'LOOK', 'ONLY', 'COME', 'ITS', 'OVER', 'ALSO', 'BACK', 'AFTER',
+        'USE', 'TWO', 'HOW', 'OUR', 'WORK', 'FIRST', 'WELL', 'WAY', 'EVEN', 'NEW', 'WANT',
+        'BECAUSE', 'ANY', 'THESE', 'GIVE', 'DAY', 'MOST', 'USA', 'CEO', 'CFO', 'COO',
+        'IPO', 'SEC', 'FDA', 'NYSE', 'NASDAQ', 'ETF', 'API', 'NEWS', 'BREAKING', 'UPDATE',
+        'LOW', 'HIGH', 'TOP', 'BIG', 'RED', 'MAY', 'RUN', 'SET', 'GET', 'PUT', 'CALL',
+        'BUY', 'SELL', 'HIT', 'CUT', 'ADD', 'END', 'AGO', 'PER', 'VIA', 'OUT', 'OFF',
+        'UAE', 'GDP', 'CPI', 'FED', 'ECB', 'BOJ', 'IMF', 'WHO', 'UN', 'EU', 'UK', 'US',
+        'AI', 'IT', 'HR', 'PR', 'TV', 'LA', 'NYC', 'OK', 'VS', 'PM', 'AM', 'EST', 'PST',
+        'NBA', 'NHL', 'MLB', 'NFL', 'UFC', 'GTA', 'CFTC', 'MAGA', 'RSS', 'URL', 'PDF',
+        'Q&A', 'B2B', 'B2C', 'R&D', 'ATH', 'ATL', 'YTD', 'QOQ', 'YOY', 'EPS', 'PE',
+        'CEO', 'CFO', 'COO', 'CTO', 'CMO', 'VP', 'LLC', 'INC', 'LTD', 'PLC',
+        'ON', 'ONE', 'AN', 'AT', 'BE', 'BY', 'DO', 'GO', 'IF', 'IN', 'IS', 'ME', 'MY',
+        'NO', 'OF', 'OR', 'SO', 'TO', 'UP', 'WE', 'CAT', 'REAL', 'NEXT', 'OPEN', 'FREE',
+        'GOOD', 'BEST', 'FAST', 'SAFE', 'TRUE', 'PLAY', 'MOVE', 'LIVE', 'HOME', 'CARE',
+    }
+
+    # Ambiguous tickers that need cashtag or company-context agreement
+    AMBIGUOUS_TICKERS = frozenset({
+        'AI', 'IT', 'ON', 'ALL', 'CAT', 'A', 'NOW', 'LOW', 'RUN', 'REAL', 'OPEN', 'FREE',
+    })
+
+    CRYPTO_SYMBOLS = {'BTC', 'ETH', 'SOL', 'XRP', 'DOGE', 'LINK'}
+
     # INDICES - Can be extracted and considered for trading
     TRADEABLE_INDICES = {
         'VIX', 'SPY', 'SPX', 'QQQ', 'IWM', 'VTI', 'VOO', 'IVV', 'SCHB',
@@ -40,6 +68,38 @@ class NewsUtils:
         'RUT', 'NDX', 'COMPX', 'DJIA', 'NYA', 'XAX', 'BATX', 'HGX',
         'SOX', 'BKX', 'XBD', 'XED', 'XEO', 'XSP', 'ES', 'NQ', 'RTY', 'YM'
     }
+
+    @staticmethod
+    def is_valid_extracted_ticker(symbol: str, from_cash_tag: bool = False) -> bool:
+        """Reject headline words and ambiguous 1-letter tokens masquerading as tickers."""
+        symbol = str(symbol or '').upper().strip()
+        if not symbol or not symbol.isalpha() or len(symbol) > 5:
+            return False
+        if symbol in NewsUtils.BLOCKED_SYMBOLS or symbol in NewsUtils.EXTRACTION_STOPWORDS:
+            return False
+        if len(symbol) == 1 and not from_cash_tag:
+            return False
+        if symbol in getattr(NewsUtils, "AMBIGUOUS_TICKERS", ()) and not from_cash_tag:
+            return False
+        return True
+
+    @staticmethod
+    def propagate_prices(items: List[Dict]) -> None:
+        """Copy known prices from market-data rows onto symbol-tagged news rows."""
+        prices: Dict[str, float] = {}
+        for item in items:
+            symbol = str(item.get('symbol') or '').upper().strip()
+            price = item.get('price') if item.get('price') is not None else item.get('current_price')
+            if not symbol or price is None:
+                continue
+            try:
+                prices[symbol] = float(price)
+            except (TypeError, ValueError):
+                continue
+        for item in items:
+            symbol = str(item.get('symbol') or '').upper().strip()
+            if symbol and item.get('price') is None and symbol in prices:
+                item['price'] = prices[symbol]
 
     @staticmethod
     def extract_symbol_from_text(text: str, company_db: Dict) -> Optional[str]:
@@ -299,7 +359,7 @@ class NewsUtils:
                 'is_moonshot': False,
                 'score': 0,
                 'keywords_found': [],
-                'potential_move': 'Unknown',
+                'potential_move': 'Not estimated',
                 'risk_level': 'LOW',
                 'priority': 'LOW'
             }

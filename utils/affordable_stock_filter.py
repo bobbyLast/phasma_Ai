@@ -9,7 +9,8 @@ import time
 class AffordableStockFilter:
     """Filters stock lists to only include affordable stocks"""
     
-    def __init__(self, max_price: float):
+    def __init__(self, max_price: float, enabled: bool = True):
+        self.enabled = enabled
         self.max_price = max_price
         self.cache = {}  # Cache prices to avoid repeated API calls
         
@@ -32,6 +33,9 @@ class AffordableStockFilter:
     
     def filter_affordable(self, symbols: List[str]) -> List[str]:
         """Filter list to only include stocks under max_price"""
+        if not self.enabled:
+            print(f"\nSkipping price pre-filter for {len(symbols)} symbols (disabled)")
+            return list(symbols)
         affordable = []
         
         print(f"\nFiltering {len(symbols)} stocks by max price: ${self.max_price:.2f}")

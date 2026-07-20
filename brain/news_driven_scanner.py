@@ -1,6 +1,6 @@
 """
 News-Driven Stock Scanner
-Finds hyped stocks under $50 from news sources
+Finds hyped stocks from news sources
 """
 
 import asyncio
@@ -13,21 +13,28 @@ if _root not in sys.path:
 
 from datetime import datetime
 import re
+from typing import Optional, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from utils.cycle_data_context import CycleDataContext
 
 class NewsDrivenScanner:
-    """Scans news to find hot stocks under $50"""
+    """Scans news to find hot stocks from headlines"""
     
-    def __init__(self, config):
+    def __init__(self, config, news_sources=None):
         self.config = config
-        self.price_threshold = 50.0
+        from utils.price_filter_config import apply_price_threshold
+        apply_price_threshold(config, self)
         
         # Import price fetcher
         from utils.price_fetcher import get_price_fetcher
         self.price_fetcher = get_price_fetcher()
         
-        # Import integrated news sources
-        from engines.news_engine_integrated import IntegratedNewsSources
-        self.news_sources = IntegratedNewsSources(config)
+        if news_sources is None:
+            from engines.news_engine_integrated import IntegratedNewsSources
+            self.news_sources = IntegratedNewsSources(config)
+        else:
+            self.news_sources = news_sources
         
         # Keywords that indicate hype/good news
         self.hype_keywords = [
@@ -44,31 +51,56 @@ class NewsDrivenScanner:
             'downgrade', 'cut', 'loss', 'miss', 'weak', 'bearish'
         ]
     
-    async def scan_news_for_hot_stocks(self):
-        """Scan all news to find hot stocks under $50"""
+    async def scan_news_for_hot_stocks(self, cycle_context: Optional["CycleDataContext"] = None):
+        """Scan all news to find hot stocks"""
         
         print("=" * 80)
         print("🔥 NEWS-DRIVEN STOCK SCANNER")
         print("=" * 80)
-        print("Finding hyped stocks under $50...")
+        print("Finding hyped stocks from news...")
         print("=" * 80)
         
-        # 1. Get all news from our 20 sources
-        print("\n📰 Fetching news from 20 sources...")
-        all_news = await self.news_sources.fetch_all_integrated_sources()
+        if cycle_context is not None:
+            print("\n📰 Using cycle ingest snapshot (no re-fetch)...")
+            all_news = cycle_context.ingested_news
+        else:
+            print("\n📰 Fetching news from 20 sources...")
+            all_news = await self.news_sources.fetch_all_integrated_sources()
         print(f"   Total news items: {len(all_news)}")
         
         # 2. Extract symbols and analyze sentiment
         print("\n🔍 Analyzing news for stock mentions...")
         stock_mentions = {}
+        prediction_mentions = {}
         
         for item in all_news:
             title = item.get('title', '').upper()
             summary = item.get('summary', '').upper()
             text = f"{title} {summary}"
+
+            if item.get('prediction_market') and item.get('market_ticker'):
+                ticker = str(item.get('market_ticker'))
+                hype_score = self._calculate_hype_score(text)
+                if ticker not in prediction_mentions:
+                    prediction_mentions[ticker] = {
+                        'market_ticker': ticker,
+                        'prediction_market': item.get('prediction_market'),
+                        'title': item.get('title', ''),
+                        'mentions': 0,
+                        'hype_score': 0,
+                        'news_match_score': item.get('news_match_score', 0),
+                        'symbol': item.get('symbol') or '',
+                    }
+                prediction_mentions[ticker]['mentions'] += 1
+                prediction_mentions[ticker]['hype_score'] += hype_score['bullish']
+                if item.get('news_match_score', 0) > prediction_mentions[ticker]['news_match_score']:
+                    prediction_mentions[ticker]['news_match_score'] = item['news_match_score']
+                if item.get('symbol'):
+                    prediction_mentions[ticker]['symbol'] = item['symbol']
+                continue
             
             # Extract symbols
-            symbol = self._extract_symbol(text)
+            symbol = item.get('symbol') or self._extract_symbol(text)
             
             if not symbol:
                 continue
@@ -82,8 +114,12 @@ class NewsDrivenScanner:
                     'hype_score': 0,
                     'bearish_score': 0,
                     'news_items': [],
-                    'sentiment': 'neutral'
+                    'sentiment': 'neutral',
+                    'price': None
                 }
+
+            if item.get('price') or item.get('current_price'):
+                stock_mentions[symbol]['price'] = item.get('price') or item.get('current_price')
             
             stock_mentions[symbol]['mentions'] += 1
             stock_mentions[symbol]['hype_score'] += hype_score['bullish']
@@ -95,14 +131,48 @@ class NewsDrivenScanner:
             })
         
         print(f"   Found {len(stock_mentions)} stocks mentioned in news")
+        news_aligned_preds = sum(
+            1 for p in prediction_mentions.values()
+            if p.get('symbol') or p.get('news_match_score', 0) > 0
+        )
+        print(
+            f"   Found {len(prediction_mentions)} prediction markets "
+            f"({news_aligned_preds} news-aligned)"
+        )
+
+        # Wire news-matched prediction intel into stock discovery universe
+        for pdata in prediction_mentions.values():
+            if float(pdata.get("news_match_score") or 0) <= 0:
+                continue
+            sym = str(pdata.get("symbol") or "").upper().strip()
+            if not sym or len(sym) > 5 or not sym.isalpha():
+                continue
+            if sym not in stock_mentions:
+                stock_mentions[sym] = {
+                    "mentions": 0,
+                    "hype_score": 0,
+                    "bearish_score": 0,
+                    "news_items": [],
+                    "sentiment": "neutral",
+                    "price": None,
+                    "kalshi_intel": True,
+                }
+            stock_mentions[sym]["mentions"] += 1
+            stock_mentions[sym]["hype_score"] += float(pdata.get("hype_score") or 0)
+            stock_mentions[sym]["news_items"].append({
+                "title": f"[Kalshi intel] {pdata.get('title', '')[:120]}",
+                "source": pdata.get("prediction_market", "kalshi"),
+                "summary": "Prediction-market flow mapped to equity research (not a trade signal).",
+            })
         
         # 3. Filter by price and sort by hype
-        print("\n💰 Checking stock prices (under $50 only)...")
+        cap_msg = f"(max ${self.price_threshold})" if self.price_filter_enabled else "(no price cap)"
+        print(f"\n💰 Checking stock prices {cap_msg}...")
         affordable_stocks = []
         
         for symbol, data in stock_mentions.items():
-            # Get current price
-            price = self.price_fetcher.get_real_price(symbol)
+            # Use prices already verified during news ingestion; avoid blocking live lookups here.
+            price = data.get('price')
             
             if not price:
                 continue
@@ -112,8 +182,11 @@ class NewsDrivenScanner:
             except:
                 continue
             
-            # Only include stocks under $50
-            if price > self.price_threshold:
+            if (
+                self.price_filter_enabled
+                and self.price_threshold is not None
+                and price > self.price_threshold
+            ):
                 continue
             
             # Calculate sentiment
@@ -140,15 +213,16 @@ class NewsDrivenScanner:
         # Sort by hype score
         affordable_stocks.sort(key=lambda x: x['total_score'], reverse=True)
         
-        print(f"   Found {len(affordable_stocks)} stocks under ${self.price_threshold}")
+        cap = f"under ${self.price_threshold}" if self.price_filter_enabled else "found"
+        print(f"   Found {len(affordable_stocks)} stocks {cap}")
         
         # 4. Display results
         print("\n" + "=" * 80)
-        print("🚀 HOT STOCKS UNDER $50")
+        print("🚀 HOT STOCKS FROM NEWS")
         print("=" * 80)
         
         if not affordable_stocks:
-            print("❌ No hot stocks found under $50")
+            print("❌ No hot stocks found from news scan")
             return []
         
         # Show top 20
@@ -168,7 +242,7 @@ class NewsDrivenScanner:
             if stock['news_items']:
                 print(f"   Latest: {stock['news_items'][0]['title'][:80]}...")
         
-        print(f"\n✅ Found {len(top_stocks)} hot stocks under $50 ready for analysis!")
+        print(f"\n✅ Found {len(top_stocks)} hot stocks ready for analysis!")
         
         return top_stocks
     

@@ -31,6 +31,8 @@ import statistics
 from collections import defaultdict
 from enum import Enum
 
+from core.runtime_paths import engine_state_path
+
 try:
     from engines.kalshi_engine import KalshiPredictionEngine
     from engines.scenario_graph_engine import ScenarioGraphEngine
@@ -175,7 +177,8 @@ class RiskGuardianMetaAgent:
         # Configuration
         self.monitoring_interval = timedelta(minutes=5)
         self.last_assessment = datetime.min
-        self.guardian_file = "risk_guardian_state.json"
+        self.guardian_file = engine_state_path("risk_guardian", "risk_guardian_state.json")
+        os.makedirs(os.path.dirname(self.guardian_file), exist_ok=True)
 
         # Load existing state
         self._load_state()
@@ -482,7 +485,9 @@ class RiskGuardianMetaAgent:
         }
 
         # Save emergency log
-        emergency_file = f"emergency_kill_switch_{int(datetime.now().timestamp())}.json"
+        emergency_file = engine_state_path(
+            "risk_guardian", f"emergency_kill_switch_{int(datetime.now().timestamp())}.json"
+        )
         with open(emergency_file, 'w') as f:
             json.dump(emergency_log, f, indent=2)
 
@@ -503,7 +508,9 @@ class RiskGuardianMetaAgent:
             'action': 'KILL_SWITCH_DEACTIVATED'
         }
 
-        deactivation_file = f"kill_switch_deactivation_{int(datetime.now().timestamp())}.json"
+        deactivation_file = engine_state_path(
+            "risk_guardian", f"kill_switch_deactivation_{int(datetime.now().timestamp())}.json"
+        )
         with open(deactivation_file, 'w') as f:
             json.dump(deactivation_log, f, indent=2)
 

@@ -8,12 +8,11 @@ import yfinance as market_data
 from datetime import datetime, timedelta
 import logging
 
-# Import multi-source providers
+from utils.price_fetcher import get_price_fetcher
+
 try:
-    from utils.multi_source_data_provider import get_multi_source_provider
     from utils.free_market_data_sources import SimulatedDataProvider
 except ImportError:
-    get_multi_source_provider = None
     SimulatedDataProvider = None
 
 @dataclass
@@ -37,11 +36,12 @@ class ConfluenceService:
         self.insider_monitor = insider_monitor
         self.options_filter = options_filter
         
-        # Get budget from config with fallback
-        trading_budget = getattr(config, 'trading_budget', config.get('trading_budget', {}))
-        self.max_price_per_share = trading_budget.get('max_price_per_share', 50)
-        
-        print(f"[CONFLUENCE] Budget: ${self.max_price_per_share} max per share")
+        from utils.price_filter_config import resolve_price_filter
+        self.price_filter_enabled, self.max_price_per_share = resolve_price_filter(config)
+        if self.price_filter_enabled:
+            print(f"[CONFLUENCE] Budget: ${self.max_price_per_share} max per share")
+        else:
+            print("[CONFLUENCE] Per-share price filter disabled")
         
         # Strategy profiles
         self.strategies = config.get('strategies', {})
@@ -72,37 +72,29 @@ class ConfluenceService:
         
         # Alert threshold
         self.alert_threshold = config.get('alert_threshold', 0.5)
+        self.logger = logging.getLogger(__name__)
         
         print(f"[CONFLUENCE] Initialized with {self.active_strategy_name} strategy")
         print(f"[CONFLUENCE] Strategy: {self.active_strategy.get('strategy_name', 'unknown')}")
         print(f"[CONFLUENCE] Required signals: {self.active_strategy.get('required_signals', [])}")
         print(f"[CONFLUENCE] Corroboration window: {self.active_strategy.get('corroboration_window_days', 21)} days")
-        print(f"[CONFLUENCE] Budget: ${self.config.get('trading_budget', {}).get('max_price_per_share', 50)} max per share")
+        if self.price_filter_enabled:
+            print(f"[CONFLUENCE] Budget: ${self.max_price_per_share} max per share")
+        else:
+            print("[CONFLUENCE] Per-share price filter disabled")
     
     def _passes_budget_filter(self, ticker: str) -> bool:
         """Quick budget check to save time on expensive stocks"""
+        if not self.price_filter_enabled:
+            return True
         try:
             max_price = self.max_price_per_share
             current_price = None
             
-            # Try multi-source provider first
-            if get_multi_source_provider:
-                try:
-                    import asyncio
-                    # Create event loop if none exists
-                    try:
-                        loop = asyncio.get_event_loop()
-                    except RuntimeError:
-                        loop = asyncio.new_event_loop()
-                        asyncio.set_event_loop(loop)
-                    
-                    # Get price data
-                    provider = get_multi_source_provider(self.config)
-                    price_data = loop.run_until_complete(provider.get_price_data(ticker))
-                    if price_data:
-                        current_price = price_data.price
-                except Exception as e:
-                    self.logger.debug(f"Multi-source provider failed: {e}")
+            try:
+                current_price = get_price_fetcher().get_real_price(ticker)
+            except Exception as e:
+                self.logger.debug(f"Price fetcher failed: {e}")
             
             # Fallback to provider bridge
             if current_price is None:

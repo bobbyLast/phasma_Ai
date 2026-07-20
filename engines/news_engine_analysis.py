@@ -3,7 +3,7 @@ News Engine Analysis Module
 Pattern detection and technical analysis
 """
 
-import random
+import os
 import re
 from typing import List, Dict, Any, Tuple
 
@@ -40,8 +40,9 @@ class NewsAnalyzer:
         title = news_item.get('title', '')
         sentiment = news_item.get('sentiment', 0)
 
-        # Technical divergence based on sentiment strength
-        technical_divergence = sentiment * 0.3 + (random.uniform(-0.1, 0.1))
+        # Technical divergence based on sentiment strength (deterministic)
+        title_hash = sum(ord(c) for c in title[:40]) % 21
+        technical_divergence = sentiment * 0.3 + (title_hash - 10) / 100.0
 
         # Sentiment divergence based on catalyst score
         catalyst_score = news_item.get('catalyst_score', 0)
@@ -196,7 +197,8 @@ class NewsAnalyzer:
         sector_data = {}
 
         for item in news_items:
-            sector = item.get('sector', 'UNKNOWN')
+            from utils.company_resolver import get_resolver
+            sector = item.get('sector') or get_resolver().sector(item.get('symbol', ''), item.get('title'))
             if sector not in sector_data:
                 sector_data[sector] = {
                     'count': 0,

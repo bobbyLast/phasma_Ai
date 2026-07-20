@@ -146,8 +146,37 @@ class CompanyResolver:
     ) -> Dict[str, str]:
         """Resolve symbol metadata. Hot path should use allow_yf=False, allow_web=False."""
         sym = _clean_symbol(symbol)
+        try:
+            from utils.company_identity_registry import get_identity_registry
+            reg = get_identity_registry()
+            reg_row = reg.get(sym) if sym else None
+            if reg_row and not is_placeholder(reg_row.get("company_name")):
+                name = str(reg_row["company_name"]).strip()
+                if name and not name.startswith("$"):
+                    return {
+                        "symbol": sym,
+                        "company_name": name,
+                        "full_name": name,
+                        "sector": reg_row.get("sector") or "Equities",
+                        "industry": reg_row.get("sector") or "Equities",
+                        "source": "identity_registry",
+                        "resolver_status": reg_row.get("resolver_status") or "registry",
+                    }
+        except Exception:
+            pass
         if sym in self._static:
             row = self._static[sym]
+            try:
+                from utils.company_identity_registry import get_identity_registry
+                get_identity_registry().remember(
+                    sym,
+                    company_name=row["company_name"],
+                    sector=row.get("sector"),
+                    source="company_reference.csv",
+                    resolver_status="cache_exact",
+                )
+            except Exception:
+                pass
             return {
                 "symbol": sym,
                 "company_name": row["company_name"],
@@ -161,6 +190,17 @@ class CompanyResolver:
         if allow_yf:
             yf_row = self._yf_lookup(sym) if sym else None
             if yf_row:
+                try:
+                    from utils.company_identity_registry import get_identity_registry
+                    get_identity_registry().remember(
+                        sym,
+                        company_name=yf_row["company_name"],
+                        sector=yf_row.get("sector"),
+                        source="yfinance",
+                        resolver_status="quote_exact",
+                    )
+                except Exception:
+                    pass
                 return {
                     "symbol": sym,
                     "company_name": yf_row["company_name"],
@@ -290,11 +330,17 @@ class CompanyResolver:
             allow_web = False
         sym = _clean_symbol(item.get("symbol"))
         title = item.get("title") or item.get("summary")
-        # Hot-path local enrich: only stamp known CSV tickers
-        if not allow_yf and not allow_web and sym and sym not in self._static:
+        # Hot-path: registry + CSV only (no yf/web)
+        if not allow_yf and not allow_web:
             if sym:
                 item["symbol"] = sym
-            return item
+            try:
+                from utils.company_identity_registry import get_identity_registry
+                get_identity_registry().stamp_item(item)
+            except Exception:
+                pass
+            if sym and sym not in self._static and is_placeholder(item.get("company_name")):
+                return item
 
         resolved = self.resolve(sym, title, allow_yf=allow_yf, allow_web=allow_web)
 
@@ -311,8 +357,21 @@ class CompanyResolver:
         elif is_placeholder(item.get("source")):
             item["source"] = resolved.get("source", "news")
 
+        if resolved.get("resolver_status") in RESOLVER_TRUSTED_STATUSES | {"registry", "cache_exact", "quote_exact", "sec_exact"}:
+            try:
+                from utils.company_identity_registry import get_identity_registry
+                get_identity_registry().remember(
+                    sym,
+                    company_name=resolved.get("company_name"),
+                    sector=resolved.get("sector"),
+                    source=resolved.get("source") or "resolver",
+                    resolver_status=resolved.get("resolver_status") or "cache_exact",
+                )
+            except Exception:
+                pass
+
         fc = item.get("fact_check")
-        if isinstance(fc, dict) and (allow_yf or allow_web or sym in self._static):
+        if isinstance(fc, dict) and (allow_yf or allow_web or sym in self._static or not is_placeholder(item.get("company_name"))):
             item["fact_check"] = self.enrich_fact_check(fc, sym or item.get("symbol"), title)
         return item
 

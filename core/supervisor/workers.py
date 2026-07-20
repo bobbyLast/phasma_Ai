@@ -159,11 +159,90 @@ class NewsIngestWorker(BaseWorker):
             system._unified_brain = UnifiedMetaBrain(app_ctx.config, market_cache=app_ctx.market_cache)
         brain = system._unified_brain
 
+        # Attach shared Kalshi snapshot + base market state if workers already ran
+        kalshi_markets = getattr(app_ctx, "kalshi_markets_snapshot", None)
+        if kalshi_markets and getattr(brain, "news_sources", None) is not None:
+            brain.news_sources._shared_kalshi_markets = kalshi_markets
+
+        base_universe = getattr(app_ctx, "base_universe", None)
+        market_snapshot = getattr(app_ctx, "market_snapshot", None)
+
+        # SEC + macro observers (incremental; failures logged, not swallowed)
+        sec_extra = []
+        macro_extra = []
+        try:
+            from utils.sec_filings_feed import fetch_recent_sec_filings
+            sec_extra = fetch_recent_sec_filings()
+        except Exception as exc:
+            logger.error("SEC worker failed: %s", exc)
+            print(f"ERROR SEC worker failed: {exc}")
+        try:
+            from utils.macro_snapshot import fetch_macro_snapshot
+            macro_extra = fetch_macro_snapshot()
+        except Exception as exc:
+            logger.error("Macro worker failed: %s", exc)
+            print(f"ERROR Macro worker failed: {exc}")
+
         cycle_data = await CycleDataContext.ingest(
             brain.news_sources,
             config=app_ctx.config,
             market_cache=app_ctx.market_cache,
+            kalshi_markets=kalshi_markets,
+            base_universe=base_universe,
+            market_snapshot=market_snapshot,
+            macro_events=macro_extra,
         )
+        if sec_extra:
+            cycle_data.sec_events = list(cycle_data.sec_events or []) + sec_extra
+            cycle_data.ingested_news = list(cycle_data.ingested_news or []) + sec_extra
+        # Event ontology + causal hypotheses + relationship expansion
+        try:
+            from utils.event_ontology import normalize_event_batch
+            from utils.causal_hypotheses import hypotheses_for_events
+            from utils.relationship_graph import expand_from_news_events, load_relationship_graph
+
+            raw_news = cycle_data.news_events or cycle_data.ingested_news or []
+            normalized = normalize_event_batch(list(raw_news) + list(cycle_data.sec_events or []))
+            cycle_data.normalized_events = normalized
+            if hasattr(cycle_data, "freshness_status"):
+                cycle_data.freshness_status = dict(cycle_data.freshness_status or {})
+                cycle_data.freshness_status["normalized_events"] = len(normalized)
+
+            hyps = hypotheses_for_events(
+                normalized,
+                market_snapshot=cycle_data.market_snapshot or market_snapshot,
+            )
+            cycle_data.causal_hypotheses = hyps
+
+            g = load_relationship_graph()
+            cycle_data.relationship_graph_version = g.get("relationship_graph_version") or f"v{g.get('version', 2)}"
+
+            rel = expand_from_news_events(
+                normalized or raw_news,
+                market_snapshot=cycle_data.market_snapshot or market_snapshot,
+            )
+            cycle_data.relationship_candidates = rel
+            rel_syms = []
+            for c in rel:
+                sym = str(c.get("candidate_ticker") or c.get("symbol") or "").upper()
+                if sym and sym not in cycle_data.event_universe:
+                    cycle_data.event_universe.append(sym)
+                if sym and sym not in cycle_data.symbol_universe:
+                    cycle_data.symbol_universe.append(sym)
+                if sym:
+                    rel_syms.append(sym)
+            cycle_data.relationship_universe = list(dict.fromkeys(rel_syms))
+            if rel:
+                print(f"   [FLOOR] relationship_candidates: {len(rel)} hypotheses={len(hyps)}")
+        except Exception as rel_err:
+            logger.warning("relationship/event ontology failed: %s", rel_err)
+
+        # Attach feature funnel finalists if market worker already ran
+        funnel = getattr(app_ctx, "feature_funnel", None)
+        if funnel and isinstance(funnel, dict):
+            cycle_data.freshness_status = dict(cycle_data.freshness_status or {})
+            cycle_data.freshness_status["feature_funnel"] = funnel
+
         ctx.cycle_data = cycle_data
         app_ctx.cycle_data = cycle_data
 
@@ -171,9 +250,20 @@ class NewsIngestWorker(BaseWorker):
             "news_ingest",
             {
                 "ingested_news": cycle_data.ingested_news,
+                "news_events": cycle_data.news_events,
+                "sec_events": cycle_data.sec_events,
+                "social_events": cycle_data.social_events,
+                "prediction_markets": cycle_data.prediction_markets[:200]
+                if isinstance(cycle_data.prediction_markets, list)
+                else [],
                 "symbol_universe": cycle_data.symbol_universe,
+                "base_universe": cycle_data.base_universe,
+                "event_universe": cycle_data.event_universe,
                 "company_names": cycle_data.company_names,
                 "prices": cycle_data.prices,
+                "market_snapshot": {
+                    k: v for i, (k, v) in enumerate((cycle_data.market_snapshot or {}).items()) if i < 100
+                },
             },
             metadata={"items": len(cycle_data.ingested_news)},
         )
@@ -226,18 +316,32 @@ class NewsIngestWorker(BaseWorker):
         from utils.cycle_data_context import CycleDataContext
 
         snap = self.store.load_last_good("news_ingest")
+        # Stale/fallback news may inform research but MUST NOT approve new trades
         if snap and not self.store.is_stale("news_ingest", self.max_snapshot_age_seconds):
             data = snap.get("data") or {}
             ctx.cycle_data = CycleDataContext(
                 ingested_news=data.get("ingested_news") or [],
+                news_events=data.get("news_events") or data.get("ingested_news") or [],
+                sec_events=data.get("sec_events") or [],
+                social_events=data.get("social_events") or [],
+                prediction_markets=data.get("prediction_markets") or [],
+                market_snapshot=data.get("market_snapshot") or {},
                 symbol_universe=data.get("symbol_universe") or [],
+                base_universe=data.get("base_universe") or [],
+                event_universe=data.get("event_universe") or [],
                 company_names=data.get("company_names") or {},
                 prices=data.get("prices") or {},
+                context_mode="STALE_CONTEXT",
+                news_from_stale_fallback=True,
+                freshness_status={"fallback": True},
             )
             if ctx.app_ctx is not None:
                 ctx.app_ctx.cycle_data = ctx.cycle_data
-            ctx.news_snapshot_stale = False
-            ctx.skip_news_signals = False
+            ctx.news_snapshot_stale = True
+            # Block trade signal generation from fallback snapshot
+            ctx.skip_news_signals = True
+            ctx.block_execution = True
+            ctx.execution_blocked_reason = "stale last-good news snapshot — research only"
             return WorkerResult.build(
                 self.name,
                 WorkerStatus.DEGRADED,
@@ -245,13 +349,15 @@ class NewsIngestWorker(BaseWorker):
                 error=error,
                 error_hash=hash_error(error) if error else None,
                 stale_data_allowed=True,
-                detail="using last good news snapshot",
+                detail="last-good news snapshot — EXECUTION_BLOCKED / skip trade signals",
                 output_snapshot_path=self.store._snapshot_path("news_ingest"),
-                metadata={"items": len(ctx.cycle_data.ingested_news)},
+                metadata={"items": len(ctx.cycle_data.ingested_news), "context_mode": "STALE_CONTEXT"},
             )
 
         ctx.skip_news_signals = True
         ctx.news_snapshot_stale = True
+        ctx.block_execution = True
+        ctx.execution_blocked_reason = "news snapshot stale or missing"
         return WorkerResult.build(
             self.name,
             WorkerStatus.ERROR if not quarantined else WorkerStatus.QUARANTINED,
@@ -340,11 +446,127 @@ class MarketDataWorker(BaseWorker):
     async def _execute(self, ctx: CycleContext) -> WorkerResult:
         started = datetime.now(timezone.utc)
         cache = getattr(ctx.app_ctx, "market_cache", None) or getattr(ctx.system, "market_cache", None)
-        if cache and hasattr(cache, "refresh_macro_data"):
-            cache.refresh_macro_data()
-        path = self.store.save_last_good("market_data", {"refreshed": True})
+        config = getattr(ctx, "config", None) or getattr(ctx.app_ctx, "config", None)
+
+        # Macro refresh (correct method name)
+        if cache:
+            try:
+                if hasattr(cache, "fetch_macro_data"):
+                    cache.fetch_macro_data()
+                elif hasattr(cache, "refresh_macro_data"):
+                    cache.refresh_macro_data()
+            except Exception as exc:
+                logger.warning("MarketDataWorker macro refresh failed: %s", exc)
+
+        base_universe: list = []
+        try:
+            from utils.infinite_symbol_provider import get_symbol_provider
+            base_universe = list(get_symbol_provider().get_symbols(limit=500) or [])
+        except Exception as exc:
+            logger.warning("MarketDataWorker base universe failed: %s", exc)
+
+        market_snapshot: dict = {}
+        prices: dict = {}
+        if cache and base_universe:
+            # Rolling refresh: prefer symbols missing/stale; batch in chunks
+            batch_size = 80
+            refreshed = 0
+            for i in range(0, min(len(base_universe), 500), batch_size):
+                chunk = base_universe[i : i + batch_size]
+                try:
+                    batch = cache.fetch_prices(chunk) or {}
+                except Exception as exc:
+                    logger.error("MarketDataWorker price batch failed: %s", exc)
+                    print(f"ERROR MarketDataWorker price batch failed: {exc}")
+                    batch = {}
+                    if not market_snapshot:
+                        # Mark failure for context_mode when we have nothing
+                        if getattr(ctx, "app_ctx", None) is not None:
+                            ctx.app_ctx.price_fetch_failed = True
+                for sym, pdata in batch.items():
+                    su = str(sym).upper()
+                    price = None
+                    volume = None
+                    change = None
+                    if isinstance(pdata, dict):
+                        price = pdata.get("current") or pdata.get("price") or pdata.get("regularMarketPrice")
+                        volume = pdata.get("volume") or pdata.get("avg_volume")
+                        change = pdata.get("change_pct") or pdata.get("day_change_pct")
+                    else:
+                        try:
+                            price = float(pdata)
+                        except (TypeError, ValueError):
+                            price = None
+                    if price is None:
+                        continue
+                    try:
+                        pf = float(price)
+                    except (TypeError, ValueError):
+                        continue
+                    if pf <= 0:
+                        continue
+                    prices[su] = pf
+                    market_snapshot[su] = {
+                        "price": pf,
+                        "volume": volume,
+                        "change_pct": change,
+                        "ts": datetime.now(timezone.utc).isoformat(),
+                    }
+                    refreshed += 1
+                    try:
+                        from utils.company_identity_registry import get_identity_registry
+                        get_identity_registry().remember(su, last_price=pf, source="market_data_worker")
+                    except Exception:
+                        pass
+                # Soft budget: stop after first 2 chunks if cycle is tight (~160 symbols)
+                if i >= batch_size and refreshed >= 100:
+                    break
+
+            if prices:
+                try:
+                    from utils.robust_price_fetcher import register_cycle_prices
+                    register_cycle_prices(prices)
+                except Exception:
+                    pass
+
+        # Fast numerical screen over snapshot
+        from utils.feature_funnel import build_feature_matrix, funnel_candidates
+        features = build_feature_matrix(market_snapshot, base_universe=base_universe)
+        funnel = funnel_candidates(features)
+        movers = [r.to_dict() for r in features[:40]]
+
+        # Attach to cycle context for downstream
+        if getattr(ctx, "app_ctx", None) is not None:
+            ctx.app_ctx.base_universe = base_universe
+            ctx.app_ctx.market_snapshot = market_snapshot
+            ctx.app_ctx.fast_movers = movers
+            ctx.app_ctx.feature_funnel = funnel
+            ctx.app_ctx.feature_matrix = [r.to_dict() for r in features[:500]]
+        ctx.metadata = getattr(ctx, "metadata", None) or {}
+        if isinstance(ctx.metadata, dict):
+            ctx.metadata["base_universe_count"] = len(base_universe)
+            ctx.metadata["market_snapshot_count"] = len(market_snapshot)
+            ctx.metadata["deep_ai_finalists"] = funnel.get("deep_ai_finalists") or []
+
+        path = self.store.save_last_good(
+            "market_data",
+            {
+                "refreshed": True,
+                "base_universe": base_universe[:500],
+                "market_snapshot": market_snapshot,
+                "fast_movers": movers[:40],
+                "feature_funnel": funnel,
+                "prices": prices,
+            },
+        )
         self.breaker.record_success(self.name)
-        return WorkerResult.build(self.name, WorkerStatus.OK, started=started, output_snapshot_path=path)
+        return WorkerResult.build(
+            self.name,
+            WorkerStatus.OK,
+            started=started,
+            output_snapshot_path=path,
+            metadata={"symbols": len(market_snapshot), "base": len(base_universe), "funnel": len(funnel.get("deep_ai_finalists") or [])},
+        )
 
 
 class SignalGenerationWorker(BaseWorker):
@@ -493,11 +715,39 @@ class KalshiIntelWorker(BaseWorker):
         started = datetime.now(timezone.utc)
         from utils.config_helpers import config_get
         intel_only = config_get(ctx.config, "kalshi_intel_only", True)
+
+        markets = []
+        engine = getattr(ctx.system, "kalshi_engine", None)
+        if engine is not None and hasattr(engine, "_fetch_open_markets_bulk"):
+            try:
+                max_pages = int(getattr(engine, "_max_market_pages", 4) or 4)
+                markets = engine._fetch_open_markets_bulk(max_pages=max_pages) or []
+            except Exception as exc:
+                logger.warning("Kalshi snapshot fetch failed: %s", exc)
+                markets = []
+
+        if getattr(ctx, "app_ctx", None) is not None:
+            ctx.app_ctx.kalshi_markets_snapshot = markets
+            # Also stamp onto news sources for same-cycle reuse
+            brain = getattr(ctx.system, "_unified_brain", None)
+            if brain and getattr(brain, "news_sources", None) is not None:
+                brain.news_sources._shared_kalshi_markets = markets
+            cycle_data = getattr(ctx.app_ctx, "cycle_data", None) or getattr(ctx, "cycle_data", None)
+            if cycle_data is not None and markets:
+                cycle_data.prediction_markets = list(markets)
+
+        path = self.store.save_last_good(
+            "kalshi_snapshot",
+            {"markets": markets[:300], "count": len(markets)},
+            metadata={"count": len(markets)},
+        )
         return WorkerResult.build(
             self.name,
             WorkerStatus.OK,
             started=started,
-            detail="INTEL_ONLY" if intel_only else "ENABLED",
+            output_snapshot_path=path,
+            detail=("INTEL_ONLY" if intel_only else "ENABLED") + f" snapshot={len(markets)}",
+            metadata={"markets": len(markets)},
         )
 
 

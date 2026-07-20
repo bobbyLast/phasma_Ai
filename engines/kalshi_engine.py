@@ -10,10 +10,14 @@ Geopolitical analysis integration added.
 """
 
 import os
+from datetime import datetime
 from typing import Any, Dict, List, Optional
+import time
 
 import requests
 import statistics
+
+from utils.prediction_market_filters import is_stale_prediction_market
 
 try:
     from engines.news_engine_core import NewsAPIIntegration
@@ -70,16 +74,59 @@ class KalshiPredictionEngine:
         self.min_contracts = self.config.get('trading', {}).get('min_contracts', 2)
         self.max_contracts = self.config.get('trading', {}).get('max_contracts', 20)
 
+        debug_cfg = self.config.get("debug") if isinstance(self.config, dict) else {}
+        if hasattr(self.config, "get"):
+            debug_cfg = self.config.get("debug") or debug_cfg or {}
+        self._kalshi_expiry_debug = bool((debug_cfg or {}).get("kalshi_expiry_debug", False))
+
+        kalshi_scan = self.config.get("kalshi_scan") if isinstance(self.config, dict) else {}
+        if hasattr(self.config, "get"):
+            kalshi_scan = self.config.get("kalshi_scan") or kalshi_scan or {}
+        self._max_event_series = int((kalshi_scan or {}).get("max_event_series_per_cycle", 50))
+        self._max_priority_series = int((kalshi_scan or {}).get("max_priority_series_per_cycle", 25))
+        self._series_cache_ttl = int((kalshi_scan or {}).get("series_cache_ttl_seconds", 300))
+        self._markets_cache_ttl = int((kalshi_scan or {}).get("markets_cache_ttl_seconds", 180))
+        self._max_market_pages = int((kalshi_scan or {}).get("max_market_pages_per_cycle", 4))
+        self._series_list_cache: Dict[str, Any] = {"ts": 0, "data": []}
+        from utils.kalshi_rate_limiter import get_kalshi_rate_limiter
+        self._rate_limiter = get_kalshi_rate_limiter(self.config)
+
+    def begin_scan_cycle(self) -> None:
+        """Reset per-cycle Kalshi request budget."""
+        self._rate_limiter.begin_cycle()
+
     def _get(self, path: str, params: Optional[Dict[str, Any]] = None) -> Optional[Dict[str, Any]]:
-        """Internal helper for GET requests with basic error handling."""
-        url = f"{self.base_url.rstrip('/')}/{path.lstrip('/') }"
-        try:
-            resp = self.session.get(url, params=params, timeout=10)
-            resp.raise_for_status()
-            return resp.json()
-        except Exception as e:
-            print(f"WARNING Kalshi GET error for {url}: {e}")
-            return None
+        """Internal helper for GET requests with shared rate limit + 429 cooldown."""
+        from utils.kalshi_rate_limiter import kalshi_get_json
+        # Allow full URL or path; also accept "markets?foo=1" legacy style
+        if path.startswith("http"):
+            url = path
+            query_params = params
+        elif "?" in path:
+            # Legacy callers passed query string in path
+            base_path, qs = path.split("?", 1)
+            url = f"{self.base_url.rstrip('/')}/{base_path.lstrip('/')}"
+            query_params = dict(params or {})
+            for part in qs.split("&"):
+                if "=" in part:
+                    k, v = part.split("=", 1)
+                    query_params.setdefault(k, v)
+        else:
+            url = f"{self.base_url.rstrip('/')}/{path.lstrip('/')}"
+            query_params = params
+        cache_ttl = 0.0
+        if "series" in url and "markets" not in url:
+            cache_ttl = float(self._series_cache_ttl)
+        elif "markets" in url:
+            cache_ttl = float(self._markets_cache_ttl)
+        return kalshi_get_json(
+            self.session,
+            url,
+            params=query_params,
+            timeout=12,
+            config=self.config,
+            cache_ttl=cache_ttl,
+        )
 
     def get_series_info(self, series_ticker: str) -> Optional[Dict[str, Any]]:
         """Get information about a series (this endpoint may not exist in current API)."""
@@ -127,16 +174,62 @@ class KalshiPredictionEngine:
         price = max(0.0, min(price, 100.0))
         return price / 100.0
 
-    def scan_all_markets(self, min_volume: int = 1000, max_markets: int = 50, use_playbook: bool = False) -> List[Dict[str, Any]]:
-        """Scan all available markets and return high-quality opportunities.
-        
-        Args:
-            min_volume: Minimum volume threshold (default 1000)
-            max_markets: Maximum markets to analyze (default 50)
-            use_playbook: Use AI Playbook strategy (default False for backward compatibility)
-        
-        Returns:
-            List of market opportunities
+    @staticmethod
+    def market_volume(market: Dict[str, Any]) -> int:
+        """Kalshi API v2 uses volume_fp; legacy uses volume."""
+        for key in ("volume_fp", "volume"):
+            raw = market.get(key)
+            if raw is None:
+                continue
+            try:
+                val = int(float(raw))
+                if val > 0:
+                    return val
+            except (TypeError, ValueError):
+                continue
+        return 0
+
+    @staticmethod
+    def market_implied_probability(market: Dict[str, Any]) -> float:
+        """Read implied YES probability from Kalshi market (dollars or cents schema)."""
+        lpd = market.get("last_price_dollars")
+        if lpd is not None:
+            try:
+                prob = float(lpd)
+                if prob > 0:
+                    return max(0.0, min(prob, 1.0))
+            except (TypeError, ValueError):
+                pass
+        lp = market.get("last_price")
+        if lp is not None:
+            try:
+                return KalshiPredictionEngine.implied_probability_from_yes_price(float(lp))
+            except (TypeError, ValueError):
+                pass
+        yb = market.get("yes_bid_dollars", market.get("yes_bid"))
+        ya = market.get("yes_ask_dollars", market.get("yes_ask"))
+        try:
+            if yb is not None and ya is not None:
+                ybf, yaf = float(yb), float(ya)
+                if ybf > 1 or yaf > 1:
+                    return KalshiPredictionEngine.implied_probability_from_yes_price((ybf + yaf) / 2.0)
+                mid = (ybf + yaf) / 2.0
+                if mid > 0:
+                    return max(0.0, min(mid, 1.0))
+        except (TypeError, ValueError):
+            pass
+        return 0.0
+
+    def scan_all_markets(
+        self,
+        min_volume: int = 1000,
+        max_markets: int = 50,
+        use_playbook: bool = False,
+        markets: Optional[List[Dict[str, Any]]] = None,
+    ) -> List[Dict[str, Any]]:
+        """Scan markets and return high-quality opportunities.
+
+        Pass ``markets`` (cycle Kalshi snapshot) to skip a second bulk HTTP fetch.
         """
         if use_playbook:
             # Use the new AI Playbook system
@@ -173,173 +266,173 @@ class KalshiPredictionEngine:
                 print("⚠️ AI Playbook not available, using legacy scan")
                 use_playbook = False
         
-        # Legacy scanning logic (existing code)
+        # Legacy scanning logic — reuse cycle snapshot when available
         print(f"🎯 Scanning Kalshi markets for high-probability opportunities...")
         
         opportunities = []
         
         try:
-            # Get all event series
-            series_url = f"{self.base_url}/series"
-            response = self.session.get(series_url)
-            response.raise_for_status()
-            
-            series_data = response.json().get('series', [])
-            print(f"   Found {len(series_data)} event series")
-            if series_data:
-                # Categories are empty in API response
-                pass
-            
-            # Focus on weather-related markets for initial testing
-            priority_keywords = [
-                'weather', 'temperature', 'rain', 'snow', 'hurricane', 'tornado',
-                'precipitation', 'heat', 'cold', 'flood', 'drought', 'wind'
-            ]
-            
-            # Filter by keywords in title since categories are empty
-            priority_series = []
+            weather_only = bool(
+                self.config.get('kalshi_weather_only')
+                or self.config.get('kalshi_trading', {}).get('weather_only', False)
+            )
+            if weather_only:
+                priority_keywords = [
+                    'weather', 'temperature', 'rain', 'snow', 'hurricane', 'tornado',
+                    'precipitation', 'heat', 'cold', 'flood', 'drought', 'wind',
+                ]
+            else:
+                priority_keywords = [
+                    'weather', 'temperature', 'rain', 'snow', 'hurricane', 'tornado',
+                    'fed', 'fomc', 'inflation', 'cpi', 'gdp', 'unemployment', 'jobs',
+                    'rate', 'recession', 'tariff', 'election', 'president', 'congress',
+                    'bitcoin', 'ethereum', 'crypto', 'oil', 'crude', 'earnings', 'ipo',
+                    'tesla', 'nvidia', 'apple', 'amazon', 'microsoft', 'google', 'meta',
+                    'nba', 'nfl', 'soccer', 'championship', 'oscar', 'grammy', 'super bowl',
+                    'spacex', 'openai', 'ai', 'chip', 'semiconductor', 'housing', 'mortgage',
+                    'china', 'ukraine', 'israel', 'sanction', 'climate', 'vaccine', 'fda',
+                ]
+
+            if markets:
+                print(f"   Reusing cycle Kalshi snapshot: {len(markets)} markets")
+            else:
+                markets = self._fetch_open_markets_bulk(max_pages=self._max_market_pages)
+            print(f"   Bulk open markets fetched: {len(markets)}")
+
+            # Optional series list (1 cached call) for keyword ranking hints
+            series_data = []
+            series_payload = self._get("series")
+            if series_payload:
+                series_data = series_payload.get("series") or []
+            priority_tickers = set()
             for s in series_data:
-                title = s.get('title', '').lower()
-                if any(keyword.lower() in title for keyword in priority_keywords):
-                    priority_series.append(s)
-            
-            print(f"   Priority series by keyword: {len(priority_series)}")
-            
-            for series in priority_series[:max_markets]:
-                try:
-                    series_ticker = series.get('ticker')
-                    if not series_ticker:
-                        continue
-                    
-                    # Get markets for this series
-                    markets_url = f"{self.base_url}/markets?series_ticker={series_ticker}"
-                    markets_response = self.session.get(markets_url)
-                    markets_response.raise_for_status()
-                    
-                    markets = markets_response.json().get('markets', [])
-                    
-                    for market in markets:
-                        # Skip expired or settled markets
-                        if market.get('status') not in ['active', 'open']:
-                            continue
-                            
-                        # Filter for high-probability YES markets
-                        # Calculate implied probability from last_price (in cents)
-                        last_price = market.get('last_price', 0)
-                        implied_prob = last_price / 100.0  # Convert cents to percentage
-                        volume = market.get('volume', 0)
-                        days_to_expiry = self._calculate_days_to_expiry(market.get('expiration_time'))
-                        
-                        # Only include markets with reasonable odds and volume
-                        if (implied_prob > 0.30 and  # Lowered to 30% probability
-                            volume >= min_volume):  # Minimum volume (no expiry limit)
-                            
-                            # Analyze this market
-                            analysis = self.analyze_market_opportunity(market)
-                            confidence = analysis.get('confidence', 0)
-                            
-                            # Skip confidence filter for now - let POP calculation handle it
-                            opportunity = {
-                                'market': market,
-                                'analysis': analysis,
-                                'implied_probability': implied_prob,
-                                'volume': volume,
-                                'days_to_expiry': days_to_expiry
-                            }
-                            opportunities.append(opportunity)
-                            print(f"   ✅ WEATHER SIGNAL: {market.get('title', 'Unknown')} - {implied_prob:.1%} | Vol: {volume:,}")
-                
-                except Exception as e:
-                    print(f"   ⚠️ Error processing series {series.get('ticker')}: {e}")
+                title = str(s.get("title") or "").lower()
+                if any(k in title for k in priority_keywords):
+                    t = s.get("ticker")
+                    if t:
+                        priority_tickers.add(str(t).upper())
+
+            scored_markets = []
+            for market in markets:
+                if market.get("status") not in ("active", "open"):
                     continue
-            
-            # Sort by probability and confidence
-            opportunities.sort(key=lambda x: (
-                x['implied_probability'] * x['analysis'].get('confidence', 0)
-            ), reverse=True)
-            
+                title = market.get("title") or market.get("subtitle") or ""
+                if is_stale_prediction_market(market, title):
+                    continue
+                days_to_expiry = self._calculate_days_to_expiry(
+                    market.get("expiration_time") or market.get("close_time")
+                )
+                if days_to_expiry <= 0:
+                    continue
+                implied_prob = self.market_implied_probability(market)
+                volume = self.market_volume(market)
+                if implied_prob <= 0.30 or volume < min_volume:
+                    continue
+                title_l = title.lower()
+                series_t = str(market.get("series_ticker") or "").upper()
+                keyword_hit = any(k in title_l for k in priority_keywords) or series_t in priority_tickers
+                if weather_only and not keyword_hit:
+                    continue
+                # Prefer keyword hits; still allow some non-keyword if fill enabled and room
+                score = implied_prob * max(volume, 1)
+                if keyword_hit:
+                    score *= 1.5
+                scored_markets.append((score, keyword_hit, market, implied_prob, volume, days_to_expiry, title))
+
+            scored_markets.sort(key=lambda row: row[0], reverse=True)
+            kalshi_scan = self.config.get("kalshi_scan") or {}
+            allow_fill = bool(kalshi_scan.get("include_non_keyword_fill", False)) and not weather_only
+            analyze_cap = min(int(max_markets or 50), 40)
+            picked = []
+            for row in scored_markets:
+                keyword_hit = row[1]
+                if not keyword_hit and not allow_fill:
+                    continue
+                if not keyword_hit and len([p for p in picked if p[1]]) >= max(10, analyze_cap // 2):
+                    # keep fill secondary
+                    if len(picked) >= analyze_cap:
+                        break
+                picked.append(row)
+                if len(picked) >= analyze_cap:
+                    break
+
+            print(f"   Analyzing {len(picked)} markets (rate-limited bulk path)")
+            for _score, _hit, market, implied_prob, volume, days_to_expiry, title in picked:
+                try:
+                    analysis = self.analyze_market_opportunity(market)
+                    confidence = analysis.get("confidence", 0)
+                    try:
+                        confidence = float(confidence or 0)
+                    except (TypeError, ValueError):
+                        confidence = 0.0
+                    if confidence <= 0:
+                        continue
+                    opportunity = {
+                        "market": market,
+                        "title": title,
+                        "ticker": market.get("ticker", ""),
+                        "trade_link": analysis.get("trade_link") or self.get_market_trade_link(
+                            market.get("ticker", "")
+                        ),
+                        "analysis": analysis,
+                        "implied_probability": implied_prob,
+                        "volume": volume,
+                        "days_to_expiry": days_to_expiry,
+                        "confidence": confidence,
+                    }
+                    opportunities.append(opportunity)
+                    print(f"   ✅ SIGNAL: {title[:60]} - {implied_prob:.1%} | Vol: {volume:,}")
+                except Exception as e:
+                    print(f"   ⚠️ Error analyzing market {market.get('ticker')}: {e}")
+                    continue
+
+            opportunities.sort(
+                key=lambda x: (
+                    float(x.get("implied_probability") or 0)
+                    * float((x.get("analysis") or {}).get("confidence") or 0)
+                ),
+                reverse=True,
+            )
             print(f"\n   📊 Found {len(opportunities)} high-probability Kalshi opportunities")
+            print(f"   📡 Kalshi HTTP requests this scan: {self._rate_limiter.cycle_requests}")
             
         except Exception as e:
             print(f"   ❌ Error scanning Kalshi markets: {e}")
         
         return opportunities
+
+    def _fetch_open_markets_bulk(self, max_pages: int = 4) -> List[Dict[str, Any]]:
+        """Paginated open markets with shared rate limit (few calls total)."""
+        all_markets: List[Dict[str, Any]] = []
+        cursor = None
+        pages = max(1, min(int(max_pages), 6))
+        for page in range(pages):
+            params: Dict[str, Any] = {"status": "open", "limit": 100}
+            if cursor:
+                params["cursor"] = cursor
+            payload = self._get("markets", params=params)
+            if not payload:
+                break
+            batch = payload.get("markets") or []
+            if not batch:
+                break
+            all_markets.extend(batch)
+            cursor = payload.get("next_cursor")
+            if not cursor:
+                break
+        # de-dupe
+        seen = set()
+        unique = []
+        for m in all_markets:
+            t = m.get("ticker")
+            if t and t not in seen:
+                seen.add(t)
+                unique.append(m)
+        return unique
     
     def _get_all_available_markets(self) -> List[Dict[str, Any]]:
-        """Get all available markets from Kalshi API"""
-        try:
-            markets_url = f"{self.base_url}/markets"
-            response = self.session.get(markets_url)
-            response.raise_for_status()
-            return response.json().get('markets', [])
-        except Exception as e:
-            print(f"   Error fetching markets: {e}")
-            return []
-    
-    def _get_all_available_markets(self) -> List[Dict[str, Any]]:
-        """Fetch ALL available markets from Kalshi API without series filtering."""
-        try:
-            print("   SCANNING FETCHING ALL KALSHI MARKETS (NO SERIES FILTER)...")
-            
-            all_markets = []
-            cursor = None
-            limit = 100
-            page_count = 0
-            
-            # Fetch all pages of markets
-            while True:
-                try:
-                    # Build URL with pagination
-                    if cursor:
-                        url = f"markets?status=open&limit={limit}&cursor={cursor}"
-                    else:
-                        url = f"markets?status=open&limit={limit}"
-                    
-                    response = self._get(url)
-                    
-                    if response and isinstance(response, dict):
-                        markets = response.get('markets', [])
-                        next_cursor = response.get('next_cursor')
-                        
-                        if markets:
-                            print(f"   PASS Found {len(markets)} markets on page {page_count + 1}")
-                            all_markets.extend(markets)
-                            page_count += 1
-                            
-                            # Continue pagination if more pages exist
-                            if next_cursor and page_count < 10:  # Limit to 10 pages max
-                                cursor = next_cursor
-                            else:
-                                print(f"   END Reached last page or page limit")
-                                break
-                        else:
-                            print(f"   EMPTY No markets on page {page_count + 1}")
-                            break
-                    else:
-                        print(f"   WARNING Invalid response on page {page_count + 1}")
-                        break
-                        
-                except Exception as e:
-                    print(f"   WARNING Error fetching page {page_count + 1}: {e}")
-                    break
-            
-            print(f"   TARGET TOTAL MARKETS FOUND: {len(all_markets)}")
-            
-            # Remove duplicates by ticker
-            seen_tickers = set()
-            unique_markets = []
-            for market in all_markets:
-                ticker = market.get('ticker', '')
-                if ticker and ticker not in seen_tickers:
-                    seen_tickers.add(ticker)
-                    unique_markets.append(market)
-            
-            print(f"   LIST UNIQUE MARKETS: {len(unique_markets)}")
-            return unique_markets
-            
-        except Exception as e:
-            print(f"FAIL Error fetching all markets: {e}")
-            return []
+        """Fetch open markets via rate-limited bulk pagination."""
+        return self._fetch_open_markets_bulk(max_pages=self._max_market_pages)
     
     def _preprocess_market_data(self, market: Dict[str, Any]) -> Dict[str, Any]:
         """Preprocess raw market data with calculated fields for analysis."""
@@ -559,8 +652,12 @@ class KalshiPredictionEngine:
         days_to_expiry = market_data.get('days_to_expiry', 0)
         is_short_term = market_data.get('is_short_term', False)
         
-        # KALSHI WEATHER-ONLY RESTRICTION
-        if not self._is_weather_market(ticker):
+        # KALSHI WEATHER-ONLY RESTRICTION (config-gated)
+        weather_only = bool(
+            self.config.get('kalshi_weather_only')
+            or (self.config.get('kalshi_trading') or {}).get('weather_only', False)
+        )
+        if weather_only and not self._is_weather_market(ticker):
             return {
                 'ticker': ticker,
                 'signal': None,
@@ -569,7 +666,8 @@ class KalshiPredictionEngine:
                 'action': None,
                 'position_size': 0,
                 'trade_link': self.get_market_trade_link(ticker),
-                'market_type': 'non_weather'
+                'market_type': 'non_weather',
+                'market_title': market_data.get('title') or '',
             }
         
         implied_prob = market_data.get('implied_probability', 0.5)
@@ -595,6 +693,7 @@ class KalshiPredictionEngine:
             'catalyst_score': 0.0,  # For unified analysis compatibility
             'sentiment': 0.5,  # Neutral sentiment for prediction markets
             'source': 'kalshi_prediction',
+            'market_title': market_data.get('title') or market_data.get('subtitle') or '',
             'cross_market_signals': [],
             'market_impact_analysis': {},
             'traditional_asset_opportunities': []
@@ -908,49 +1007,48 @@ class KalshiPredictionEngine:
         return analysis
 
     def _calculate_days_to_expiry(self, expiration_date) -> int:
-        """Calculate days until market expiration.
-        
-        Args:
-            expiration_date: Expiration date (string or datetime)
-            
-        Returns:
-            Number of days until expiration (0 if expired or unknown)
-        """
-        print(f"SCANNING DEBUG _calculate_days_to_expiry: Input = '{expiration_date}' (type: {type(expiration_date)})")
-        
+        """Calculate days until market expiration."""
+        if self._kalshi_expiry_debug:
+            print(
+                f"SCANNING DEBUG _calculate_days_to_expiry: Input = "
+                f"'{expiration_date}' (type: {type(expiration_date)})"
+            )
+
         if not expiration_date:
-            print("SCANNING DEBUG: expiration_date is None/empty, returning 0")
+            if self._kalshi_expiry_debug:
+                print("SCANNING DEBUG: expiration_date is None/empty, returning 0")
             return 0
-            
+
         try:
             from datetime import datetime, timezone
-            from engines.weather_consistency_engine_new import WeatherConsistencyEngine
-            
-            # Handle different date formats
+
             if isinstance(expiration_date, str):
-                # Try common date formats (FIXED: Added microseconds format)
+                exp_dt = None
                 for fmt in ['%Y-%m-%d', '%Y-%m-%dT%H:%M:%S', '%Y-%m-%dT%H:%M:%SZ', '%Y-%m-%dT%H:%M:%S.%fZ']:
                     try:
-                        print(f"SCANNING DEBUG: Trying format '{fmt}' on '{expiration_date}'")
+                        if self._kalshi_expiry_debug:
+                            print(f"SCANNING DEBUG: Trying format '{fmt}' on '{expiration_date}'")
                         exp_dt = datetime.strptime(expiration_date, fmt)
-                        print(f"SCANNING DEBUG: Successfully parsed with format '{fmt}', exp_dt = {exp_dt}")
+                        if self._kalshi_expiry_debug:
+                            print(f"SCANNING DEBUG: Successfully parsed with format '{fmt}', exp_dt = {exp_dt}")
                         break
                     except ValueError as e:
-                        print(f"SCANNING DEBUG: Format '{fmt}' failed: {e}")
+                        if self._kalshi_expiry_debug:
+                            print(f"SCANNING DEBUG: Format '{fmt}' failed: {e}")
                         continue
-                else:
-                    print("SCANNING DEBUG: All formats failed, returning 0")
-                    return 0  # Couldn't parse date
+                if exp_dt is None:
+                    if self._kalshi_expiry_debug:
+                        print("SCANNING DEBUG: All formats failed, returning 0")
+                    return 0
             else:
                 exp_dt = expiration_date
-                print(f"SCANNING DEBUG: Using datetime object directly: {exp_dt}")
-                
-            # Calculate days difference
+                if self._kalshi_expiry_debug:
+                    print(f"SCANNING DEBUG: Using datetime object directly: {exp_dt}")
+
             now = datetime.now()
             days_diff = (exp_dt - now).days
-            
-            return max(0, days_diff)  # Don't return negative days
-            
+            return max(0, days_diff)
+
         except Exception:
             return 0
 
@@ -3048,13 +3146,14 @@ class KalshiPredictionEngine:
         title_upper = title.upper()
         
         # Election markets
+        election_year = str(datetime.now().year)
         if 'POLPRES' in ticker_upper or 'PRESIDENT' in title_upper or 'ELECTION' in title_upper:
             if 'D' in ticker_upper or 'DEMOCRAT' in title_upper:
-                return ['democrat', 'democrats', 'biden', 'kamala', 'harris', 'democratic party', 'election 2024']
+                return ['democrat', 'democrats', 'biden', 'kamala', 'harris', 'democratic party', f'election {election_year}']
             elif 'R' in ticker_upper or 'REPUBLICAN' in title_upper:
-                return ['republican', 'republicans', 'trump', 'donald', 'desantis', 'election 2024']
+                return ['republican', 'republicans', 'trump', 'donald', 'desantis', f'election {election_year}']
             else:
-                return ['election 2024', 'president', 'polls', 'voting', 'democrat', 'republican']
+                return [f'election {election_year}', 'president', 'polls', 'voting', 'democrat', 'republican']
         
         # Fed rate markets
         elif 'FED' in ticker_upper or 'RATE' in title_upper:

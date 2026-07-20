@@ -51,9 +51,25 @@ def _has_volume(signal: Dict[str, Any]) -> bool:
 
 def assess_signal_data_quality(signal: Dict[str, Any]) -> SignalDataQuality:
     """Assess signal completeness for alert vs paper eligibility."""
+    # Stamp identity from shared registry before judging company validity
+    try:
+        from utils.company_identity_registry import get_identity_registry
+        get_identity_registry().stamp_item(signal)
+    except Exception:
+        pass
+
     fc = signal.get("fact_check") or {}
     if fc.get("is_valid") is False:
-        return SignalDataQuality.INVALID_COMPANY
+        # Soft unresolved: registry may still have a real name
+        try:
+            from utils.company_identity_registry import get_identity_registry
+            if get_identity_registry().resolve_for_alert(signal):
+                fc["is_valid"] = True
+                signal["fact_check"] = fc
+            else:
+                return SignalDataQuality.INVALID_COMPANY
+        except Exception:
+            return SignalDataQuality.INVALID_COMPANY
 
     if not _has_price(signal):
         return SignalDataQuality.MISSING_PRICE
@@ -68,7 +84,15 @@ def assess_signal_data_quality(signal: Dict[str, Any]) -> SignalDataQuality:
 
     name = signal.get("company_name") or (fc.get("company_info") or {}).get("name")
     if is_placeholder(name) and fc.get("is_valid") is not True:
-        return SignalDataQuality.INVALID_COMPANY
+        try:
+            from utils.company_identity_registry import get_identity_registry
+            resolved = get_identity_registry().resolve_for_alert(signal)
+            if resolved:
+                signal["company_name"] = resolved
+            else:
+                return SignalDataQuality.INVALID_COMPANY
+        except Exception:
+            return SignalDataQuality.INVALID_COMPANY
 
     if not _has_volume(signal):
         return SignalDataQuality.PARTIAL_PRICE_ONLY
@@ -190,20 +214,76 @@ def resolve_pop_pct(signal: Any) -> Optional[float]:
     return pct if pct > 0 else None
 
 
+def volume_from_history(hist: Any) -> Optional[int]:
+    """Average volume from a shared coalition/market history frame."""
+    if hist is None:
+        return None
+    try:
+        if getattr(hist, "empty", False):
+            return None
+        if "Volume" not in getattr(hist, "columns", []):
+            return None
+        avg = int(float(hist["Volume"].mean()))
+        return avg if avg > 0 else None
+    except Exception:
+        return None
+
+
+def price_from_history(hist: Any) -> Optional[float]:
+    """Last close from a shared history frame."""
+    if hist is None:
+        return None
+    try:
+        if getattr(hist, "empty", False):
+            return None
+        if "Close" not in getattr(hist, "columns", []):
+            return None
+        price = float(hist["Close"].iloc[-1])
+        return price if price > 0 else None
+    except Exception:
+        return None
+
+
 def enrich_signal_market_fields(
     signal: Dict[str, Any],
     *,
     market_cache: Any = None,
     price_fetcher: Any = None,
+    coalition: Any = None,
 ) -> bool:
-    """Fetch missing price/volume so signal can reach COMPLETE quality."""
+    """Fetch missing price/volume so signal can reach COMPLETE quality.
+
+    Prefer cycle SymbolCoalition batch (already fetched) before external APIs.
+    """
     sym = str(signal.get("symbol") or signal.get("ticker") or "").upper().strip()
     if not sym:
         return False
 
+    # 1) Reuse coalition prices / histories when available
+    if coalition is not None:
+        prices = getattr(coalition, "prices", None) or {}
+        if not _has_price(signal) and sym in prices:
+            apply_fetched_price(signal, prices.get(sym))
+            signal["_price_source"] = "coalition_prices"
+
+        batch = getattr(coalition, "history_batch", None) or {}
+        hist = batch.get(sym)
+        if hist is not None:
+            if not _has_price(signal):
+                apply_fetched_price(signal, price_from_history(hist))
+                if _has_price(signal):
+                    signal["_price_source"] = "coalition_history"
+            if not _has_volume(signal):
+                vol = volume_from_history(hist)
+                if vol:
+                    apply_fetched_volume(signal, vol)
+                    signal["_volume_source"] = "coalition_history"
+
     if not _has_price(signal) and price_fetcher is not None:
         try:
             apply_fetched_price(signal, price_fetcher.get_real_price(sym))
+            if _has_price(signal):
+                signal["_price_source"] = "price_fetcher"
         except Exception:
             pass
 
@@ -211,6 +291,8 @@ def enrich_signal_market_fields(
         getter = getattr(market_cache, "get_avg_volume", None)
         if callable(getter):
             apply_fetched_volume(signal, getter(sym))
+            if _has_volume(signal):
+                signal["_volume_source"] = "market_cache"
 
     return assess_signal_data_quality(signal) == SignalDataQuality.COMPLETE
 

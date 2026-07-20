@@ -1,16 +1,12 @@
 """
 📊 MICROSTRUCTURE ENGINE
 
-Advanced market microstructure analysis system for identifying "easy trades" in
-liquidity anomalies, volume imbalances, and short-lived pricing inefficiencies.
+Capability-honest microstructure analysis.
 
-Features:
-- Order Flow Analysis (bid/ask imbalances, volume spikes)
-- Liquidity Detection (thin markets, wide spreads)
-- Volume Anomaly Detection (unusual trading activity)
-- Price Impact Assessment (temporary vs permanent price moves)
-- Microstructure Edge Detection (short-term mean reversion opportunities)
-- High-Confidence Microstructure Trade Identification (flow-based edges)
+Without consolidated L2 / full depth (Alpaca Basic / IEX quotes):
+  capability = limited_quote_microstructure
+  — never claim "easy trades" from canned profiles alone.
+  — use bid/ask/spread/slippage when available; else degrade size or block aggressive entries.
 """
 
 import asyncio
@@ -22,6 +18,8 @@ import os
 import math
 import statistics
 from collections import defaultdict
+
+from core.runtime_paths import engine_state_path
 
 try:
     from engines.kalshi_engine import KalshiPredictionEngine
@@ -144,57 +142,62 @@ class MicrostructureProfile:
         return reversion_probability, reversion_speed
 
     def get_easy_microstructure_trade(self, current_data: Dict[str, Any]) -> Tuple[float, str, str]:
-        """Get easy trade based on microstructure analysis."""
+        """Legacy name kept for callers — capability-gated; never claims easy L2 trades."""
+        capability = str(
+            current_data.get("capability")
+            or getattr(self, "capability", None)
+            or "limited_quote_microstructure"
+        )
+        has_quote = any(
+            current_data.get(k) is not None
+            for k in ("bid", "ask", "bid_price", "ask_price", "spread_bps")
+        )
+        has_depth = bool(current_data.get("l2_depth") or current_data.get("full_depth"))
 
-        # Check for various anomalies
+        if capability == "limited_quote_microstructure" and not has_depth:
+            # Without real L2: only soft liquidity/spread advice, never "easy trade"
+            spread = current_data.get("spread_bps")
+            try:
+                spread_f = float(spread) if spread is not None else None
+            except (TypeError, ValueError):
+                spread_f = None
+            if spread_f is not None and spread_f > 50:
+                return 0.2, "Wide spread under limited_quote_microstructure — degrade size / block aggressive", "DEGRADE_OR_BLOCK"
+            if has_quote:
+                return 0.35, "Limited quote microstructure only — no L2 easy-trade claim", "MONITOR"
+            return 0.15, "No bid/ask/depth — cannot assert microstructure edge", "BLOCK_AGGRESSIVE"
+
+        # Full-depth path (only when explicitly available)
         anomalies = []
-
-        # Volume anomaly
         current_vol = current_data.get('current_volume', 0)
         recent_avg_vol = current_data.get('recent_avg_volume', 0)
         vol_anomaly, vol_zscore = self.detect_volume_anomaly(current_vol, recent_avg_vol)
         if vol_anomaly:
             anomalies.append(('volume_spike', vol_zscore))
-
-        # Price anomaly
         current_price = current_data.get('current_price', 0)
         recent_prices = current_data.get('recent_prices', [])
         price_anomaly, price_zscore = self.detect_price_anomaly(current_price, recent_prices)
         if price_anomaly:
             anomalies.append(('price_move', price_zscore))
-
-        # Flow imbalance
         bid_vol = current_data.get('bid_volume', 0)
         ask_vol = current_data.get('ask_volume', 0)
         flow_imbalance, imbalance_ratio = self.detect_flow_imbalance(bid_vol, ask_vol)
         if flow_imbalance:
             anomalies.append(('flow_imbalance', imbalance_ratio))
-
         if not anomalies:
-            return 0.5, "No microstructure anomalies detected", "MONITOR"
-
-        # Find strongest anomaly
+            return 0.4, "No microstructure anomalies (full depth path)", "MONITOR"
         strongest_anomaly = max(anomalies, key=lambda x: abs(x[1]))
         anomaly_type, anomaly_strength = strongest_anomaly
-
-        # Predict reversion
-        time_since = current_data.get('time_since_anomaly', 5)  # minutes
+        time_since = current_data.get('time_since_anomaly', 5)
         reversion_prob, reversion_speed = self.predict_microstructure_reversion(
             anomaly_type, anomaly_strength, time_since
         )
-
-        # Easy trade conditions
-        if reversion_prob > 0.75 and abs(anomaly_strength) > 2.0:
+        if reversion_prob > 0.75 and abs(anomaly_strength) > 2.0 and has_depth:
             direction = "BUY" if (anomaly_type == 'price_move' and anomaly_strength < 0) or \
                                (anomaly_type == 'flow_imbalance' and anomaly_strength > 0) else "SELL"
-            confidence = min(0.9, reversion_prob * 1.1)
-            return confidence, f"Strong {anomaly_type} anomaly ({anomaly_strength:.1f}σ) with {reversion_prob:.1%} reversion probability within {reversion_speed:.0f} minutes", f"{direction} MICRO REVERSION"
-
-        elif reversion_prob > 0.65 and time_since < 10:  # Recent anomaly
-            direction = "FADE" if anomaly_strength > 0 else "BUY"
-            return 0.75, f"Recent {anomaly_type} anomaly suggests short-term reversion", f"{direction} RECENT ANOMALY"
-
-        return 0.6, f"Weak {anomaly_type} signal - monitor for strengthening", "MONITOR CLOSELY"
+            confidence = min(0.75, reversion_prob)
+            return confidence, f"{anomaly_type} with depth ({anomaly_strength:.1f}σ) rev {reversion_prob:.0%} ~{reversion_speed:.0f}m", f"{direction} MICRO"
+        return 0.45, f"Weak {anomaly_type} — monitor", "MONITOR"
 
 
 @dataclass
@@ -232,30 +235,57 @@ class MicrostructureAnalysis:
 
 class MicrostructureEngine:
     """
-    📊 Microstructure Engine
+    Capability-honest microstructure analysis.
 
-    Specialized AI for analyzing market microstructure and finding "easy trades"
-    based on order flow anomalies and short-term pricing inefficiencies.
+    Default capability: limited_quote_microstructure (Alpaca Basic / no consolidated L2).
+    Canned profiles are diagnostic priors only — they never authorize "easy trades".
     """
+
+    CAPABILITY_LIMITED = "limited_quote_microstructure"
+    CAPABILITY_FULL_DEPTH = "full_depth_microstructure"
 
     def __init__(self, kalshi_engine: KalshiPredictionEngine, scenario_graph: ScenarioGraphEngine):
         self.kalshi = kalshi_engine
         self.scenario_graph = scenario_graph
+        self.capability = self.CAPABILITY_LIMITED
 
-        # Microstructure profile database
+        # Microstructure profile database (diagnostic priors only)
         self.microstructure_profiles: Dict[str, MicrostructureProfile] = {}
 
         # Analysis results
         self.microstructure_analyses: Dict[str, MicrostructureAnalysis] = {}
 
         # Data files
-        self.profiles_file = "microstructure_profiles.json"
-        self.analyses_file = "microstructure_analyses.json"
+        self.profiles_file = engine_state_path("microstructure_profiles.json")
+        self.analyses_file = engine_state_path("microstructure_analyses.json")
 
         # Initialize with known microstructure profiles
         self._initialize_microstructure_profiles()
         self._load_data()
 
+    def assess_entry_permission(self, market_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Return size_mult / block_aggressive based on real quotes, not canned profiles."""
+        data = dict(market_data or {})
+        data.setdefault("capability", self.capability)
+        conf, rationale, action = MicrostructureProfile(
+            market_name=str(data.get("symbol") or "UNKNOWN"),
+            market_type=str(data.get("market_type") or "equity"),
+        ).get_easy_microstructure_trade(data)
+        block = action in ("BLOCK_AGGRESSIVE", "DEGRADE_OR_BLOCK") or conf < 0.25
+        size_mult = 1.0
+        if action == "DEGRADE_OR_BLOCK":
+            size_mult = 0.35
+        elif self.capability == self.CAPABILITY_LIMITED:
+            size_mult = 0.7 if conf >= 0.3 else 0.4
+        return {
+            "capability": self.capability,
+            "confidence": conf,
+            "rationale": rationale,
+            "action": action,
+            "block_aggressive": block,
+            "size_multiplier": size_mult,
+            "claims_easy_trade": False,
+        }
     def _initialize_microstructure_profiles(self):
         """Initialize with known market microstructure profiles."""
 
@@ -529,7 +559,9 @@ class MicrostructureEngine:
         return anomaly_type, anomaly_strength, reversion_prob, reversion_speed, easy_confidence, rationale, action
 
     def get_easy_microstructure_trades(self, min_confidence: float = 0.75) -> List[Dict[str, Any]]:
-        """Find microstructure opportunities with strong reversion signals."""
+        """Under limited_quote_microstructure, never emit canned-profile 'easy trades'."""
+        if getattr(self, "capability", self.CAPABILITY_LIMITED) == self.CAPABILITY_LIMITED:
+            return []  # No fake L2 edge from profile database
 
         easy_trades = []
 

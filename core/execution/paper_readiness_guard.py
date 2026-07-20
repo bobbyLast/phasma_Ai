@@ -11,6 +11,12 @@ from core.execution.execution_modes import ExecutionMode, normalize_execution_co
 from core.execution.outcome_grader import OutcomeGrader
 from core.execution.signal_outcome_tracker import SignalOutcomeTracker
 from utils.trade_memory import TradeMemory, get_trade_memory
+from utils.confidence_utils import normalize_confidence_to_pct
+from utils.signal_data_quality import (
+    SignalDataQuality,
+    assess_signal_data_quality,
+    is_paper_trade_eligible,
+)
 
 PAPER_ALPACA_URL = "https://paper-api.alpaca.markets"
 
@@ -44,13 +50,7 @@ class ReadinessResult:
 def _normalize_confidence_pct(confidence: Any) -> Optional[float]:
     if confidence is None:
         return None
-    try:
-        val = float(confidence)
-    except (TypeError, ValueError):
-        return None
-    if val <= 1:
-        val *= 100.0
-    return val
+    return normalize_confidence_to_pct(confidence)
 
 
 def _alpaca_creds_from_env() -> Tuple[Optional[str], Optional[str], str]:
@@ -211,6 +211,17 @@ class PaperReadinessGuard:
             price = signal.get("entry_price")
         if exec_cfg.get("require_price", True) and (price is None or float(price) <= 0):
             failures.append("current_price_missing")
+
+        quality_raw = signal.get("data_quality")
+        if quality_raw:
+            try:
+                quality = SignalDataQuality(str(quality_raw))
+            except ValueError:
+                quality = assess_signal_data_quality(signal)
+        else:
+            quality = assess_signal_data_quality(signal)
+        if not is_paper_trade_eligible(quality):
+            failures.append("signal_data_quality_not_complete")
 
         conf = _normalize_confidence_pct(signal.get("confidence"))
         floor = safety.get("block_low_confidence_below", 65)

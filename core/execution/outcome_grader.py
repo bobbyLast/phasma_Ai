@@ -400,3 +400,160 @@ class OutcomeGrader:
             for ticker, stats in report["by_ticker_bottom"]:
                 print(f"  {ticker}: n={stats['count']} avg_ret={stats['avg_return_pct']:+.2f}%")
         print("=" * 72 + "\n")
+
+    def multi_axis_grade(self, record: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Grade event/cause/relationship/timing/probability/execution separately.
+
+        Winning trade + bad reasoning must NOT strengthen causal rules.
+        Losing trade + good thesis + bad fill must NOT weaken event model.
+        """
+        grading = record.get("grading") or {}
+        horizons = grading.get("horizons") or {}
+        best = horizons.get("1d") or horizons.get("eod") or horizons.get("1h") or {}
+        pnl_outcome = best.get("outcome") or grading.get("final_outcome") or "unknown"
+        direction_ok = bool(best.get("direction_correct") or grading.get("was_direction_correct"))
+        timing = best.get("timing_quality") or grading.get("was_timing_good")
+
+        thesis = record.get("thesis") or record.get("causal_hypothesis") or {}
+        if isinstance(thesis, str):
+            thesis = {"mechanism": thesis}
+        causal_status = str(thesis.get("status") or record.get("causal_status") or "unknown")
+        event_type = str(record.get("event_type") or "unknown")
+        edge_valid = record.get("relationship_edge_valid")
+        claimed_prob = record.get("calibrated_probability") or (record.get("forecast") or {}).get("probability")
+        fill_quality = str(record.get("fill_quality") or "unknown")
+        research_only = bool(record.get("research_only"))
+
+        axes = {
+            "event_detection": {
+                "grade": "pass" if event_type and event_type != "unknown" else "unknown",
+                "feeds_event_model": True,
+                "feeds_causal_model": False,
+            },
+            "classification": {
+                "grade": "pass" if record.get("event_scope") or event_type else "unknown",
+                "feeds_event_model": True,
+                "feeds_causal_model": False,
+            },
+            "cause": {
+                # PnL win does not validate cause; require explicit postmortem or contradiction-free
+                "grade": (
+                    "pass" if causal_status in ("probable_primary", "confirmed") and not record.get("causal_contradicted")
+                    else "fail" if record.get("causal_contradicted") or causal_status == "contradicted"
+                    else "unknown"
+                ),
+                "feeds_event_model": False,
+                "feeds_causal_model": pnl_outcome != "win" or causal_status in ("probable_primary", "confirmed"),
+                "note": "win+bad_reasoning_does_not_strengthen",
+            },
+            "relationship": {
+                "grade": "pass" if edge_valid is True else "fail" if edge_valid is False else "unknown",
+                "feeds_event_model": False,
+                "feeds_causal_model": False,
+                "feeds_relationship_graph": edge_valid is True and not research_only,
+            },
+            "direction_timing": {
+                "grade": "pass" if direction_ok and timing in ("excellent", "good", True) else (
+                    "fail" if best else "unknown"
+                ),
+                "feeds_event_model": False,
+                "feeds_causal_model": False,
+            },
+            "probability": {
+                "grade": "calibrated" if claimed_prob is not None and best else "unknown",
+                "claimed": claimed_prob,
+                "realized_hit": direction_ok if best else None,
+                "feeds_calibration": True,
+            },
+            "entry_execution_exit": {
+                "grade": fill_quality if fill_quality != "unknown" else (
+                    "pass" if pnl_outcome == "win" else "unknown"
+                ),
+                # Bad fill on good thesis: do not weaken event model
+                "feeds_event_model": fill_quality not in ("poor", "slippage_bad"),
+                "feeds_causal_model": False,
+            },
+            "risk_sizing": {
+                "grade": "pass" if not record.get("risk_breach") else "fail",
+                "feeds_event_model": False,
+                "feeds_causal_model": False,
+            },
+            "pnl_outcome": pnl_outcome,
+        }
+        return axes
+
+    def apply_learning_updates(self) -> Dict[str, Any]:
+        """Push multi-axis grades into AdaptiveConfidenceThreshold with decay / champion-challenger."""
+        updates = {
+            "threshold_records": 0,
+            "causal_updates_skipped_bad_reasoning_wins": 0,
+            "calibration_samples": 0,
+            "champion_challenger": None,
+        }
+        try:
+            from engines.adaptive_confidence_threshold import AdaptiveConfidenceThreshold
+            act = AdaptiveConfidenceThreshold()
+        except Exception as exc:
+            logger.warning("AdaptiveConfidenceThreshold unavailable: %s", exc)
+            return updates
+
+        for record in self.tracker.get_all_records():
+            grading = record.get("grading") or {}
+            if not grading.get("horizons"):
+                continue
+            axes = self.multi_axis_grade(record)
+            record.setdefault("grading", {})["multi_axis"] = axes
+
+            # Probability / PnL feed thresholds; causal only when cause axis allows
+            conf = record.get("confidence")
+            best = (grading.get("horizons") or {}).get("1d") or {}
+            ret = float(best.get("return_pct") or 0)
+            is_win = best.get("outcome") == "win" or bool(best.get("direction_correct"))
+            try:
+                act.record_trade_outcome(float(conf or 55), ret, bool(is_win))
+                updates["threshold_records"] += 1
+            except Exception:
+                pass
+
+            if axes["cause"].get("grade") == "pass" and axes["pnl_outcome"] == "loss":
+                # Good thesis, bad outcome — do not punish event detection
+                pass
+            if axes["pnl_outcome"] == "win" and axes["cause"].get("grade") != "pass":
+                updates["causal_updates_skipped_bad_reasoning_wins"] += 1
+
+            if axes["probability"].get("feeds_calibration") and axes["probability"].get("claimed") is not None:
+                updates["calibration_samples"] += 1
+
+        # Champion/challenger: compare current vs challenger floor (+2 pts if hit rate better)
+        try:
+            report = self.get_calibration_report()
+            hit = float((report.get("paper_traded") or {}).get("hit_rate") or 0)
+            current = float(act.current_threshold)
+            challenger = min(act.max_threshold, current + 2.0)
+            champion = current
+            if hit < 0.45:
+                champion = challenger  # raise bar when underperforming
+            elif hit > 0.58:
+                champion = max(act.min_threshold, current - 1.0)
+            updates["champion_challenger"] = {
+                "current": current,
+                "challenger": challenger,
+                "selected": champion,
+                "paper_hit_rate": hit,
+            }
+            if abs(champion - current) >= 0.5:
+                act.current_threshold = champion
+                act.save_performance_data()
+                try:
+                    act.update_config_threshold()
+                except Exception:
+                    pass
+        except Exception as exc:
+            logger.debug("champion/challenger skipped: %s", exc)
+
+        try:
+            self.tracker._save()
+        except Exception:
+            pass
+        return updates

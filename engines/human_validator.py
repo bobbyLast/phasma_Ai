@@ -34,7 +34,7 @@ class HumanValidator:
             Validation result with details
         """
         validation_results = {
-            'symbol': signal.get('ticker', 'UNKNOWN'),
+            'symbol': signal.get('ticker') or signal.get('symbol') or 'N/A',
             'confluence_score': signal.get('confluence_score', 0),
             'validation_items': {},
             'total_score': 0,

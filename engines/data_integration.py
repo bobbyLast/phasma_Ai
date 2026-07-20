@@ -350,7 +350,11 @@ def integrate_with_underground_discovery():
         
         # Extract ticker if available
         tickers = article.get('tickers', [])
-        ticker = tickers[0] if tickers else 'UNKNOWN'
+        title = article.get('title', '')
+        ticker = tickers[0] if tickers else ''
+        if not ticker and title:
+            from utils.company_resolver import get_resolver
+            ticker = get_resolver().resolve('', title).get('symbol') or ''
         
         # Calculate strength based on confidence and sentiment
         strength = signal['confidence']
@@ -363,7 +367,7 @@ def integrate_with_underground_discovery():
             strength=strength,
             evidence=f"News signal: {article.get('title', '')[:100]}",
             timestamp=datetime.now(),
-            sources=[article.get('source', 'unknown')],
+            sources=[article.get('source') or 'news_feed'],
             liquidity_score=0.7,  # Default
             dilution_risk='LOW'
         )

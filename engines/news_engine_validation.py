@@ -512,6 +512,36 @@ class CompanyValidator:
         symbol_upper = symbol.upper()
         current_time = time.time()
 
+        # 0. IDENTITY REGISTRY — reuse known company names across engines
+        try:
+            from utils.company_identity_registry import get_identity_registry
+            reg = get_identity_registry()
+            reg_row = reg.get(symbol_upper)
+            if reg_row and reg_row.get("company_name") and reg_row.get("is_tradeable", True):
+                name = str(reg_row["company_name"]).strip()
+                if name and not name.startswith("$") and name.lower() not in ("unknown", "n/a"):
+                    result = {
+                        "is_valid": True,
+                        "validation_score": 0.85,
+                        "company_info": {
+                            "symbol": symbol_upper,
+                            "name": name,
+                            "full_name": name,
+                            "company_name": name,
+                            "sector": reg_row.get("sector") or "Equities",
+                            "industry": reg_row.get("sector") or "Equities",
+                            "avg_volume": reg_row.get("avg_volume") or "N/A",
+                            "validation_method": "identity_registry",
+                            "resolver_status": reg_row.get("resolver_status") or "registry",
+                        },
+                        "risk_level": "MEDIUM",
+                    }
+                    if reg_row.get("last_price"):
+                        result["company_info"]["price_range"] = f"${float(reg_row['last_price']):.2f}"
+                    return result
+        except Exception:
+            pass
+
         # 1. BLOCKED SYMBOLS - Never trade these (currencies, commodities)
         if symbol_upper in self.blocked_symbols:
             self.logger.info(f"Blocked symbol: {symbol_upper} - not tradeable")
@@ -532,31 +562,50 @@ class CompanyValidator:
         if symbol_upper in self.indices:
             return self._validate_index(symbol_upper, news_item)
 
-        # 3. VALIDATION CACHE - Recently validated symbols
+        # 3. VALIDATION CACHE - Recently validated symbols (skip stale negatives if registry knows name)
         if symbol_upper in self.validation_cache:
             cached_data = self.validation_cache[symbol_upper]
             if current_time - cached_data.get('timestamp', 0) < self.cache_expiry:
-                self.logger.info(f"Valid cache hit: {symbol_upper} - using cached validation")
-                cached_data = dict(cached_data)
-                cached_data["resolver_status"] = "cache_exact"
-                return self._normalize_fact_check({
-                    'is_valid': cached_data.get('is_valid', False),
-                    'validation_score': cached_data.get('validation_score', 0.0),
-                    'company_info': cached_data,
-                    'risk_level': self._calculate_risk_level(cached_data)
-                }, symbol_upper, news_item.get('title'))
+                skip_negative = False
+                if cached_data.get('is_valid') is False:
+                    try:
+                        from utils.company_identity_registry import get_identity_registry
+                        if get_identity_registry().company_name(symbol_upper):
+                            skip_negative = True
+                    except Exception:
+                        pass
+                if not skip_negative and cached_data.get('is_valid') is not False:
+                    self.logger.info(f"Valid cache hit: {symbol_upper} - using cached validation")
+                    cached_data = dict(cached_data)
+                    cached_data["resolver_status"] = "cache_exact"
+                    return self._normalize_fact_check({
+                        'is_valid': cached_data.get('is_valid', False),
+                        'validation_score': cached_data.get('validation_score', 0.0),
+                        'company_info': cached_data,
+                        'risk_level': self._calculate_risk_level(cached_data)
+                    }, symbol_upper, news_item.get('title'))
+                if not skip_negative and cached_data.get('is_valid') is False:
+                    # Keep old negative behavior only when registry has no name
+                    pass
 
         # 4. REJECTED CACHE - Recently rejected symbols
         if symbol_upper in self.rejected_cache:
             cached_data = self.rejected_cache[symbol_upper]
             if current_time - cached_data.get('timestamp', 0) < self.rejected_cache_expiry:
-                self.logger.info(f"Rejected cache hit: {symbol_upper} - using cached rejection")
-                return {
-                    'is_valid': False,
-                    'validation_score': 0.0,
-                    'company_info': cached_data,
-                    'risk_level': 'INVALID'
-                }
+                try:
+                    from utils.company_identity_registry import get_identity_registry
+                    if get_identity_registry().company_name(symbol_upper):
+                        cached_data = None
+                except Exception:
+                    pass
+                if cached_data is not None:
+                    self.logger.info(f"Rejected cache hit: {symbol_upper} - using cached rejection")
+                    return {
+                        'is_valid': False,
+                        'validation_score': 0.0,
+                        'company_info': cached_data,
+                        'risk_level': 'INVALID'
+                    }
 
         # 5. NEW SYMBOL - Use enhanced validation with multiple sources
         self.logger.info(f"New symbol: {symbol_upper} - using enhanced validation")

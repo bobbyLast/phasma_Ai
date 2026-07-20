@@ -603,12 +603,24 @@ class PhasmaMonteCarloEngine:
         # Get optimal exit from drift simulation (when returns peak)
         drift_optimal = drift_results.get('optimal_exit_day', dte // 2)
         
-        # Risk-neutral POP tells us confidence level
-        if risk_neutral_results is None:
-            risk_neutral_pop = 50  # Default medium confidence
-        else:
-            risk_neutral_pop = risk_neutral_results.get('pop_from_sim', 50)
-        
+        # Risk-neutral POP tells us confidence level (no fabricated default)
+        risk_neutral_pop = None
+        if risk_neutral_results is not None:
+            risk_neutral_pop = risk_neutral_results.get('pop_from_sim')
+        if risk_neutral_pop is None:
+            risk_neutral_pop = drift_results.get('pop_from_sim')
+        if risk_neutral_pop is not None:
+            try:
+                risk_neutral_pop = float(risk_neutral_pop)
+                if 0 < risk_neutral_pop <= 1:
+                    risk_neutral_pop *= 100.0
+            except (TypeError, ValueError):
+                risk_neutral_pop = None
+
+        if risk_neutral_pop is None:
+            optimal_close = max(1, min(int(drift_optimal * 0.60), dte))
+            return optimal_close
+
         # High POP = can hold longer (more confident)
         # Low POP = close early (less confident)
         if risk_neutral_pop >= 60:

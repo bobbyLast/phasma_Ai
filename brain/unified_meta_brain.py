@@ -77,26 +77,22 @@ class UnifiedMetaBrain:
     def _initialize_intelligence_systems(self):
         """Initialize all intelligence systems"""
         print("\n🧠 Loading Intelligence Systems...")
-        
-        # Universal Trading Intelligence
-        from brain.universal_trading_intelligence import UniversalTradingIntelligence
-        self.universal_intel = UniversalTradingIntelligence(self.config)
-        print("   ✅ Universal Intelligence - All 15 strategies")
-        
-        # Bull Run Detector
-        from brain.bull_run_detector import BullRunDetector
-        self.bull_run_detector = BullRunDetector(self.config)
-        print("   ✅ Bull Run Detector - Multi-source confirmation")
-        
-        # News-Driven Scanner
-        from brain.news_driven_scanner import NewsDrivenScanner
-        self.news_scanner = NewsDrivenScanner(self.config)
-        print("   ✅ News Scanner - News-driven stock discovery")
-        
-        # Integrated News Sources (20 sources)
+
         from engines.news_engine_integrated import IntegratedNewsSources
         self.news_sources = IntegratedNewsSources(self.config)
-        print("   ✅ News Sources - 20 integrated feeds")
+
+        from brain.universal_trading_intelligence import UniversalTradingIntelligence
+        self.universal_intel = UniversalTradingIntelligence(self.config, news_sources=self.news_sources)
+        print("   ✅ Universal Intelligence - All 15 strategies")
+
+        from brain.bull_run_detector import BullRunDetector
+        self.bull_run_detector = BullRunDetector(self.config, news_sources=self.news_sources)
+        print("   ✅ Bull Run Detector - Multi-source confirmation")
+
+        from brain.news_driven_scanner import NewsDrivenScanner
+        self.news_scanner = NewsDrivenScanner(self.config, news_sources=self.news_sources)
+        print("   ✅ News Scanner - News-driven stock discovery")
+        print("   ✅ News Sources - 20 integrated feeds (shared)")
     
     def _initialize_data_sources(self):
         """Initialize all data sources"""
@@ -207,9 +203,9 @@ class UnifiedMetaBrain:
                 return dict(cached)
         
         # Phase 1 — INGEST (single fetch, universe, price enrich) — always first
-        print("\n📥 PHASE 1 — INGEST (once per cycle)")
-        print("-" * 40)
         if cycle_context is None:
+            print("\n📥 PHASE 1 — INGEST (once per cycle)")
+            print("-" * 40)
             try:
                 cycle_context = await CycleDataContext.ingest(
                     self.news_sources,
@@ -227,6 +223,8 @@ class UnifiedMetaBrain:
                     {"exception_type": type(exc).__name__, "exception_message": str(exc)[:300]},
                 )
         else:
+            print("\n♻️ PHASE 1 — INGEST: reusing cycle snapshot (single fetch this cycle)")
+            print("-" * 40)
             print("   Using pre-built cycle context from caller")
             cycle_context._log_phase("phase1_ingest_reused", {
                 "items": len(cycle_context.ingested_news),
@@ -917,14 +915,36 @@ class UnifiedMetaBrain:
             if isinstance(result, list):
                 combined.extend(result)
         
-        # Remove duplicates by symbol
+        # Normalize ticker / tickers[] into symbol before dedupe
+        normalized = []
+        for opp in combined:
+            if not isinstance(opp, dict):
+                continue
+            row = dict(opp)
+            if not row.get("symbol"):
+                if row.get("ticker"):
+                    row["symbol"] = str(row["ticker"]).upper()
+                elif row.get("candidate_ticker"):
+                    row["symbol"] = str(row["candidate_ticker"]).upper()
+            tickers = row.get("tickers")
+            if isinstance(tickers, list) and tickers and not row.get("symbol"):
+                # Expand sector-wide into per-symbol rows
+                for t in tickers:
+                    clone = dict(row)
+                    clone["symbol"] = str(t).upper()
+                    clone.pop("tickers", None)
+                    normalized.append(clone)
+                continue
+            normalized.append(row)
+
         seen_symbols = set()
         unique_opportunities = []
         
-        for opp in combined:
-            symbol = opp.get('symbol', '')
+        for opp in normalized:
+            symbol = str(opp.get('symbol', '') or '').upper()
             if symbol and symbol not in seen_symbols:
                 seen_symbols.add(symbol)
+                opp["symbol"] = symbol
                 unique_opportunities.append(opp)
         
         print(f"   ✅ Combined: {len(combined)} total → {len(unique_opportunities)} unique")

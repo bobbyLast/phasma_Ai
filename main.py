@@ -335,36 +335,61 @@ class PhasmaTradingSystem:
         self.target_calculator = get_target_calculator()
         self.real_portfolio = LocalPortfolioLedger(self.config)
         
-        # 📊 Paper Trading Portfolio - Track AI performance without real money
-        if self.config.get('paper_trading', {}).get('enabled', False):
-            # Initialize Alpaca Paper Trading FIRST (real market data)
+        # Paper / Alpaca: enable when PAPER_ALPACA mode OR legacy paper_trading.enabled
+        exec_mode = str((self.config.get("execution") or {}).get("mode") or "ALERT_ONLY").upper()
+        want_paper = exec_mode in ("PAPER_ALPACA", "PAPER_INTERNAL") or bool(
+            self.config.get("paper_trading", {}).get("enabled", False)
+        )
+        self.paper_portfolio = None
+        self.alpaca_paper_trader = None
+        if want_paper:
             try:
                 self.alpaca_paper_trader = EnhancedAlpacaPaperTrader()
                 if self.alpaca_paper_trader.alpaca:
                     print("✅ Enhanced Alpaca Paper Trading Initialized - REAL MARKET DATA")
                     print("   Platform: Alpaca Paper Trading API")
-                    print("   Market Data: Real-time IEX feeds")
-                    print("   Features: Whole Stock Logic + Auto-Selling")
+                    print("   Mode target:", exec_mode)
                     print("   Account: Paper trading (no real money)")
                 else:
-                    print("⚠️ Alpaca Paper Trading failed - falling back to internal")
-                    self.paper_portfolio = get_paper_trading_portfolio(self.config)
+                    print("⚠️ Alpaca Paper Trading failed — set ALPACA_API_KEY + ALPACA_API_SECRET in .env")
+                    if exec_mode == "PAPER_INTERNAL" or not self.alpaca_paper_trader.alpaca:
+                        self.paper_portfolio = get_paper_trading_portfolio(self.config)
             except Exception as e:
                 print(f"⚠️ Alpaca Paper Trading Error: {e}")
                 print("   Falling back to internal paper trading")
                 self.paper_portfolio = get_paper_trading_portfolio(self.config)
                 self.alpaca_paper_trader = None
-            print("✅ Paper Trading Portfolio Initialized")
-            if hasattr(self, 'paper_portfolio') and self.paper_portfolio:
-                print(f"   Starting Capital: ${self.paper_portfolio.state['starting_capital']:,.2f}")
+            if self.paper_portfolio:
+                print(f"   Internal paper capital: ${self.paper_portfolio.state['starting_capital']:,.2f}")
         else:
-            self.paper_portfolio = None
-            print("⚠️ Paper Trading Disabled")
-            self.alpaca_paper_trader = None
+            print("⚠️ Paper Trading Disabled (execution.mode not PAPER_*)")
 
         self.execution_router = ExecutionRouter(self)
         self.signal_outcome_tracker = SignalOutcomeTracker()
         self.outcome_grader = OutcomeGrader(tracker=self.signal_outcome_tracker)
+        try:
+            from utils.trade_performance_ledger import get_trade_performance_ledger
+            self.trade_performance_ledger = get_trade_performance_ledger()
+        except Exception as exc:
+            print(f"⚠️ TradePerformanceLedger unavailable: {exc}")
+            self.trade_performance_ledger = None
+        try:
+            from engines.pattern_transfer_learner import get_pattern_transfer_learner
+            self.pattern_transfer_learner = get_pattern_transfer_learner()
+        except Exception as exc:
+            print(f"⚠️ PatternTransferLearner unavailable: {exc}")
+            self.pattern_transfer_learner = None
+        try:
+            from engines.kalshi_virtual_book import get_kalshi_virtual_book
+            self.kalshi_virtual_book = get_kalshi_virtual_book()
+        except Exception as exc:
+            print(f"⚠️ KalshiVirtualBook unavailable: {exc}")
+            self.kalshi_virtual_book = None
+        try:
+            self.trade_logger = TradeLogger()
+        except Exception as exc:
+            print(f"⚠️ TradeLogger unavailable: {exc}")
+            self.trade_logger = None
         self.cooldown_trade_memory = get_trade_memory()
         disabled_apis = audit_api_keys(self.config.data)
         if disabled_apis:
@@ -633,6 +658,11 @@ class PhasmaTradingSystem:
 
     def _reset_cycle_caches(self):
         self._price_cache = {}
+        try:
+            from utils.kalshi_rate_limiter import get_kalshi_rate_limiter
+            get_kalshi_rate_limiter(self.config).begin_cycle()
+        except Exception:
+            pass
 
     def _print_cycle_profile(
         self,
@@ -2777,6 +2807,42 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
                     current_price = getattr(signal, 'current_price', None) or self._get_cached_price(symbol, ctx)
                     if current_price and float(current_price) > 0:
                         signal.current_price = float(current_price)
+                    # Backfill volume/price from cycle coalition before quality gates
+                    try:
+                        sig_row = {
+                            "symbol": symbol,
+                            "current_price": getattr(signal, "current_price", None),
+                            "entry_price": getattr(signal, "entry_price", None),
+                            "avg_volume": getattr(signal, "avg_volume", None),
+                            "fact_check": getattr(signal, "fact_check", None) or {},
+                        }
+                        enrich_signal_market_fields(
+                            sig_row,
+                            market_cache=getattr(s, "market_cache", None),
+                            price_fetcher=getattr(s, "robust_price_fetcher", None),
+                            coalition=getattr(ctx, "symbol_coalition", None),
+                        )
+                        if sig_row.get("current_price"):
+                            signal.current_price = float(sig_row["current_price"])
+                        if sig_row.get("avg_volume"):
+                            signal.avg_volume = sig_row["avg_volume"]
+                        if isinstance(sig_row.get("fact_check"), dict):
+                            signal.fact_check = sig_row["fact_check"]
+                    except Exception:
+                        pass
+                    # Pattern-transfer boost from past winning setups
+                    learner = getattr(s, "pattern_transfer_learner", None)
+                    if learner is not None:
+                        try:
+                            learner.apply_to_signal_object(signal)
+                            boost = getattr(signal, "pattern_boost", 0) or 0
+                            if boost:
+                                print(
+                                    f"  🧠 {symbol}: pattern boost +{float(boost)*100:.1f}% "
+                                    f"(sim={getattr(signal, 'pattern_similarity', 0):.2f})"
+                                )
+                        except Exception:
+                            pass
 
                 has_catalyst = bool(
                     getattr(signal, 'rationale', '')
@@ -3222,15 +3288,18 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
         coalition_boost = {e.symbol: coalition.boost_for_symbol(e.symbol) for e in coalition.entries}
 
         # Heavy-mover / new-circulation watch list (shared history batch)
+        from utils.discovery_limits import discovery_limit
+        heavy_limit = int(discovery_limit(s.config, "heavy_mover_limit", 10) or 10)
+        momentum_limit = int(discovery_limit(s.config, "day_trade_momentum_limit", 30) or 30)
         heavy_movers = s.day_trading_scanner.scan_heavy_movers(
-            limit=10,
+            limit=heavy_limit,
             additional_symbols=news_symbols,
             history_batch=history_batch,
             coalition_boost=coalition_boost,
         )
 
         day_trading_signals = s.day_trading_scanner.scan_momentum_stocks(
-            limit=30, 
+            limit=momentum_limit, 
             additional_symbols=news_symbols,
             bankroll=current_bankroll,
             history_batch=history_batch,
@@ -3303,6 +3372,8 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
                 'symbol': signal['symbol'],
                 'title': signal['title'],
                 'source': 'day_trading',
+                'asset_class': 'DAY_TRADE',
+                'ledger_asset_class': 'DAY_TRADE',
                 'sentiment': 0.8 if signal['confidence'] > 70 else 0.6,
                 'catalyst_score': signal['confidence'] / 100,
                 'sector': signal['sector'],
@@ -3514,10 +3585,18 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
         if s.kalshi_engine:
             print("\n📊 Scanning Kalshi prediction markets for trading opportunities...")
             try:
+                shared_markets = None
+                if getattr(ctx, "cycle_data", None) is not None:
+                    shared_markets = getattr(ctx.cycle_data, "prediction_markets", None)
+                if not shared_markets:
+                    shared_markets = getattr(ctx, "app_ctx", ctx).__dict__.get("kalshi_markets_snapshot") if getattr(ctx, "app_ctx", None) else None
+                if not shared_markets:
+                    shared_markets = getattr(s, "_kalshi_markets_snapshot", None)
                 opportunities = s.kalshi_engine.scan_all_markets(
                     min_volume=100,
-                    max_markets=50,
+                    max_markets=150,
                     use_playbook=False,
+                    markets=shared_markets if shared_markets else None,
                 )
                 
                 if opportunities:
@@ -3530,19 +3609,27 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
                         
                         # Calculate position sizing for Kalshi bet
                         confidence = analysis.get('confidence', 0)
+                        try:
+                            confidence = float(confidence or 0)
+                        except (TypeError, ValueError):
+                            confidence = 0.0
+                        if confidence <= 0 or not analysis.get('signal'):
+                            continue
                         bankroll = s.real_portfolio.state["available_capital"]
 
                         # Use same dynamic risk calculation as day trading
                         risk_pct = s.day_trading_scanner.calculate_dynamic_risk(confidence)
                         bet_amount = bankroll * risk_pct
                         
+                        api_title = market.get('title') or market.get('subtitle') or ''
                         # Create unified opportunity structure
                         kalshi_opportunity = tag_intel_only_fields({
                             'symbol': analysis.get('ticker', market.get('ticker', '')),
-                            'title': f"Kalshi: {market.get('title', '')} - {analysis.get('signal', '')}",
+                            'title': api_title or f"Kalshi: {market.get('ticker', '')} - {analysis.get('signal', '')}",
+                            'market_title': api_title,
                             'source': 'kalshi_prediction',
                             'prediction_market': 'kalshi',
-                            'sentiment': 0.8 if analysis.get('confidence', 0) > 0.7 else 0.6 if analysis.get('confidence', 0) > 0.5 else 0.4,
+                            'sentiment': 0.8 if confidence > 0.7 else 0.6 if confidence > 0.5 else 0.4,
                             'catalyst_score': analysis.get('catalyst_score', 0),
                             'sector': 'Prediction Markets',
                             'current_price': opp_data['implied_probability'] * 100,
@@ -3552,11 +3639,11 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
                             'phasma_prediction': phasma_prediction,
                             'prediction_probability': opp_data['implied_probability'],
                             'market_volume': opp_data['volume'],
-                            'confidence': analysis.get('confidence', 0),
+                            'confidence': confidence,
                             'kalshi_signal': analysis.get('signal'),
                             'kalshi_action': analysis.get('action'),
                             'position_size': analysis.get('position_size', 0),
-                            'trade_link': analysis.get('trade_link', ''),
+                            'trade_link': analysis.get('trade_link') or opp_data.get('trade_link') or '',
                             'days_to_expiry': analysis.get('days_to_expiry', 0),
                             'expiration_analysis': analysis.get('expiration_analysis', {}),
                             'market_assessment': analysis.get('market_assessment', {}),
@@ -3582,6 +3669,21 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
                     no_signals = sum(1 for opp in kalshi_opportunities if opp.get('kalshi_signal') == 'BUY_NO')
                     print(f"\n   📊 Signal breakdown: {yes_signals} BUY_YES, {no_signals} BUY_NO")
                     print(f"   🎯 Automatic discovery completed - no manual configuration needed!")
+
+                    # Virtual Kalshi book: same news cycle context + weather snapshot
+                    book = getattr(s, "kalshi_virtual_book", None)
+                    if book is not None and kalshi_opportunities:
+                        opened = 0
+                        for kop in kalshi_opportunities[:10]:
+                            try:
+                                tid = book.open_from_opportunity(kop, news_items=news_items)
+                                if tid:
+                                    opened += 1
+                            except Exception:
+                                continue
+                        if opened:
+                            print(f"   📒 Opened {opened} virtual Kalshi bets (research P&L)")
+                            print(f"   📈 Kalshi virtual win-rate: {book.win_rate_label()}")
                     
                 else:
                     print("   💤 No qualified Kalshi opportunities found in this scan")
@@ -3597,12 +3699,20 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
         undervalued_stocks = []
         print("\n💎 Scanning for UNDervalued stocks using fundamental analysis...")
         try:
-            # Get a list of stocks to analyze (from news items and watchlist)
+            # Get a list of stocks to analyze (from news items + broad universe)
             symbols_to_analyze = set()
-            for item in news_items[:50]:  # Analyze top 50
+            for item in news_items[:120]:  # Broader news-driven value scan
                 symbol = item.get('symbol', '').upper()
-                if symbol:
+                if symbol and not str(symbol).startswith('KX'):
                     symbols_to_analyze.add(symbol)
+            try:
+                from utils.infinite_symbol_provider import InfiniteSymbolProvider
+                for sym in InfiniteSymbolProvider().get_symbols(category='stocks', limit=80) or []:
+                    su = str(sym).upper()
+                    if su and not su.startswith('KX'):
+                        symbols_to_analyze.add(su)
+            except Exception:
+                pass
             
             # Keep the value scan fully news/universe-driven (no fixed symbol seed list).
             
@@ -3791,12 +3901,14 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
                             if symbol:
                                 # Already tracked above, just ensure it's in watchlist
                                 s.ai_watchlist.add(symbol)
-                                # Keep watchlist manageable (remove old entries if too many)
-                                if len(s.ai_watchlist) > 100:
-                                    # Convert to list to remove oldest items
+                                # Keep watchlist manageable but wide for competitive discovery
+                                watch_max = int(
+                                    (s.config.get("competitive_discovery") or {}).get("ai_watchlist_max", 500)
+                                    or 500
+                                )
+                                if len(s.ai_watchlist) > watch_max:
                                     watchlist_list = list(s.ai_watchlist)
-                                    # Keep only the 50 most recent (simple FIFO)
-                                    s.ai_watchlist = set(watchlist_list[-50:])
+                                    s.ai_watchlist = set(watchlist_list[-watch_max:])
                 except Exception as e:
                     print(f"⚠️ Unified analysis failed for {news_item.get('symbol') or 'N/A'}: {str(e)}")
 
@@ -3881,16 +3993,26 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
                         kalshi_opportunities.append(opp)
                         existing_kalshi_keys.add(key)
                 for opportunity in kalshi_opportunities:
+                    try:
+                        conf = float(opportunity.get('confidence', 0) or 0)
+                    except (TypeError, ValueError):
+                        conf = 0.0
+                    if conf <= 0:
+                        continue
                     signal = {
                         'source': 'kalshi_prediction',
                         'ticker': opportunity.get('ticker') or opportunity.get('symbol') or 'N/A',
                         'action': opportunity.get('action', 'BUY'),
-                        'confidence': opportunity.get('confidence', 0.5),
+                        'confidence': conf,
                         'position_size': opportunity.get('position_size', 0.02),
                         'sector': 'Prediction Markets',
                         'region': 'US',
                         'timestamp': datetime.now(),
-                        'details': opportunity
+                        'details': opportunity,
+                        'trade_link': opportunity.get('trade_link')
+                            or (opportunity.get('kalshi_market_data') or {}).get('trade_link'),
+                        'title': opportunity.get('title')
+                            or (opportunity.get('kalshi_market_data') or {}).get('title'),
                     }
                     s.convergence_engine.add_signal(signal)
             
@@ -4189,10 +4311,12 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
             from engines.dynamic_market_scanner import DynamicMarketScanner
             
             # Initialize dynamic scanner
-            scanner = DynamicMarketScanner()
+            scanner = DynamicMarketScanner(s.config)
             
             # Get fresh opportunities for today
-            fresh_opportunities = scanner.get_fresh_opportunities(total_limit=25)
+            from utils.discovery_limits import discovery_limit
+            fresh_limit = int(discovery_limit(s.config, "fresh_opportunity_limit", 25) or 25)
+            fresh_opportunities = scanner.get_fresh_opportunities(total_limit=fresh_limit)
             
             # Extract symbols from fresh opportunities
             comprehensive_watchlist = [opp['symbol'] for opp in fresh_opportunities]
@@ -4479,6 +4603,37 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
                         f"entry ${entry_price:.2f} → ${current_price:.2f} ({realized_gain_pct*100:.1f}%)"
                     )
 
+                    # Performance ledger close
+                    try:
+                        from utils.trade_performance_ledger import get_trade_performance_ledger
+                        ledger = getattr(ctx.system, "trade_performance_ledger", None) or get_trade_performance_ledger()
+                        ledger_tid = None
+                        if isinstance(pos, dict):
+                            ledger_tid = pos.get("ledger_trade_id")
+                        if ledger_tid:
+                            ledger.record_close(
+                                ledger_tid,
+                                exit_price=current_price,
+                                win=realized_pnl_dollars > 0,
+                                pnl=realized_pnl_dollars,
+                                pnl_pct=realized_gain_pct,
+                                reason="hold_period_exit",
+                            )
+                        else:
+                            ledger.record_close_by_symbol(
+                                sym,
+                                exit_price=current_price,
+                                win=realized_pnl_dollars > 0,
+                                pnl=realized_pnl_dollars,
+                                pnl_pct=realized_gain_pct,
+                                reason="hold_period_exit",
+                            )
+                        learner = getattr(ctx.system, "pattern_transfer_learner", None)
+                        if learner:
+                            learner.refresh_from_ledger()
+                    except Exception as led_err:
+                        print(f"   ⚠️ Ledger close failed for {sym}: {led_err}")
+
                     try:
                         trade_data = {
                             'symbol': sym,
@@ -4525,6 +4680,12 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
             "Kalshi intel digest (research only — not trade signals)",
             "",
         ]
+        try:
+            from engines.kalshi_virtual_book import get_kalshi_virtual_book
+            lines.append(f"Virtual Kalshi win-rate: {get_kalshi_virtual_book().win_rate_label()}")
+            lines.append("")
+        except Exception:
+            pass
         for item in matched:
             sym = item.get("symbol") or "—"
             score = item.get("news_match_score", 0)
@@ -4978,6 +5139,24 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
 
                                 signal_dict['dedup_key'] = signal_key
                                 signal_dict['trade_type'] = signal_dict.get('trade_type', 'STOCK')
+                                # Tag day trades for performance ledger
+                                src = str(signal_dict.get("source") or getattr(signal, "source", "") or "").lower()
+                                if src in ("day_trading", "heavy_mover", "heavy_mover_watch") or getattr(signal, "asset_class", None) == "DAY_TRADE":
+                                    signal_dict["asset_class"] = "DAY_TRADE"
+                                    signal_dict["ledger_asset_class"] = "DAY_TRADE"
+
+                                # Block zero/missing price before execute noise
+                                try:
+                                    px = float(
+                                        signal_dict.get("current_price")
+                                        or signal_dict.get("entry_price")
+                                        or 0
+                                    )
+                                except (TypeError, ValueError):
+                                    px = 0.0
+                                if px <= 0:
+                                    print(f"  ⏭️ Skipping {symbol} — missing/non-positive price")
+                                    continue
 
                                 # 1) Execute via single router path
                                 exec_result = self.execution_router.submit_signal(
@@ -5338,12 +5517,9 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
             pnl_change = 0.0  # Default PnL change for this cycle
             self.meta_brain.risk_manager.update_pnl(pnl_change)
 
-            # Add positions to risk manager (for all approved signals)
-            for signal in approved_signals:
-                self.meta_brain.risk_manager.add_position(signal.symbol, {
-                    "signal": signal.to_dict(),
-                    "entry_time": datetime.now()
-                })
+            # Positions are recorded on actual paper fills in ExecutionRouter._on_fill
+            # (not for every approved alert).
+            print("📒 Risk positions track paper fills only (see ExecutionRouter._on_fill)")
         else:
             print("💤 No high-confidence signals to add to portfolio")
     async def run_full_cycle(self, *, cycle_attempt: int = 1):
@@ -5418,6 +5594,8 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
         _stage_name = "signal_generation"
         _stage_start = time.perf_counter()
         print("\n--- STAGE: ingest & signals ---")
+        # One Kalshi snapshot before news so ingest + opportunity scan share it
+        await self.worker_supervisor.run_worker("KalshiIntelWorker", sup_ctx)
         await self.worker_supervisor.run_worker("NewsIngestWorker", sup_ctx)
         ctx.cycle_data = sup_ctx.cycle_data
         ctx.skip_news_signals = sup_ctx.skip_news_signals
@@ -5494,6 +5672,25 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
             convergence_opportunities=convergence_opportunities,
             crash_assessment=crash_assessment,
         )
+
+        # Settle virtual Kalshi + print performance ledger
+        try:
+            book = getattr(self, "kalshi_virtual_book", None)
+            if book is not None:
+                settled = book.settle_pending(kalshi_engine=getattr(self, "kalshi_engine", None))
+                if settled:
+                    print(f"📒 Settled {len(settled)} virtual Kalshi bets")
+                    learner = getattr(self, "pattern_transfer_learner", None)
+                    if learner:
+                        learner.refresh_from_ledger()
+        except Exception as ksettle_err:
+            print(f"⚠️ Kalshi virtual settle failed: {ksettle_err}")
+        try:
+            ledger = getattr(self, "trade_performance_ledger", None)
+            if ledger is not None:
+                print("\n" + ledger.summary_report())
+        except Exception:
+            pass
 
         cycle_stage_timings[_stage_name] = time.perf_counter() - _stage_start
 
@@ -5640,6 +5837,7 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
                     market_row,
                     market_cache=getattr(ps, "market_cache", None),
                     price_fetcher=getattr(ps, "robust_price_fetcher", None),
+                    coalition=getattr(ctx, "symbol_coalition", None),
                 )
                 fact_check = market_row.get("fact_check") or fact_check
                 news_item["fact_check"] = fact_check
@@ -6143,6 +6341,7 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
                             signal,
                             market_cache=getattr(ps, "market_cache", None),
                             price_fetcher=getattr(ps, "robust_price_fetcher", None),
+                            coalition=getattr(ctx, "symbol_coalition", None),
                         )
                         quality = assess_signal_data_quality(signal)
                         signal['data_quality'] = quality.value
@@ -6496,6 +6695,7 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
             sig,
             market_cache=getattr(self, "market_cache", None),
             price_fetcher=self.robust_price_fetcher,
+            coalition=getattr(ctx, "symbol_coalition", None) if ctx is not None else None,
         )
         fc = sig.get("fact_check") if isinstance(sig.get("fact_check"), dict) else fc
         company_info = fc.get("company_info") if isinstance(fc.get("company_info"), dict) else company_info
@@ -6809,10 +7009,21 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
                 logging.warning(f"Invalid signal received: {symbol} {action} (confidence: {confidence:.1%})")
                 return None
                 
-            # Get current market data (simplified - replace with actual market data)
             current_price = getattr(signal, 'current_price', 0)
+            try:
+                current_price = float(current_price) if current_price is not None else 0.0
+            except (TypeError, ValueError):
+                current_price = 0.0
             if current_price <= 0:
-                logging.warning(f"Invalid price for {symbol}: {current_price}")
+                # Try cycle cache / coalition before bailing (quiet on ALERT_ONLY)
+                try:
+                    hydrated = self._get_cached_price(symbol, ctx)
+                    if hydrated and float(hydrated) > 0:
+                        current_price = float(hydrated)
+                except Exception:
+                    pass
+            if current_price <= 0:
+                logging.debug("Skipping %s — non-positive price %s", symbol, current_price)
                 return None
                 
             # Classify the trade (resilient fallback)
@@ -6843,7 +7054,7 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
                 trade_params = {
                     'trade_class': 'SWING_30D',
                     'stop_pct': 0.05,
-                    'risk_reward_ratio': 2.0,
+                    'risk_reward_ratio': 5.0,
                     'min_hold_days': 7,
                     'max_hold_days': 30
                 }
@@ -6855,13 +7066,18 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
                 stop_pct = 0.05
             position_size = (cfg.get('bankroll', 10000) * risk_per_trade) / stop_pct
             
-            # Calculate target and stop prices
+            # Calculate target and stop prices — stock angle requires ≥5:1
+            from utils.stock_reward_risk import min_reward_risk_ratio
+            min_rr = min_reward_risk_ratio(cfg if isinstance(cfg, dict) else None)
+            rr = float(trade_params.get('risk_reward_ratio') or min_rr)
+            if rr < min_rr:
+                rr = min_rr
             if 'CALL' in action:
                 stop_price = current_price * (1 - stop_pct)
-                target_price = current_price * (1 + (stop_pct * trade_params.get('risk_reward_ratio', 2.0)))
+                target_price = current_price * (1 + (stop_pct * rr))
             else:  # PUT
                 stop_price = current_price * (1 + stop_pct)
-                target_price = current_price * (1 - (stop_pct * trade_params.get('risk_reward_ratio', 2.0)))
+                target_price = current_price * (1 - (stop_pct * rr))
             
             # Log the trade decision (do not fail execution if logging fails)
             trade_file = None
@@ -7677,6 +7893,9 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
         if ctx is None:
             ctx = ApplicationContext.bind(self, {})
         ps = ctx.system
+        if not getattr(ps, "trade_logger", None):
+            print("⚠️ trade_logger missing — skipping trade file log")
+            return None
         return ps.trade_logger.log_trade(
             symbol=symbol,
             trade_type=trade_type,

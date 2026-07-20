@@ -103,6 +103,18 @@ class AdaptivePositionSizer:
             PositionSize recommendation
         """
         try:
+            if current_price is None or float(current_price) <= 0:
+                return PositionSize(
+                    shares=0,
+                    position_value=0.0,
+                    risk_amount=0.0,
+                    risk_percent=0.0,
+                    method="skipped_no_price",
+                    confidence=0.0,
+                    max_loss=0.0,
+                    recommended=False,
+                )
+
             # Extract opportunity data
             confidence = opportunity_data.get('confidence', 0.5) if opportunity_data else 0.5
             volatility = opportunity_data.get('volatility', 0.3) if opportunity_data else 0.3

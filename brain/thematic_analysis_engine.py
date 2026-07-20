@@ -16,6 +16,10 @@ from typing import Dict, List, Optional, Tuple
 from datetime import datetime, timedelta
 from collections import defaultdict, Counter
 import yfinance as yf
+import json
+import requests
+
+from utils.confidence_utils import normalize_confidence_to_pct
 
 
 class ThematicTheme:
@@ -41,6 +45,26 @@ class ThematicAnalyzer:
         self.themes = self._initialize_themes()
         self.news_history = []
         self.theme_momentum = defaultdict(list)
+
+    # region agent log
+    def _debug_log(self, run_id: str, hypothesis_id: str, location: str, message: str, data: Dict):
+        """Temporary debug instrumentation for session 28cc99."""
+        try:
+            payload = {
+                "sessionId": "28cc99",
+                "runId": run_id,
+                "hypothesisId": hypothesis_id,
+                "location": location,
+                "message": message,
+                "data": data,
+                "pid": __import__("os").getpid(),
+                "timestamp": int(datetime.now().timestamp() * 1000),
+            }
+            with open("debug-28cc99.log", "a", encoding="utf-8") as f:
+                f.write(json.dumps(payload, default=str) + "\n")
+        except Exception:
+            pass
+    # endregion
         
     def _initialize_themes(self) -> List[ThematicTheme]:
         """Initialize predefined investment themes"""
@@ -126,7 +150,11 @@ class ThematicAnalyzer:
         
         print(f"[THEMATIC ANALYSIS] Found {len(active_themes)} active themes")
         for theme in active_themes[:3]:
-            print(f"   TARGET {theme.name}: {theme.confidence_score:.1%} confidence ({len(theme.news_mentions)} mentions)")
+            conf_pct = normalize_confidence_to_pct(theme.confidence_score)
+            print(
+                f"   TARGET {theme.name}: {conf_pct:.1f}% confidence "
+                f"({len(theme.news_mentions)} mentions)"
+            )
         
         return active_themes
     
@@ -255,16 +283,17 @@ class ThematicAnalyzer:
                     
                     # Get stock data
                     try:
-                        stock = yf.Ticker(ticker)
-                        info = stock.info
-                        current_price = stock.history(period="1d")['Close'].iloc[-1]
+                        current_price = self._fetch_stock_price(ticker)
+                        if current_price is None:
+                            print(f"      SKIP {ticker}: No verified live price")
+                            continue
                         
-                        # Check if within price limits
-                        if current_price <= 50:  # Respect bankroll limits
+                        from utils.price_filter_config import within_price_cap
+                        if within_price_cap(current_price, self.config):
                             opportunity = {
                                 'theme': theme.name,
                                 'ticker': ticker,
-                                'name': stock_info["name"],
+                                'name': stock_info.get("name", ticker),
                                 'price': current_price,
                                 'reason': stock_info["reason"],
                                 'theme_confidence': theme.confidence_score,
@@ -274,10 +303,24 @@ class ThematicAnalyzer:
                             mapped_opportunities.append(opportunity)
                             print(f"      PASS {ticker}: ${current_price:.2f} - {stock_info['reason']}")
                         else:
-                            print(f"      FAIL {ticker}: ${current_price:.2f} - Above $50 limit")
+                            print(f"      FAIL {ticker}: ${current_price:.2f} - Above max price cap")
                             
                     except Exception as e:
                         print(f"      ERROR {ticker}: Error fetching data - {str(e)}")
+        
+        # region agent log
+        self._debug_log(
+            "pre-fix",
+            "H13",
+            "brain/thematic_analysis_engine.py:map_themes_to_stocks",
+            "thematic stock mapping result",
+            {
+                "themes": [theme.name for theme in themes],
+                "mapped_opportunities": len(mapped_opportunities),
+                "mapped_symbols": [item.get("ticker") for item in mapped_opportunities],
+            },
+        )
+        # endregion
         
         # Sort by combined score
         mapped_opportunities.sort(key=lambda x: x['combined_score'], reverse=True)
@@ -285,14 +328,59 @@ class ThematicAnalyzer:
         print(f"\n[THEMATIC ANALYSIS] Found {len(mapped_opportunities)} thematic stock opportunities")
         
         return mapped_opportunities
+
+    def _fetch_stock_price(self, ticker: str) -> Optional[float]:
+        """Fetch a live price with fallbacks for empty yfinance history."""
+        try:
+            history = yf.Ticker(ticker).history(period="5d")
+            if len(history) > 0:
+                closes = history['Close'].dropna()
+                if len(closes) > 0:
+                    return float(closes.iloc[-1])
+        except Exception:
+            pass
+
+        try:
+            response = requests.get(
+                f"https://query1.finance.yahoo.com/v8/finance/chart/{ticker}",
+                params={"range": "5d", "interval": "1d"},
+                headers={"User-Agent": "Mozilla/5.0"},
+                timeout=8,
+            )
+            if response.status_code == 200:
+                result = (response.json().get("chart", {}).get("result") or [None])[0]
+                quote = ((result or {}).get("indicators", {}).get("quote") or [{}])[0]
+                closes = [value for value in quote.get("close", []) if value is not None]
+                if closes:
+                    return float(closes[-1])
+        except Exception:
+            pass
+
+        try:
+            import csv
+            import io
+            response = requests.get(
+                f"https://stooq.com/q/l/?s={ticker.lower()}.us&f=sd2t2ohlcv&h&e=csv",
+                headers={"User-Agent": "Mozilla/5.0"},
+                timeout=8,
+            )
+            rows = list(csv.DictReader(io.StringIO(response.text)))
+            if rows and rows[0].get("Close") not in (None, "N/D"):
+                return float(rows[0]["Close"])
+        except Exception:
+            pass
+
+        return None
     
     def _calculate_combined_score(self, theme: ThematicTheme, stock_price: float) -> float:
         """Calculate combined score for theme + stock"""
         # Base score from theme confidence
         base_score = theme.confidence_score
         
-        # Price adjustment (prefer affordable stocks for small bankroll)
-        price_factor = max(0, 1 - (stock_price / 50))  # Linear decay to $50
+        from utils.price_filter_config import resolve_price_filter
+        _, cap = resolve_price_filter(self.config)
+        ref = cap if cap else 10000.0
+        price_factor = max(0, 1 - (stock_price / ref))
         
         # Momentum boost
         momentum_boost = theme.momentum_score * 0.2
