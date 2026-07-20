@@ -364,8 +364,18 @@ class UnifiedMetaBrain:
                         'summary': item.get('summary', ''),
                         'url': item.get('url', ''),
                         'published': item.get('published') or item.get('timestamp', ''),
-                        'sentiment': item.get('sentiment', 0)
+                        'sentiment': item.get('sentiment', 0),
+                        'symbol': item.get('symbol', ''),
                     })
+
+            try:
+                from utils.prediction_context import select_thematic_news_items
+                all_news_items = select_thematic_news_items(
+                    all_news_items,
+                    config=self.config,
+                )
+            except Exception:
+                pass
 
             self._debug_log(
                 "pre-fix",

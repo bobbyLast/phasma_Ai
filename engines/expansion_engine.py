@@ -12,7 +12,7 @@ if _root not in sys.path:
     sys.path.insert(0, _root)
 
 from datetime import datetime, timedelta
-from typing import List, Dict, Set
+from typing import List, Dict, Set, Optional
 import random
 import json
 
@@ -110,6 +110,14 @@ class ExpansionEngine:
         # Remove duplicates
         unique_discoveries = self._deduplicate_discoveries(new_discoveries)
         
+        # Require verified live prices — never emit synthetic tickers/prices
+        validated_discoveries = []
+        for discovery in unique_discoveries:
+            enriched = self._attach_live_price(discovery)
+            if enriched:
+                validated_discoveries.append(enriched)
+        unique_discoveries = validated_discoveries
+        
         # Sort by novelty score
         unique_discoveries.sort(key=lambda x: x.get('novelty_score', 0), reverse=True)
         
@@ -132,59 +140,31 @@ class ExpansionEngine:
         
         return unique_discoveries
     
+    def _attach_live_price(self, discovery: Dict) -> Optional[Dict]:
+        """Attach a verified live price or drop the discovery."""
+        symbol = str(discovery.get("symbol") or "").upper().strip()
+        if not symbol or symbol.startswith("KX") or len(symbol) > 6:
+            return None
+        try:
+            from utils.price_fetcher import get_price_fetcher
+            price = get_price_fetcher().get_real_price(symbol)
+        except Exception:
+            price = None
+        if price is None or float(price) <= 0:
+            return None
+        discovery = dict(discovery)
+        discovery["current_price"] = float(price)
+        discovery["entry_price"] = float(price)
+        discovery["_price_source"] = "live_fetch"
+        return discovery
+    
     async def _find_new_listings(self, current_signals: List[Dict]) -> List[Dict]:
-        """Find newly listed stocks"""
-        discoveries = []
-        
-        # Simulate finding new listings (would integrate with IPO data)
-        new_listings = [
-            {'symbol': 'RENU', 'name': 'Renewable Energy NU', 'sector': 'Energy', 'price': 12.50},
-            {'symbol': 'TECH', 'name': 'Tech Innovations Inc', 'sector': 'Technology', 'price': 8.75},
-            {'symbol': 'BIOX', 'name': 'BioX Therapeutics', 'sector': 'Healthcare', 'price': 15.20},
-            {'symbol': 'FINQ', 'name': 'Finance Quantum', 'sector': 'Finance', 'price': 22.30},
-            {'symbol': 'SPACE', 'name': 'Space Exploration Co', 'sector': 'Industrial', 'price': 18.90}
-        ]
-        
-        for listing in new_listings:
-            if listing['symbol'] not in self.known_stocks:
-                discoveries.append({
-                    'symbol': listing['symbol'],
-                    'title': f"NEW LISTING: {listing['name']} ({listing['symbol']})",
-                    'summary': f"Recently listed {listing['sector']} company at ${listing['price']}",
-                    'confidence': 0.6,
-                    'discovery_strategy': 'new_listings',
-                    'novelty_score': 0.9,
-                    'trade_type': 'IPO_MOMENTUM'
-                })
-        
-        return discoveries
+        """Find newly listed stocks — requires live IPO feed (no simulated listings)."""
+        return []
     
     async def _find_unusual_volume(self, current_signals: List[Dict]) -> List[Dict]:
-        """Find stocks with unusual volume"""
-        discoveries = []
-        
-        # Simulate unusual volume scan
-        volume_anomalies = [
-            {'symbol': 'MESH', 'volume_ratio': 5.2, 'price': 6.80},
-            {'symbol': 'QBIT', 'volume_ratio': 4.8, 'price': 9.20},
-            {'symbol': 'NUWR', 'volume_ratio': 4.1, 'price': 14.50},
-            {'symbol': 'PYKT', 'volume_ratio': 3.9, 'price': 11.30},
-            {'symbol': 'ZAPX', 'volume_ratio': 3.5, 'price': 7.90}
-        ]
-        
-        for anomaly in volume_anomalies:
-            if anomaly['symbol'] not in self.known_stocks:
-                discoveries.append({
-                    'symbol': anomaly['symbol'],
-                    'title': f"UNUSUAL VOLUME: {anomaly['symbol']} {anomaly['volume_ratio']}x normal",
-                    'summary': f"Volume spike detected at ${anomaly['price']} per share",
-                    'confidence': 0.65,
-                    'discovery_strategy': 'unusual_volume',
-                    'novelty_score': 0.8,
-                    'trade_type': 'VOLUME_BREAKOUT'
-                })
-        
-        return discoveries
+        """Find stocks with unusual volume — requires live volume scan (no simulated anomalies)."""
+        return []
     
     async def _expand_sector_universe(self, current_signals: List[Dict]) -> List[Dict]:
         """Find lesser-known stocks in hot sectors"""
@@ -223,36 +203,8 @@ class ExpansionEngine:
         return discoveries[:5]  # Limit to 5
     
     async def _expand_by_market_cap(self, current_signals: List[Dict]) -> List[Dict]:
-        """Find stocks in specific market cap ranges"""
-        discoveries = []
-        
-        # Define market cap tiers
-        cap_tiers = {
-            'micro_cap': {'min': 50_000_000, 'max': 300_000_000, 'multiplier': 1.2},
-            'small_cap': {'min': 300_000_000, 'max': 2_000_000_000, 'multiplier': 1.1},
-            'mid_cap': {'min': 2_000_000_000, 'max': 10_000_000_000, 'multiplier': 1.0}
-        }
-        
-        # Simulate finding stocks in each tier
-        for tier, config in cap_tiers.items():
-            sample_stocks = [
-                {'symbol': f'M{random.randint(100, 999)}', 'cap': random.randint(config['min'], config['max'])}
-                for _ in range(3)
-            ]
-            
-            for stock in sample_stocks:
-                if stock['symbol'] not in self.known_stocks:
-                    discoveries.append({
-                        'symbol': stock['symbol'],
-                        'title': f"{tier.upper()}: {stock['symbol']} (${stock['cap']/1_000_000:.0f}M)",
-                        'summary': f"{tier.replace('_', ' ').title()} opportunity with growth potential",
-                        'confidence': 0.5,
-                        'discovery_strategy': 'market_cap_expansion',
-                        'novelty_score': 0.6,
-                        'trade_type': 'CAP_TIER_PLAY'
-                    })
-        
-        return discoveries
+        """Find stocks in specific market cap ranges — requires live screener (no random tickers)."""
+        return []
     
     async def _expand_geographically(self, current_signals: List[Dict]) -> List[Dict]:
         """Find international stocks"""
@@ -399,27 +351,8 @@ class ExpansionEngine:
         return discoveries
     
     async def _random_explore(self, current_signals: List[Dict]) -> List[Dict]:
-        """Random exploration to find hidden gems"""
-        discoveries = []
-        
-        # Generate random stock symbols (simulated)
-        for _ in range(5):
-            # Generate random 3-4 letter ticker
-            length = random.choice([3, 4])
-            symbol = ''.join(random.choices('ABCDEFGHIJKLMNOPQRSTUVWXYZ', k=length))
-            
-            if symbol not in self.known_stocks and symbol not in self.discovered_today:
-                discoveries.append({
-                    'symbol': symbol,
-                    'title': f"HIDDEN GEM: {symbol} discovered by random exploration",
-                    'summary': f"Random discovery requiring further investigation",
-                    'confidence': 0.3,
-                    'discovery_strategy': 'random_exploration',
-                    'novelty_score': 0.95,
-                    'trade_type': 'EXPLORATORY'
-                })
-        
-        return discoveries
+        """Random exploration disabled — never invent tickers without live validation."""
+        return []
     
     def _deduplicate_discoveries(self, discoveries: List[Dict]) -> List[Dict]:
         """Remove duplicate discoveries"""

@@ -530,8 +530,8 @@ class InsiderMonitor:
             return {
                 "current_price": current_price,
                 "market_cap": info.get("marketCap", 0),
-                "sector": info.get("sector", "Unknown"),
-                "industry": info.get("industry", "Unknown"),
+                "sector": info.get("sector") or "Equities",
+                "industry": info.get("industry") or info.get("sector") or "Equities",
                 "fifty_two_week_high": info.get("fiftyTwoWeekHigh", 0),
                 "average_volume": info.get("averageVolume", 0),
                 "day_high": info.get("dayHigh", 0)
@@ -563,8 +563,8 @@ class InsiderMonitor:
             for tx, info in large_cap_buys:
                 ticker = tx["ticker"]
                 value = tx["total_value"]
-                insider = tx.get("insider_name", "Unknown")
-                sector = info.get("sector", "Unknown")
+                insider = tx.get("insider_name") or "insider"
+                sector = info.get("sector") or "Equities"
                 current_price = info.get("current_price")
                 purchase_price = tx["price"]
                 market_cap = info.get("market_cap", 0)
@@ -596,7 +596,7 @@ class InsiderMonitor:
         stock_info = self._get_stock_info(ticker)
         current_price = stock_info.get("current_price")
         market_cap = stock_info.get("market_cap", 0)
-        sector = stock_info.get("sector", "Unknown")
+        sector = stock_info.get("sector") or "Equities"
         
         # Moonshot filter: Focus on small/micro-caps
         if market_cap > 2_000_000_000:  # >$2B = too large for moonshots
@@ -626,11 +626,11 @@ class InsiderMonitor:
         
         return {
             "ticker": ticker,
-            "title": f"🚀 MOONSHOT: {tx.get('insider_name', 'Unknown')} ({tx.get('insider_role', 'Unknown')}) buys {ticker}",
+            "title": f"🚀 MOONSHOT: {tx.get('insider_name') or 'insider'} ({tx.get('insider_role') or 'role pending'}) buys {ticker}",
             "link": "",
             "published": tx.get("date", ""),
             "price": purchase_price,
-            "insider_name": tx.get("insider_name", "Unknown"),
+            "insider_name": tx.get("insider_name") or "insider",
             "transaction_type": f"{tx['transaction_code']} - Purchase",
             "transaction_value": tx["total_value"],
             "purchase_price": purchase_price,

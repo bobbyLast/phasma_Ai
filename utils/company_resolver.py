@@ -109,18 +109,24 @@ class CompanyResolver:
 
             info = yf.Ticker(symbol).info or {}
             name = (
-                info.get("longName")
-                or info.get("shortName")
+                info.get("shortName")
+                or info.get("longName")
                 or info.get("displayName")
             )
+            if name:
+                name = str(name).strip()
+                if " - Wikipedia" in name:
+                    name = name.split(" - Wikipedia")[0].strip()
+                if len(name) > 80:
+                    name = name[:77].rstrip() + "..."
             sector = info.get("sector") or info.get("quoteType") or ""
             industry = info.get("industry") or sector or ""
-            if not name:
+            if not name or str(name).strip().lower() in ("unknown", "n/a"):
                 return None
             record = {
-                "company_name": str(name).strip(),
-                "sector": str(sector).strip() if sector else "Equities",
-                "industry": str(industry).strip() if industry else "Equities",
+                "company_name": name,
+                "sector": str(sector).strip() if sector and str(sector).lower() != "unknown" else "Equities",
+                "industry": str(industry).strip() if industry and str(industry).lower() != "unknown" else "Equities",
                 "source": "yfinance",
                 "_ts": time.time(),
             }
@@ -225,14 +231,20 @@ class CompanyResolver:
                 }
 
         snippet = _title_snippet(title)
-        if sym and snippet:
-            label = f"${sym} - {snippet}"
+        # Prefer a readable shortName-style label — never "Unknown" / bare n/a
+        if sym and snippet and not snippet.lower().startswith("unknown"):
+            label = f"{sym} related: {snippet[:48]}"
         elif sym:
-            label = sym
+            # Last-ditch: still not Unknown — caller should treat derived status carefully
+            label = f"{sym} Holdings"
         elif snippet:
             label = snippet
         else:
-            label = "Market headline"
+            label = "Listed equity"
+
+        # Never emit placeholder tokens as the company name
+        if is_placeholder(label) or str(label).strip().lower() in ("unknown", "n/a"):
+            label = f"{sym} Holdings" if sym else "Listed equity"
 
         return {
             "symbol": sym,

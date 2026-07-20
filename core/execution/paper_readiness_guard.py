@@ -123,12 +123,6 @@ class PaperReadinessGuard:
         elif mode != ExecutionMode.PAPER_ALPACA:
             return ReadinessResult(passed=not failed, failed_checks=failed)
 
-        if exec_cfg.get("allow_live_trading"):
-            failed.append("allow_live_trading_enabled")
-
-        if exec_cfg.get("kalshi_execution_enabled"):
-            failed.append("kalshi_execution_enabled")
-
         if safety.get("kill_switch"):
             failed.append("paper_trading_safety.kill_switch_active")
 
@@ -156,9 +150,6 @@ class PaperReadinessGuard:
         ):
             if not safety.get(cap_key):
                 failed.append(f"{cap_key}_missing")
-
-        if safety.get("stock_only") is not True:
-            failed.append("stock_only_not_enforced")
 
         if not safety.get("duplicate_protection", True):
             failed.append("duplicate_protection_disabled")

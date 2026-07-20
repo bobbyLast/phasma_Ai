@@ -10,7 +10,7 @@ from core.signals.signal_decision import (
     SignalDecision,
 )
 from core.signals.strategy_router import StrategyRouter, classify_asset_type, has_option_contract_fields
-from core.source_status import block_demo_geo_from_decision, block_demo_signal, is_demo_source
+from core.source_status import block_demo_geo_from_decision, block_demo_signal, is_demo_source, signal_uses_fake_price
 from utils.confidence_utils import normalize_confidence_to_pct
 from utils.signal_data_quality import (
     SignalDataQuality,
@@ -60,6 +60,39 @@ class DecisionPipeline:
             decision.apply_to_signal()
             return decision
         decision.pass_gate("demo_firewall")
+
+        if signal_uses_fake_price(sig_dict):
+            decision.fail_gate("fake_price_source", "simulated/mock price source blocked")
+            decision.set_status(DecisionStatus.WATCHLIST_ONLY, "fake market data — blocked")
+            self.summary.record(decision)
+            decision.apply_to_signal()
+            return decision
+
+        # Fill real company identity before later gates / Telegram (no Unknown leftovers)
+        try:
+            from utils.signal_identity import ensure_signal_identity, ensure_trade_levels
+            work0 = signal if isinstance(signal, dict) else sig_dict
+            ensure_signal_identity(work0)
+            ensure_trade_levels(work0)
+            if work0.get("company_name"):
+                if isinstance(signal, dict):
+                    signal["company_name"] = work0["company_name"]
+                    if work0.get("sector"):
+                        signal["sector"] = work0["sector"]
+                else:
+                    try:
+                        setattr(signal, "company_name", work0["company_name"])
+                    except Exception:
+                        pass
+        except Exception:
+            pass
+
+        # Compact structured context for prediction/jury skills (token-light)
+        try:
+            from utils.prediction_context import attach_prediction_context
+            attach_prediction_context(signal, config=self.config)
+        except Exception:
+            pass
 
         # Gate: strategy routing
         route = self.router.route(signal)
@@ -354,6 +387,29 @@ class DecisionPipeline:
             return decision
         if jury_verdict:
             decision.pass_gate("jury")
+
+        # Gate: LLM prediction (when present)
+        lp = sig_dict.get("llm_prediction") if isinstance(sig_dict.get("llm_prediction"), dict) else None
+        if lp is None and hasattr(signal, "llm_prediction") and isinstance(getattr(signal, "llm_prediction"), dict):
+            lp = getattr(signal, "llm_prediction")
+        if lp:
+            lp_score = lp.get("prediction_score")
+            try:
+                lp_score_f = float(lp_score)
+            except (TypeError, ValueError):
+                lp_score_f = 0.0
+            llm_cfg = self.config.get("llm_prediction") if isinstance(self.config, dict) else {}
+            min_lp = float((llm_cfg or {}).get("min_prediction_score", 42))
+            if lp_score_f < min_lp and lp.get("grounding_status") in ("ok", "ok_web"):
+                decision.fail_gate("llm_prediction", f"LLM prediction {lp_score_f:.0f} below {min_lp:.0f}")
+                decision.set_status(DecisionStatus.REJECTED, "LLM prediction below floor")
+                self.summary.record(decision)
+                decision.apply_to_signal()
+                return decision
+            decision.pass_gate("llm_prediction")
+            decision.warnings.append(
+                f"LLM prediction {lp_score_f:.0f}/100 ({lp.get('verdict')}) via {lp.get('provider')}"
+            )
 
         # Final approval tier
         decision.can_alert = is_alert_only_eligible(quality)

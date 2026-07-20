@@ -24,5 +24,59 @@
     "signal_data": null,
     "confidence": null,
     "pnl": 25.0
+  },
+  {
+    "timestamp": "2026-05-19T18:17:49.521192",
+    "symbol": "AAPL",
+    "action": "BUY",
+    "quantity": 0,
+    "price": 192.5,
+    "signal_data": {
+      "strategy": "unknown",
+      "confidence": 0.95,
+      "target_price": 173.25,
+      "stop_price": 202.125,
+      "trade_class": "MOONSHOT_7D",
+      "rsi": 50,
+      "macd": "neutral"
+    },
+    "confidence": 95.0,
+    "pnl": null
+  },
+  {
+    "timestamp": "2026-05-20T12:00:20.578559",
+    "symbol": "AAPL",
+    "action": "BUY",
+    "quantity": 0,
+    "price": 192.5,
+    "signal_data": {
+      "strategy": "unknown",
+      "confidence": 0.95,
+      "target_price": 173.25,
+      "stop_price": 202.125,
+      "trade_class": "MOONSHOT_7D",
+      "rsi": 50,
+      "macd": "neutral"
+    },
+    "confidence": 95.0,
+    "pnl": null
+  },
+  {
+    "timestamp": "2026-05-20T14:53:25.023635",
+    "symbol": "AAPL",
+    "action": "BUY",
+    "quantity": 0,
+    "price": 192.5,
+    "signal_data": {
+      "strategy": "unknown",
+      "confidence": 0.95,
+      "target_price": 173.25,
+      "stop_price": 202.125,
+      "trade_class": "MOONSHOT_7D",
+      "rsi": 50,
+      "macd": "neutral"
+    },
+    "confidence": 95.0,
+    "pnl": null
   }
 ]

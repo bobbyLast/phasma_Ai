@@ -318,74 +318,17 @@ class RSSMarketData:
         return list(symbols)
 
 
-# Simulated data provider for testing
 class SimulatedDataProvider:
-    """Provides simulated market data for testing when APIs are unavailable"""
+    """Deprecated — do not use in live pipeline. Raises if called."""
     
     def __init__(self):
+        import logging
         self.logger = logging.getLogger(__name__)
-        self.base_prices = {
-            'AAPL': 190.50, 'MSFT': 380.20, 'GOOGL': 140.80, 'AMZN': 155.60,
-            'NVDA': 785.40, 'META': 350.10, 'TSLA': 192.30, 'SPY': 478.20,
-            'QQQ': 425.80, 'IWM': 198.50, 'DIA': 375.40, 'GLD': 185.20,
-            'SLV': 22.50, 'TLT': 92.80, 'HYG': 78.90, 'LQD': 112.30,
-            'BTC-USD': 43250.00, 'ETH-USD': 2280.00, 'BNB-USD': 315.00,
-            'XRP-USD': 0.52, 'ADA-USD': 0.58, 'SOL-USD': 105.00
-        }
+        self.logger.error("SimulatedDataProvider must not be used in live trading paths")
     
     def get_price(self, symbol: str) -> Optional[Dict]:
-        """Get simulated price"""
-        import random
-        
-        base_price = self.base_prices.get(symbol, random.uniform(10, 500))
-        
-        # Add random movement
-        change = random.uniform(-0.05, 0.05)
-        price = base_price * (1 + change)
-        
-        volume = random.randint(100000, 10000000)
-        
-        return {
-            'symbol': symbol,
-            'price': round(price, 2),
-            'volume': volume,
-            'avg_volume': volume,
-            'market_cap': price * random.randint(1000000, 10000000),
-            'source': 'simulated'
-        }
+        """Refuse to return simulated prices."""
+        return None
     
     def get_options_chain(self, symbol: str) -> Optional[Dict]:
-        """Get simulated options chain"""
-        import random
-        
-        base_price = self.base_prices.get(symbol, 100)
-        
-        # Generate strikes around current price
-        strikes = []
-        for i in range(-5, 6):
-            strike = round(base_price + (i * base_price * 0.05), 2)
-            strikes.append(strike)
-        
-        options = {'calls': [], 'puts': []}
-        
-        for strike in strikes:
-            # Generate random options data
-            volume = random.randint(0, 5000)
-            oi = random.randint(0, 10000)
-            iv = random.uniform(0.2, 0.8)
-            
-            options['calls'].append({
-                'strike': strike,
-                'volume': volume,
-                'oi': oi,
-                'iv': iv
-            })
-            
-            options['puts'].append({
-                'strike': strike,
-                'volume': volume,
-                'oi': oi,
-                'iv': iv
-            })
-        
-        return options
+        return None

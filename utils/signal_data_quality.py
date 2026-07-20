@@ -5,6 +5,7 @@ from __future__ import annotations
 from enum import Enum
 from typing import Any, Dict, Optional
 
+from core.source_status import is_demo_source, signal_uses_fake_price
 from utils.company_resolver import is_placeholder
 
 
@@ -51,6 +52,12 @@ def _has_volume(signal: Dict[str, Any]) -> bool:
 
 def assess_signal_data_quality(signal: Dict[str, Any]) -> SignalDataQuality:
     """Assess signal completeness for alert vs paper eligibility."""
+    if signal_uses_fake_price(signal):
+        return SignalDataQuality.DEMO_SOURCE
+    source = signal.get("source")
+    if is_demo_source(source):
+        return SignalDataQuality.DEMO_SOURCE
+
     # Stamp identity from shared registry before judging company validity
     try:
         from utils.company_identity_registry import get_identity_registry

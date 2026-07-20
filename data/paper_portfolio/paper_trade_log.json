@@ -40,5 +40,86 @@
       "avg_cost": 150.0
     },
     "paper_trade": true
+  },
+  {
+    "id": 3,
+    "timestamp": "2026-05-19T18:17:46.364780",
+    "action": "BUY",
+    "symbol": "AAPL",
+    "quantity": 0,
+    "price": 192.5,
+    "total_cost": 0.0,
+    "signal_data": {
+      "strategy": "unknown",
+      "confidence": 0.95,
+      "target_price": 173.25,
+      "stop_price": 202.125,
+      "trade_class": "MOONSHOT_7D",
+      "rsi": 50,
+      "macd": "neutral"
+    },
+    "confidence": 95.0,
+    "position_after": {
+      "quantity": 5,
+      "avg_cost": 150.0,
+      "total_cost": 750.0
+    },
+    "paper_trade": true,
+    "verified": true,
+    "verification_hash": "2b210ef47aefce0e"
+  },
+  {
+    "id": 4,
+    "timestamp": "2026-05-20T12:00:20.560953",
+    "action": "BUY",
+    "symbol": "AAPL",
+    "quantity": 0,
+    "price": 192.5,
+    "total_cost": 0.0,
+    "signal_data": {
+      "strategy": "unknown",
+      "confidence": 0.95,
+      "target_price": 173.25,
+      "stop_price": 202.125,
+      "trade_class": "MOONSHOT_7D",
+      "rsi": 50,
+      "macd": "neutral"
+    },
+    "confidence": 95.0,
+    "position_after": {
+      "quantity": 5,
+      "avg_cost": 150.0,
+      "total_cost": 750.0
+    },
+    "paper_trade": true,
+    "verified": true,
+    "verification_hash": "57f5b18a65e5b82d"
+  },
+  {
+    "id": 5,
+    "timestamp": "2026-05-20T14:53:21.676536",
+    "action": "BUY",
+    "symbol": "AAPL",
+    "quantity": 0,
+    "price": 192.5,
+    "total_cost": 0.0,
+    "signal_data": {
+      "strategy": "unknown",
+      "confidence": 0.95,
+      "target_price": 173.25,
+      "stop_price": 202.125,
+      "trade_class": "MOONSHOT_7D",
+      "rsi": 50,
+      "macd": "neutral"
+    },
+    "confidence": 95.0,
+    "position_after": {
+      "quantity": 5,
+      "avg_cost": 150.0,
+      "total_cost": 750.0
+    },
+    "paper_trade": true,
+    "verified": true,
+    "verification_hash": "a43ced2521807e32"
   }
 ]

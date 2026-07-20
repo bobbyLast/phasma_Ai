@@ -17,6 +17,16 @@ DEMO_SOURCES: Set[str] = {
 
 DEMO_SOURCE_PREFIXES = ("demo_", "sample_")
 
+FAKE_PRICE_SOURCES: Set[str] = {
+    "simulated",
+    "mock",
+    "demo",
+    "fake",
+    "test",
+    "sample",
+    "placeholder",
+}
+
 
 def is_demo_geo_event(event: Dict[str, Any]) -> bool:
     """True for synthetic/demo geopolitical events."""
@@ -57,6 +67,27 @@ def is_demo_source(source: Any) -> bool:
 
 def demo_allowed_in_pipeline(config: Dict[str, Any]) -> bool:
     return normalize_demo_config(config).get("allow_in_live_pipeline", False)
+
+
+def is_fake_price_source(source: Any) -> bool:
+    if not source:
+        return False
+    text = str(source).strip().lower()
+    if text in FAKE_PRICE_SOURCES:
+        return True
+    return is_demo_source(text)
+
+
+def signal_uses_fake_price(signal: Dict[str, Any]) -> bool:
+    """True when price metadata indicates simulated/mock/demo data."""
+    if not isinstance(signal, dict):
+        return False
+    for key in ("source", "price_source", "_price_source", "data_source", "market_data_source"):
+        if is_fake_price_source(signal.get(key)):
+            return True
+    if signal.get("is_demo") or signal.get("demo_only"):
+        return True
+    return False
 
 
 def block_demo_signal(signal: Dict[str, Any], config: Dict[str, Any]) -> bool:

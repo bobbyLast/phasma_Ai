@@ -136,7 +136,14 @@ class SignalDecision:
         }.get(self.status, f"• {self.status.value}")
         reason = self.final_decision_reason or self.reject_reason or "; ".join(self.warnings[:2])
         conf = f"{self.confidence_pct:.1f}%" if self.confidence_pct is not None else "N/A"
-        return f"{prefix}: {self.symbol} ({conf}) — {reason}" if reason else f"{prefix}: {self.symbol} ({conf})"
+        sym = self.symbol or getattr(self, "ticker", None) or "?"
+        if not sym or str(sym).strip() in ("", "N/A", "None"):
+            raw = self.raw_signal
+            if isinstance(raw, dict):
+                sym = raw.get("symbol") or raw.get("ticker") or "?"
+            elif raw is not None:
+                sym = getattr(raw, "symbol", None) or getattr(raw, "ticker", None) or "?"
+        return f"{prefix}: {sym} ({conf}) — {reason}" if reason else f"{prefix}: {sym} ({conf})"
 
     def apply_to_signal(self) -> None:
         sig = self.raw_signal

@@ -252,7 +252,7 @@ class TradePerformanceLedger:
                 "wins": sum(1 for r in rows if r.get("win")),
                 "losses": sum(1 for r in rows if r.get("win") is False),
                 "samples": n,
-                "label": "n/a — building sample",
+                "label": f"building sample ({n} closed)",
                 "asset_class": asset_class or "ALL",
             }
         wins = sum(1 for r in rows if r.get("win"))

@@ -12,10 +12,20 @@ import pandas as pd
 from enum import Enum
 
 class TradeDirection(str, Enum):
+    BUY = "BUY"
+    SELL = "SELL"
     BUY_CALL = "BUY_CALL"
     BUY_PUT = "BUY_PUT"
     SELL_CALL = "SELL_CALL"
     SELL_PUT = "SELL_PUT"
+
+
+_TRADE_TYPE_ALIASES = {
+    "LONG": "BUY",
+    "SHORT": "SELL",
+    "BUY_TO_OPEN": "BUY",
+    "SELL_TO_OPEN": "SELL",
+}
 
 class TradeLogger:
     """
@@ -61,9 +71,11 @@ class TradeLogger:
         Returns:
             Path to the saved trade file
         """
-        # Validate trade type
+        # Validate trade type (stocks use BUY/SELL; options use BUY_CALL/…)
+        raw = str(trade_type or "").upper().strip()
+        raw = _TRADE_TYPE_ALIASES.get(raw, raw)
         try:
-            trade_direction = TradeDirection(trade_type)
+            trade_direction = TradeDirection(raw)
         except ValueError:
             raise ValueError(f"Invalid trade type: {trade_type}")
         

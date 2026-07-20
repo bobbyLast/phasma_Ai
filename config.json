@@ -1,7 +1,11 @@
 {
-  "price_filter_enabled": false,
+  "price_filter_enabled": true,
   "max_stock_price": null,
   "telegram_enabled": true,
+  "webull_level2_enabled": true,
+  "news_apis_enabled": true,
+  "crypto_enabled": true,
+  "debug_mode": true,
   "max_discovery": true,
   "discovery_limits": {
     "max": {
@@ -35,12 +39,12 @@
     },
     "financial_modeling_prep": {
       "api_key": "YOUR_FMP_KEY", 
-      "enabled": false,
+      "enabled": true,
       "free_tier": "250 calls/day"
     },
     "polygon_io": {
       "api_key": "YOUR_POLYGON_KEY",
-      "enabled": false,
+      "enabled": true,
       "free_tier": "5 calls/minute"
     },
     "sec_edgar": {
@@ -64,7 +68,7 @@
     "max_signals_per_cycle": 25
   },
   "debug": {
-    "kalshi_expiry_debug": false
+    "kalshi_expiry_debug": true
   },
   "demo_data": {
     "allow_in_live_pipeline": false
@@ -80,7 +84,7 @@
     "max_requests_per_cycle": 35,
     "cooldown_on_429_seconds": 45,
     "broad_keyword_scan": true,
-    "include_non_keyword_fill": false
+    "include_non_keyword_fill": true
   },
   "news_pipeline": {
     "single_ingest_per_cycle": true,
@@ -93,6 +97,27 @@
       "INTRADAY": 18,
       "RECENT_CATALYST": 72,
       "BACKGROUND": 168
+    }
+  },
+  "prediction_context": {
+    "enabled": true,
+    "max_unified_analysis_items": 20,
+    "max_thematic_news_items": 80,
+    "max_rationale_chars": 200,
+    "max_title_chars": 120,
+    "max_summary_chars": 240
+  },
+  "llm_prediction": {
+    "enabled": true,
+    "max_predictions_per_cycle": 12,
+    "min_prediction_score": 42,
+    "confidence_blend_weight": 0.25,
+    "require_grounding_for_reject": true,
+    "brave": {
+      "maximum_number_of_tokens": 2048,
+      "maximum_number_of_urls": 3,
+      "count": 5,
+      "timeout_seconds": 20
     }
   },
   "engine_groups": {
@@ -119,12 +144,12 @@
     "max_symbols_partnership_fast": 5,
     "max_candidates_deep_analysis": 40,
     "max_candidates_monte_carlo": 15,
-    "skip_low_value_engines_when_over_budget": false
+    "skip_low_value_engines_when_over_budget": true
   },
   "execution": {
     "mode": "PAPER_ALPACA",
-    "allow_live_trading": false,
-    "kalshi_execution_enabled": false,
+    "allow_live_trading": true,
+    "kalshi_execution_enabled": true,
     "require_price": true,
     "require_valid_symbol": true,
     "require_fresh_data": true,
@@ -137,7 +162,9 @@
     "max_notional_per_order": 100,
     "max_total_daily_notional": 500,
     "cooldown_minutes_per_symbol": 120,
-    "stock_only": true,
+    "stock_only": false,
+    "duplicate_protection": true,
+    "require_recently_traded_cooldown": true,
     "block_low_confidence_below": 65,
     "require_outcome_tracking": true,
     "require_fresh_price": true,
@@ -154,8 +181,8 @@
   },
   "trading_mode": "stocks_and_kalshi",
   "kalshi_enabled": true,
-  "kalshi_intel_only": true,
-  "post_prediction_trades": false,
+  "kalshi_intel_only": false,
+  "post_prediction_trades": true,
   "kalshi_weather_only": false,
   "kalshi_ai_playbook": {
     "enabled": true,
@@ -171,9 +198,13 @@
       "entry_window_hours": [168, 12]
     }
   },
-  "options_enabled": false,
+  "options_enabled": true,
+  "options_engine": {
+    "min_pop": 0.4,
+    "min_option_score": 0.45
+  },
   "profit_maximization": {
-    "enabled": false,
+    "enabled": true,
     "trailing_stop_pct": 0.2,
     "min_hold_days": 7,
     "max_hold_days": 90
@@ -181,7 +212,7 @@
   "bankroll_allocation": {
     "stock_trading": 50,
     "kalshi_trading": 50,
-    "options_trading": 0
+    "options_trading": 25
   },
   "trading": {
     "bankroll": 100,
@@ -189,6 +220,8 @@
     "min_contracts": 2,
     "max_contracts": 20,
     "three_mind_enabled": true,
+    "all_sectors_mode": true,
+    "ai_focus_only": false,
     "max_stock_positions": 50
   },
   "sports_betting": {
@@ -227,7 +260,7 @@
   },
   "politician_tracker": {
     "enabled": true,
-    "politician_trades_use_live": false,
+    "politician_trades_use_live": true,
     "lookback_days": 30,
     "min_value": 1000
   },

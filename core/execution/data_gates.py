@@ -9,7 +9,8 @@ from datetime import datetime, timezone
 from typing import Any, Dict, Optional, Tuple
 
 from utils.company_resolver import is_placeholder
-from utils.prediction_market_filters import kalshi_intel_only
+from utils.prediction_market_filters import kalshi_intel_only, post_prediction_trades_enabled
+from core.source_status import signal_uses_fake_price
 
 logger = logging.getLogger(__name__)
 
@@ -89,18 +90,29 @@ def validate_execution_gates(
     exec_cfg = config.get("execution", {}) or {}
 
     symbol = str(signal.get("symbol") or "").upper().strip()
-    if exec_cfg.get("require_valid_symbol", True):
-        if not symbol or len(symbol) > 6 or symbol.startswith("KX"):
-            if symbol.startswith("KX") and kalshi_intel_only(config):
-                return False, "kalshi_intel_only", {"symbol": symbol}
-            if not symbol or symbol.startswith("KX"):
-                return False, "invalid_symbol", {"symbol": symbol}
-
-    if kalshi_intel_only(config) and (
+    is_kalshi = (
         symbol.startswith("KX")
-        or signal.get("kalshi_signal")
-        or signal.get("source") == "kalshi_prediction"
-    ):
+        or bool(signal.get("kalshi_signal"))
+        or str(signal.get("source") or "").lower() in ("kalshi_prediction", "kalshi")
+        or str(signal.get("trade_type") or "").upper() in ("KALSHI_PREDICTION", "PREDICTION_MARKET")
+        or bool(signal.get("prediction_market"))
+    )
+    # Virtual Kalshi Telegram trades are allowed without live Kalshi API orders
+    kalshi_virtual_ok = post_prediction_trades_enabled(config) and not exec_cfg.get(
+        "kalshi_execution_enabled", False
+    )
+
+    if exec_cfg.get("require_valid_symbol", True):
+        if is_kalshi:
+            if kalshi_intel_only(config) and not kalshi_virtual_ok:
+                return False, "kalshi_intel_only", {"symbol": symbol}
+            if not symbol:
+                return False, "invalid_symbol", {"symbol": symbol}
+            # KX tickers are longer than 6 chars — do not apply equity length rule
+        elif not symbol or len(symbol) > 6:
+            return False, "invalid_symbol", {"symbol": symbol}
+
+    if is_kalshi and kalshi_intel_only(config) and not kalshi_virtual_ok:
         if not exec_cfg.get("kalshi_execution_enabled", False):
             return False, "kalshi_intel_only", {"symbol": symbol}
 
@@ -109,8 +121,8 @@ def validate_execution_gates(
         return False, "missing_side", {"action": action}
 
     trade_type = str(signal.get("trade_type") or "STOCK").upper()
-    supported = {"STOCK", "CRYPTO", "OPTION", "OPTIONS"}
-    if trade_type not in supported and not symbol.endswith("USD"):
+    supported = {"STOCK", "CRYPTO", "OPTION", "OPTIONS", "KALSHI_PREDICTION", "PREDICTION_MARKET", "KALSHI"}
+    if trade_type not in supported and not symbol.endswith("USD") and not is_kalshi:
         return False, "unsupported_trade_type", {"trade_type": trade_type}
 
     confidence = signal.get("confidence", 0)
@@ -131,6 +143,9 @@ def validate_execution_gates(
     if exec_cfg.get("require_price", True):
         if current_price is None or current_price <= 0:
             return False, "missing_price", {"current_price": current_price}
+
+    if not is_kalshi and signal_uses_fake_price(signal):
+        return False, "fake_price_source", {"symbol": symbol}
 
     price_ts = signal.get("price_timestamp") or signal.get("data_timestamp")
     data_age = _data_age_seconds(price_ts)

@@ -162,6 +162,26 @@ class ExecutionRouter:
             self._log(ExecutionDecision.SKIPPED, "duplicate submit in session", symbol)
             return self._skip("duplicate submit in session", symbol)
 
+        # Kalshi: virtual book + Telegram only (never Alpaca / never live API orders)
+        is_kalshi = (
+            symbol.startswith("KX")
+            or bool(signal_dict.get("kalshi_signal"))
+            or str(signal_dict.get("source") or "").lower() in ("kalshi_prediction", "kalshi")
+            or str(signal_dict.get("trade_type") or "").upper() in ("KALSHI_PREDICTION", "PREDICTION_MARKET", "KALSHI")
+            or bool(signal_dict.get("prediction_market"))
+        )
+        if is_kalshi:
+            if self.exec_cfg.get("kalshi_execution_enabled"):
+                self._log(ExecutionDecision.REJECTED, "live kalshi execution not implemented", symbol)
+                return ExecutionResult(
+                    decision=ExecutionDecision.REJECTED,
+                    reason="live kalshi execution not implemented — keep kalshi_execution_enabled false",
+                    mode=mode,
+                    symbol=symbol,
+                    alert_label="NO TRADE — live Kalshi disabled",
+                )
+            return self._execute_kalshi_virtual(signal_dict)
+
         if mode == ExecutionMode.LIVE_ALPACA:
             if not self.exec_cfg.get("allow_live_trading"):
                 self._log(ExecutionDecision.REJECTED, "live trading disabled", symbol)
@@ -240,6 +260,51 @@ class ExecutionRouter:
         self._paper_cycle_orders += 1
         self._paper_daily_orders += 1
         self._paper_daily_notional += notional
+
+    def _execute_kalshi_virtual(self, signal_dict: Dict[str, Any]) -> ExecutionResult:
+        """Open a virtual Kalshi book entry — Telegram trade-style, no live money."""
+        symbol = str(signal_dict.get("symbol") or "").upper()
+        signal_dict["trade_type"] = signal_dict.get("trade_type") or "KALSHI_PREDICTION"
+        signal_dict["source"] = signal_dict.get("source") or "kalshi_prediction"
+        signal_dict["asset_class"] = "KALSHI"
+        signal_dict["ledger_asset_class"] = "KALSHI"
+        signal_dict["virtual_kalshi"] = True
+
+        trade_id = None
+        try:
+            from engines.kalshi_virtual_book import get_kalshi_virtual_book
+            book = get_kalshi_virtual_book()
+            trade_id = book.open_from_opportunity(signal_dict)
+        except Exception as exc:
+            logger.warning("kalshi virtual book open failed: %s", exc)
+
+        dedup_key = signal_dict.get("dedup_key") or f"{symbol}:{signal_dict.get('action', 'BUY')}"
+        self._submitted_keys.add(dedup_key)
+        fill = {
+            "symbol": symbol,
+            "price": signal_dict.get("current_price") or signal_dict.get("entry_price") or signal_dict.get("yes_price"),
+            "quantity": signal_dict.get("position_size") or signal_dict.get("bet_amount") or 1,
+            "order_id": trade_id or f"virtual_{symbol}",
+            "virtual": True,
+        }
+        self._record_outcome(
+            signal_dict,
+            self.mode,
+            ExecutionDecision.FILLED,
+            alerted_only=True,
+            paper_traded=False,
+        )
+        self._log(ExecutionDecision.FILLED, f"kalshi_virtual:{trade_id or 'opened'}", symbol)
+        return ExecutionResult(
+            decision=ExecutionDecision.FILLED,
+            reason=f"kalshi_virtual_book:{trade_id or 'opened'}",
+            mode=self.mode,
+            symbol=symbol,
+            success=True,
+            fill=fill,
+            alert_label="KALSHI VIRTUAL — research book (not live money)",
+            metadata={"virtual_kalshi": True, "virtual_trade_id": trade_id},
+        )
 
     def _skip(self, reason: str, symbol: str, alert_label: str = "") -> ExecutionResult:
         return ExecutionResult(
@@ -345,13 +410,15 @@ class ExecutionRouter:
         if bot and fill.get("price"):
             try:
                 from utils.trade_performance_ledger import get_trade_performance_ledger
+                from utils.signal_identity import format_sample_label
                 wr = get_trade_performance_ledger().win_rate()
                 qty = fill.get("quantity") or 1
+                src = signal_dict.get("source") or "signal pipeline"
                 msg = (
                     f"PAPER FILL (Alpaca)\n"
                     f"{signal_dict.get('action', 'BUY')} {symbol} x{qty} @ ${float(fill['price']):.2f}\n"
-                    f"Source: {signal_dict.get('source', 'n/a')}\n"
-                    f"Rolling win-rate: {wr.get('label', 'n/a')}"
+                    f"Source: {src}\n"
+                    f"Rolling win-rate: {format_sample_label(wr.get('label'))}"
                 )
                 bot.send_message(msg)
             except Exception:
@@ -453,14 +520,26 @@ class ExecutionRouter:
         enriched["data_age_seconds"] = signal_dict.get("data_age_seconds")
         enriched["price_source"] = signal_dict.get("price_source", "signal")
         enriched["kalshi_intel_only"] = bool(
-            (self.config.get("kalshi_intel_only") or self.config.get("post_prediction_trades") is False)
+            self.config.get("kalshi_intel_only") and not self.config.get("post_prediction_trades")
+        )
+        enriched["kalshi_virtual"] = bool(
+            signal_dict.get("virtual_kalshi")
+            or str(signal_dict.get("source") or "").lower() in ("kalshi_prediction", "kalshi")
+            or str(signal_dict.get("trade_type") or "").upper().startswith("KALSHI")
+            or str(signal_dict.get("symbol") or "").upper().startswith("KX")
         )
         sym = str(signal_dict.get("symbol") or "").upper()
         enriched["memory_recently_traded"] = self.trade_memory.is_recently_traded(sym)
         enriched["risk_gate"] = "passed" if result.decision != ExecutionDecision.SKIPPED or "risk" not in result.reason else "blocked"
         if result.decision in (ExecutionDecision.SKIPPED, ExecutionDecision.REJECTED):
             enriched["skip_reason"] = result.reason
-        if result.decision in (ExecutionDecision.FILLED, ExecutionDecision.SUBMITTED) and result.mode == ExecutionMode.PAPER_ALPACA:
+        if enriched.get("kalshi_virtual") and result.decision in (ExecutionDecision.FILLED, ExecutionDecision.SUBMITTED):
+            enriched["execution_alert_label"] = result.alert_label or "KALSHI VIRTUAL — research book (not live money)"
+            enriched["virtual"] = True
+            if result.fill:
+                enriched["fill_price"] = result.fill.get("price")
+                enriched["fill_quantity"] = result.fill.get("quantity")
+        elif result.decision in (ExecutionDecision.FILLED, ExecutionDecision.SUBMITTED) and result.mode == ExecutionMode.PAPER_ALPACA:
             enriched["execution_alert_label"] = "PAPER FILL (Alpaca)"
             if result.fill:
                 enriched["fill_price"] = result.fill.get("price")

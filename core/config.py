@@ -19,9 +19,33 @@ class PhasmaConfig:
         """Initialize configuration system"""
         self.config_path = config_path or "config.json"
         self.data = self._load_config()
+        self._hydrate_api_keys_from_env()
         self.data["execution"] = normalize_execution_config(self.data)
         self.data["paper_trading_safety"] = normalize_paper_trading_safety(self.data)
         self._execution_startup_message = format_execution_startup_message(self.data)
+
+    def _hydrate_api_keys_from_env(self) -> None:
+        """Overlay real env keys onto config when file still has placeholders."""
+        env_map = (
+            ("FMP_API_KEY", ("apis", "financial_modeling_prep", "api_key")),
+            ("POLYGON_API_KEY", ("apis", "polygon_io", "api_key")),
+            ("ALPHA_VANTAGE_KEY", ("apis", "alpha_vantage", "api_key")),
+            ("UNUSUAL_WHALES_API_KEY", ("unusual_whales", "api_key")),
+            ("UNUSUAL_WHALES_KEY", ("unusual_whales", "api_key")),
+            ("NEWS_API_KEY", ("geopolitical_analysis", "news_api_key")),
+            ("BING_API_KEY", ("geopolitical_analysis", "bing_api_key")),
+            ("ODDS_API_KEY", ("sports_betting", "api_key")),
+        )
+        for env_name, path in env_map:
+            env_val = os.getenv(env_name)
+            if not env_val or not str(env_val).strip():
+                continue
+            block: Any = self.data
+            for key in path[:-1]:
+                if not isinstance(block.get(key), dict):
+                    block[key] = {}
+                block = block[key]
+            block[path[-1]] = str(env_val).strip()
 
     def _load_config(self):
         """Load configuration from file or create default"""

@@ -49,7 +49,18 @@ class TelegramBot:
 
     def send_alert(self, signal):
         """Send a high-confidence signal alert during monitoring mode."""
-        message = self.format_signal_message(signal)
+        from utils.signal_identity import ensure_signal_identity, ensure_trade_levels
+        data = self._as_signal_dict(signal)
+        ok, _ = ensure_signal_identity(data)
+        if not ok and not (
+            str(data.get("symbol") or "").upper().startswith("KX")
+            or data.get("kalshi_signal")
+            or data.get("prediction_market")
+        ):
+            print(f"[TELEGRAM] Cannot resolve company for {data.get('symbol')} — resolving failed")
+            return False
+        ensure_trade_levels(data)
+        message = self.format_signal_message(data)
         return self.send_message(message)
 
     async def send_alert_async(self, signal):
@@ -364,60 +375,74 @@ Probability of Profit: {pop:.0f}%"""
     
     def format_stock_signal_message(self, signal):
         """Format regular stock signals with compelling reasoning."""
-        
-        symbol = signal.get('symbol', 'UNKNOWN')
+        from utils.signal_identity import (
+            ensure_signal_identity,
+            ensure_trade_levels,
+            format_money,
+        )
+
+        if not isinstance(signal, dict):
+            signal = self._as_signal_dict(signal)
+
+        ok, company_name = ensure_signal_identity(signal)
+        if not ok or not company_name:
+            print(f"[TELEGRAM] Could not resolve real company for {signal.get('symbol')} — not posting Unknown")
+            return ""
+        ensure_trade_levels(signal)
+
+        symbol = signal.get('symbol', '')
         action = signal.get('action', 'BUY')
-        source = signal.get('source', 'unknown')
-        
-        # Get company name from fact_check if available
-        company_info = signal.get('fact_check', {}).get('company_info', {})
-        company_name = company_info.get('name') or company_info.get('full_name') or symbol
-        try:
-            from utils.company_identity_registry import get_identity_registry
-            resolved = get_identity_registry().resolve_for_alert(signal if isinstance(signal, dict) else {})
-            if resolved:
-                company_name = resolved
-            elif str(company_name).strip().lower() in ("unknown", "n/a", "") or company_name == symbol:
-                # Do not post Unknown / bare ticker as company identity
-                return ""
-        except Exception:
-            pass
-        
+        source = str(signal.get('source', 'unknown') or 'unknown').lower()
+        asset_class = str(signal.get('asset_class') or signal.get('ledger_asset_class') or '').upper()
+        is_day_trade = (
+            asset_class == 'DAY_TRADE'
+            or source in ('day_trading', 'heavy_mover', 'heavy_mover_watch', 'day_trade')
+            or bool(signal.get('day_trade'))
+            or str(signal.get('strategy') or '').lower() in ('day_trade', 'scalp', 'intraday')
+        )
+
         # Fix confidence format - if it's already a percentage (like 75), don't multiply by 100
         confidence = signal.get('confidence', 0)
         if confidence > 1:
             confidence = confidence / 100  # Convert from percentage to decimal
         confidence_pct = confidence * 100
-        
+
         # ADD CONFLUENCE SCORE if available
         confluence_score = signal.get('confluence_score', confidence_pct)
-        
+
         pop_from_sim = resolve_pop_pct(signal)
-        entry_price = signal.get('entry_price', 'N/A')
-        target_price = signal.get('target_price', 'N/A')
-        stop_price = signal.get('stop_loss') or signal.get('stop_price') or 'N/A'
+        entry_price = format_money(signal.get('entry_price') or signal.get('current_price'))
+        target_price = format_money(signal.get('target_price'))
+        stop_price = format_money(signal.get('stop_loss') or signal.get('stop_price'))
         rr = signal.get('reward_risk_ratio') or signal.get('risk_reward_ratio')
         try:
-            from utils.stock_reward_risk import apply_stock_rr_targets, compute_reward_risk
-            apply_stock_rr_targets(signal, invent_target=True)
-            rr = signal.get('reward_risk_ratio') or compute_reward_risk(
-                signal.get('entry_price') or signal.get('current_price'),
-                signal.get('stop_loss') or signal.get('stop_price'),
-                signal.get('target_price'),
-            )
-            stop_price = signal.get('stop_loss') or signal.get('stop_price') or stop_price
-            target_price = signal.get('target_price') or target_price
-            entry_price = signal.get('entry_price') or signal.get('current_price') or entry_price
+            from utils.stock_reward_risk import compute_reward_risk
+            if rr is None:
+                rr = compute_reward_risk(
+                    signal.get('entry_price') or signal.get('current_price'),
+                    signal.get('stop_loss') or signal.get('stop_price'),
+                    signal.get('target_price'),
+                )
         except Exception:
             pass
-        
+        rr_display = f"{float(rr):.1f}:1" if rr is not None else "sized to 5:1"
+
         # Check if this is a fundamental analysis signal (undervalued stock)
         is_fundamental = source == 'fundamental_analysis' or signal.get('valuation_score') is not None
-        
+
         # Build concise WHY with key data - Strategy First
         why_lines = []
-        
-        if is_fundamental:
+
+        if is_day_trade:
+            why_lines.append("Strategy: DAY TRADING")
+            why_lines.append("Horizon: same session / intraday — not a swing hold")
+            rationale = str(signal.get('rationale') or signal.get('title') or '')[:120]
+            if rationale:
+                why_lines.append(f"Type: {rationale}")
+            why_lines.append(f"Confidence: {confidence_pct:.0f}%")
+            if pop_from_sim is not None:
+                why_lines.append(f"Success Rate: {pop_from_sim:.0f}%")
+        elif is_fundamental:
             why_lines.append(f"Strategy: VALUE INVESTING")
             
             # Add AI reasoning: why THIS stock, why industry needs it
@@ -516,7 +541,7 @@ Probability of Profit: {pop:.0f}%"""
                     expected_gain = ((float(target_price)/float(entry_price)-1)*100)
                     why_lines.append(f"Expected: +{expected_gain:.1f}%")
             except Exception:
-                why_lines.append(f"Target: ${signal.get('target_price', 'N/A')}")
+                why_lines.append(f"Target: ${format_money(signal.get('target_price'))}")
             
             why_lines.append(f"Confidence: {confidence_pct:.0f}%")
             if pop_from_sim is not None:
@@ -525,13 +550,16 @@ Probability of Profit: {pop:.0f}%"""
         why_text = "\n".join(why_lines)
         
         # Build exit strategy based on signal type
-        if is_fundamental:
+        if is_day_trade:
+            exit_text = "Day trade: flatten before session close. Trail stop after +1R. Do not overnight unless explicitly promoted to swing."
+        elif is_fundamental:
             exit_text = "Hold for 6-12 months for value realization. Scale out if target reached early. Reassess if fundamentals deteriorate."
         else:
             exit_text = "Scale out 50% at halfway point. Hold remainder for full target if momentum strong. Stop below recent low if price action fails."
         
         # Build message - Strategy First (Compact format)
-        message = f"""🚀 PHASMA AI - {action} {symbol} ({company_name})
+        header = "DAY TRADE" if is_day_trade else action
+        message = f"""🚀 PHASMA AI - {header} {symbol} ({company_name})
 
 ━━━━━━━━━━━━━━━━━━━━━━
 🎯 STRATEGY
@@ -546,7 +574,7 @@ Exit: {exit_text}
 ━━━━━━━━━━━━━━━━━━━━━━
 
         Entry: ${entry_price} | Stop: ${stop_price} | Target: ${target_price}
-        Angle: {f'{float(rr):.1f}:1' if rr else 'n/a'} reward:risk (min 5:1)"""
+        Angle: {rr_display} reward:risk (min 5:1)"""
 
         message += self._execution_status_block(signal)
         message += self._win_rate_block(signal)
@@ -563,13 +591,15 @@ Exit: {exit_text}
 💎 VALUATION
 ━━━━━━━━━━━━━━━━━━━━━━
 
-P/E: {pe_ratio:.1f} (Industry: {industry_pe:.1f}) | PEG: {peg_ratio:.2f if peg_ratio else 'N/A'}
+P/E: {pe_ratio:.1f} (Industry: {industry_pe:.1f}) | PEG: {f'{peg_ratio:.2f}' if peg_ratio else 'not available'}
 Score: {signal.get('valuation_score', 0)}/10 | Confluence: {confluence_score:.0f}/100"""
         
         return message
     
     def _win_rate_block(self, signal: Dict[str, Any]) -> str:
         """Rolling measured win-rates from the performance ledger."""
+        from utils.signal_identity import format_sample_label
+
         overall = signal.get("win_rate_overall")
         stocks = signal.get("win_rate_stocks")
         day = signal.get("win_rate_day_trade")
@@ -593,9 +623,9 @@ Score: {signal.get('valuation_score', 0)}/10 | Confluence: {confluence_score:.0f
             "\n\n━━━━━━━━━━━━━━━━━━━━━━\n"
             "📊 MEASURED WIN RATES\n"
             "━━━━━━━━━━━━━━━━━━━━━━\n"
-            f"Overall: {overall or 'n/a'}\n"
-            f"Stocks: {stocks or 'n/a'} | Day trades: {day or 'n/a'}\n"
-            f"Kalshi (virtual): {kalshi or 'n/a'}"
+            f"Overall: {format_sample_label(overall)}\n"
+            f"Stocks: {format_sample_label(stocks)} | Day trades: {format_sample_label(day)}\n"
+            f"Kalshi (virtual): {format_sample_label(kalshi)}"
         )
 
     def _execution_status_block(self, signal: Dict[str, Any]) -> str:
@@ -617,12 +647,22 @@ Score: {signal.get('valuation_score', 0)}/10 | Confluence: {confluence_score:.0f
 
         conf_type = signal.get("confidence_type", "heuristic")
         data_age = signal.get("data_age_seconds")
-        data_age_str = f"{int(data_age)}s" if data_age is not None else "unknown"
+        data_age_str = f"{int(data_age)}s" if data_age is not None else "not stamped"
         price_source = signal.get("price_source", "signal")
         kalshi_intel = signal.get("kalshi_intel_only", False)
         mem_recent = signal.get("memory_recently_traded", False)
-        risk_gate = signal.get("risk_gate", "n/a")
+        risk_gate = signal.get("risk_gate") or "not evaluated"
+        if str(risk_gate).lower() in ("n/a", "na", "unknown"):
+            risk_gate = "not evaluated"
         sim_pop = signal.get("simulation_pop") or signal.get("monte_carlo_sim_score") or signal.get("pop_from_sim")
+        sim_txt = f"{float(sim_pop):.1f}" if sim_pop is not None else "not simulated yet"
+        lp = signal.get("llm_prediction") if isinstance(signal.get("llm_prediction"), dict) else {}
+        lp_score = lp.get("prediction_score")
+        lp_line = (
+            f"LLM prediction: {lp_score}/100 ({lp.get('verdict')}) | grounding: {lp.get('grounding_status')}"
+            if lp_score is not None
+            else "LLM prediction: pending"
+        )
 
         lines = [
             "",
@@ -631,10 +671,11 @@ Score: {signal.get('valuation_score', 0)}/10 | Confluence: {confluence_score:.0f
             "━━━━━━━━━━━━━━━━━━━━━━",
             f"Mode: {mode}",
             f"Execution: {decision}",
-            f"Label: {label or 'N/A'}",
+            f"Label: {label or 'pending report'}",
             f"Data age: {data_age_str} | Price source: {price_source}",
             f"Confidence type: {conf_type}",
-            f"Simulation score (assumption-based): {sim_pop if sim_pop is not None else 'n/a'}",
+            f"Simulation score (assumption-based): {sim_txt}",
+            lp_line,
             f"Kalshi intel-only: {'yes' if kalshi_intel else 'no'}",
             f"Memory recently traded: {'yes' if mem_recent else 'no'}",
             f"Risk gate: {risk_gate}",
@@ -647,7 +688,7 @@ Score: {signal.get('valuation_score', 0)}/10 | Confluence: {confluence_score:.0f
         """Format Kalshi prediction market signals with direct trade links."""
         signal = self._as_signal_dict(signal)
 
-        symbol = signal.get('symbol') or signal.get('ticker') or 'UNKNOWN'
+        symbol = signal.get('symbol') or signal.get('ticker') or 'pending symbol'
         kalshi_signal = str(signal.get('kalshi_signal') or signal.get('action') or 'BUY_YES').upper()
         confidence_raw = signal.get('sim_scaled_confidence', signal.get('confidence', 0))
         try:
@@ -659,7 +700,7 @@ Score: {signal.get('valuation_score', 0)}/10 | Confluence: {confluence_score:.0f
 
         pop_from_sim = resolve_pop_pct(signal)
         # Watch/intel alerts may not have a simulation POP — still post the bet link
-        pop_display = f"{pop_from_sim:.1f}%" if pop_from_sim is not None else "n/a"
+        pop_display = f"{pop_from_sim:.1f}%" if pop_from_sim is not None else "not simulated yet"
 
         kalshi_analysis = signal.get('kalshi_analysis') or {}
         if not isinstance(kalshi_analysis, dict):
@@ -737,7 +778,7 @@ Score: {signal.get('valuation_score', 0)}/10 | Confluence: {confluence_score:.0f
                     event = '-'.join(parts[:-1])
             trade_link = f"https://kalshi.com/events/{event}"
 
-        yes_line = f"YES odds: {yes_pct:.1f}%" if yes_pct is not None else "YES odds: n/a"
+        yes_line = f"YES odds: {yes_pct:.1f}%" if yes_pct is not None else "YES odds: awaiting quote"
         why_lines = [
             "Strategy: PREDICTION MARKET",
             f"Market: {str(market_title)[:120]}",
@@ -748,8 +789,9 @@ Score: {signal.get('valuation_score', 0)}/10 | Confluence: {confluence_score:.0f
         ]
         why_text = "\n".join(why_lines)
 
-        message = f"""🎯 KALSHI VIRTUAL / RESEARCH — {symbol}
-(Not a brokerage fill — tracked for win-rate learning)
+        message = f"""🎯 KALSHI TRADE ALERT (VIRTUAL) — {symbol}
+Not live money — tracked in Phasma virtual book for win-rate learning.
+Live Kalshi API orders: OFF
 
 ━━━━━━━━━━━━━━━━━━━━━━
 🎯 STRATEGY
@@ -760,7 +802,7 @@ Score: {signal.get('valuation_score', 0)}/10 | Confluence: {confluence_score:.0f
 Exit: Hold until event resolution. Close early if probability shifts against position.
 
 ━━━━━━━━━━━━━━━━━━━━━━
-📊 BET OPTIONS (VIRTUAL)
+📊 BET (VIRTUAL BOOK)
 ━━━━━━━━━━━━━━━━━━━━━━
 
 • YES — {pick_detail if pick == 'BUY YES' else 'alternate side'}
@@ -768,7 +810,7 @@ Exit: Hold until event resolution. Close early if probability shifts against pos
 AI pick: {pick}
 
 ━━━━━━━━━━━━━━━━━━━━━━
-📱 TRADE LINK (open & place bet yourself)
+📱 OPEN ON KALSHI (you place the bet yourself if you want)
 ━━━━━━━━━━━━━━━━━━━━━━
 
 {trade_link}"""

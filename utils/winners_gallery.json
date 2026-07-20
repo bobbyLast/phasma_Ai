@@ -1,0 +1,85 @@
+{
+  "winners": [
+    {
+      "symbol": "GOOGL",
+      "entry_date": "2026-06-21T17:19:52.782863",
+      "exit_date": "2026-07-06T16:07:41.000662",
+      "realized_gain_pct": 1.5238291422526045,
+      "peak_gain_pct": 1.5238291422526045,
+      "holding_period_days": 14,
+      "catalyst_type": "Unknown",
+      "engines_used": [
+        "unusual_whales"
+      ],
+      "key_factors": [
+        "Institutional BLOCK_TRADE: $75,000,000 at $145.20"
+      ],
+      "added_date": "2026-07-06T16:07:41.000662"
+    },
+    {
+      "symbol": "GOOGL",
+      "entry_date": "2026-06-21T17:19:52.782863",
+      "exit_date": "2026-07-06T14:57:02.216081",
+      "realized_gain_pct": 1.522314823035038,
+      "peak_gain_pct": 1.522314823035038,
+      "holding_period_days": 14,
+      "catalyst_type": "Unknown",
+      "engines_used": [
+        "unusual_whales"
+      ],
+      "key_factors": [
+        "Institutional BLOCK_TRADE: $75,000,000 at $145.20"
+      ],
+      "added_date": "2026-07-06T14:57:02.216081"
+    },
+    {
+      "symbol": "GOOGL",
+      "entry_date": "2026-06-21T17:19:52.782863",
+      "exit_date": "2026-07-06T13:39:08.061832",
+      "realized_gain_pct": 1.512258944760998,
+      "peak_gain_pct": 1.512258944760998,
+      "holding_period_days": 14,
+      "catalyst_type": "Unknown",
+      "engines_used": [
+        "unusual_whales"
+      ],
+      "key_factors": [
+        "Institutional BLOCK_TRADE: $75,000,000 at $145.20"
+      ],
+      "added_date": "2026-07-06T13:39:08.061832"
+    },
+    {
+      "symbol": "GOOGL",
+      "entry_date": "2026-06-21T17:19:52.782863",
+      "exit_date": "2026-07-06T12:46:50.917978",
+      "realized_gain_pct": 1.5069559901213845,
+      "peak_gain_pct": 1.5069559901213845,
+      "holding_period_days": 14,
+      "catalyst_type": "Unknown",
+      "engines_used": [
+        "unusual_whales"
+      ],
+      "key_factors": [
+        "Institutional BLOCK_TRADE: $75,000,000 at $145.20"
+      ],
+      "added_date": "2026-07-06T12:46:50.918975"
+    },
+    {
+      "symbol": "GOOGL",
+      "entry_date": "2026-06-21T17:19:52.782863",
+      "exit_date": "2026-07-19T18:01:21.660953",
+      "realized_gain_pct": 1.3882230648324512,
+      "peak_gain_pct": 1.3882230648324512,
+      "holding_period_days": 28,
+      "catalyst_type": "Unknown",
+      "engines_used": [
+        "unusual_whales"
+      ],
+      "key_factors": [
+        "Institutional BLOCK_TRADE: $75,000,000 at $145.20"
+      ],
+      "added_date": "2026-07-19T18:01:21.660953"
+    }
+  ],
+  "last_updated": "2026-07-19T18:01:21.677101"
+}

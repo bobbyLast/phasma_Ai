@@ -35,6 +35,10 @@ def _is_real_name(name: Any) -> bool:
         return False  # derived "$SYM - headline"
     if text.upper() == text and len(text) <= 5 and text.isalpha():
         return False  # bare ticker as name
+    if len(text) > 80:
+        return False  # Wikipedia dumps / article blobs
+    if "wikipedia" in low or "http://" in low or "https://" in low:
+        return False
     return True
 
 
@@ -80,6 +84,47 @@ class CompanyIdentityRegistry:
 
     def _seed_from_csv(self) -> None:
         root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        # Hard seeds for mega-caps that must never post as Unknown
+        mega = {
+            "AAPL": "Apple Inc.",
+            "MSFT": "Microsoft Corporation",
+            "GOOG": "Alphabet Inc.",
+            "GOOGL": "Alphabet Inc.",
+            "AMZN": "Amazon.com Inc.",
+            "NVDA": "NVIDIA Corporation",
+            "TSLA": "Tesla Inc.",
+            "META": "Meta Platforms Inc.",
+            "SPY": "SPDR S&P 500 ETF",
+            "QQQ": "Invesco QQQ Trust",
+            "AMD": "Advanced Micro Devices Inc.",
+            "NFLX": "Netflix Inc.",
+            "WELL": "Welltower Inc.",
+            "GOLD": "Barrick Gold Corporation",
+            "SNAP": "Snap Inc.",
+            "LINK": "Chainlink (crypto) — not a US equity trade",
+        }
+        now = datetime.now(timezone.utc).isoformat()
+        for sym, name in mega.items():
+            if sym not in self._data:
+                self._data[sym] = {
+                    "symbol": sym,
+                    "company_name": name,
+                    "aliases": [name],
+                    "cik": "",
+                    "sector": "",
+                    "sources": ["mega_seed"],
+                    "resolver_status": "cache_exact",
+                    "last_price": None,
+                    "avg_volume": None,
+                    "is_tradeable": not sym.startswith("LINK") or True,
+                    "updated_at": now,
+                    "unresolved_entities": [],
+                }
+                self._dirty = True
+            elif not _is_real_name((self._data.get(sym) or {}).get("company_name")):
+                self._data[sym]["company_name"] = name
+                self._data[sym]["resolver_status"] = "cache_exact"
+                self._dirty = True
         csv_path = os.path.join(root, "data", "company_reference.csv")
         if not os.path.isfile(csv_path):
             return
@@ -101,7 +146,7 @@ class CompanyIdentityRegistry:
                             "last_price": None,
                             "avg_volume": None,
                             "is_tradeable": True,
-                            "updated_at": datetime.now(timezone.utc).isoformat(),
+                            "updated_at": now,
                             "unresolved_entities": [],
                         }
                         self._dirty = True
@@ -270,7 +315,10 @@ class CompanyIdentityRegistry:
         return item
 
     def resolve_for_alert(self, signal: Dict[str, Any]) -> Optional[str]:
-        """Return real company name for Telegram, or None if unresolved."""
+        """Return real company name for Telegram, or None if unresolved.
+
+        Tries registry, then live CompanyResolver (CSV/yfinance) and remembers hits.
+        """
         sym = _clean_symbol(signal.get("symbol") or signal.get("ticker"))
         fc = signal.get("fact_check") or {}
         info = fc.get("company_info") or {}
@@ -283,6 +331,28 @@ class CompanyIdentityRegistry:
         ):
             if _is_real_name(candidate):
                 return str(candidate).strip()
+        if not sym:
+            return None
+        # Live resolve — prefer quote/CSV (no web blobs); never leave mega-caps as Unknown
+        try:
+            from utils.company_resolver import CompanyResolver
+            resolver = CompanyResolver.get()
+            for allow_web in (False, True):
+                resolved = resolver.resolve(sym, allow_yf=True, allow_web=allow_web)
+                name = (resolved or {}).get("company_name") or (resolved or {}).get("name")
+                if not _is_real_name(name):
+                    continue
+                self.remember(
+                    sym,
+                    company_name=str(name).strip(),
+                    sector=(resolved or {}).get("sector"),
+                    source="telegram_live_resolve",
+                    resolver_status=str((resolved or {}).get("resolver_status") or "quote_exact"),
+                )
+                self.save(force=True)
+                return str(name).strip()
+        except Exception:
+            pass
         return None
 
 

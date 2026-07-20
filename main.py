@@ -393,8 +393,22 @@ class PhasmaTradingSystem:
         self.cooldown_trade_memory = get_trade_memory()
         disabled_apis = audit_api_keys(self.config.data)
         if disabled_apis:
-            print(f"⚠️ Disabled APIs (placeholder keys): {', '.join(disabled_apis.keys())}")
+            print(
+                f"⚠️ APIs with placeholder keys (still enabled per config): "
+                f"{', '.join(disabled_apis.keys())}"
+            )
+            for section, reason in disabled_apis.items():
+                block = self.config.data.get(section)
+                if isinstance(block, dict):
+                    block["_placeholder_key_warning"] = reason
         print(f"✅ Execution router ready (mode={self.execution_router.mode})")
+        if self.config.get("post_prediction_trades"):
+            print(
+                "✅ Kalshi Telegram TRADE alerts ON (virtual book) — "
+                f"live Kalshi execution={'ON' if (self.config.get('execution') or {}).get('kalshi_execution_enabled') else 'OFF'}"
+            )
+        elif self.config.get("kalshi_intel_only", True):
+            print("ℹ️ Kalshi intel-only — digest posts only (no trade-style Telegram alerts)")
         self.worker_supervisor = WorkerSupervisor()
         print("✅ Worker supervisor ready (circuit breakers enabled)")
         self.group_coordinator = GroupCoordinator(self.config.data)
@@ -1605,14 +1619,16 @@ class PhasmaTradingSystem:
             except Exception as e:
                 print(f"Error detecting crash risk: {e}")
         
-        # Check VIX for volatility adjustment
+        # Check VIX for volatility adjustment (skip if live VIX unavailable)
         try:
-            vix = float(ps.price_fetcher.get_real_price('VIX') or 20)
-            if vix > 30:
-                signal['position_size'] = signal.get('position_size', 0.02) * 0.5
-                signal['risk_warning'] = "High volatility - position size reduced"
-            elif vix > 25:
-                signal['position_size'] = signal.get('position_size', 0.02) * 0.75
+            vix_raw = ps.price_fetcher.get_real_price('VIX')
+            if vix_raw is not None and float(vix_raw) > 0:
+                vix = float(vix_raw)
+                if vix > 30:
+                    signal['position_size'] = signal.get('position_size', 0.02) * 0.5
+                    signal['risk_warning'] = "High volatility - position size reduced"
+                elif vix > 25:
+                    signal['position_size'] = signal.get('position_size', 0.02) * 0.75
         except Exception:
             pass
 
@@ -2988,7 +3004,17 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
                         continue
 
                     intelligence = engine.analyze_symbol_intelligence(symbol, signal_type)
-                    signal.market_intelligence = intelligence
+                    try:
+                        from utils.prediction_context import (
+                            attach_prediction_context,
+                            compact_market_intelligence,
+                        )
+                        signal.market_intelligence = compact_market_intelligence(
+                            intelligence, config=ctx.config
+                        )
+                        attach_prediction_context(signal, config=ctx.config)
+                    except Exception:
+                        signal.market_intelligence = intelligence
                     signal.intelligence_strength = intelligence.get('opportunity_strength', 50)
 
                     print(f"[MARKET INTEL] ✅ {symbol}: {signal_type} | Strength: {signal.intelligence_strength:.0f}/100")
@@ -3081,6 +3107,69 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
             print(f"[PRO ANALYSIS] 📊 Final signals after professional analysis: {len(high_confidence_approved)}")
 
         return high_confidence_approved
+
+    def _stage_llm_prediction_review(
+        self,
+        ctx: ApplicationContext,
+        high_confidence_approved: List[Signal],
+    ) -> List[Signal]:
+        """Brave LLM grounding + compact-context skill fusion before jury."""
+        cfg = ctx.config.get("llm_prediction") if hasattr(ctx.config, "get") else {}
+        if isinstance(cfg, dict) and cfg.get("enabled") is False:
+            return high_confidence_approved
+        if not high_confidence_approved:
+            return high_confidence_approved
+
+        from engines.llm_prediction_engine import LLMPredictionEngine
+
+        engine = LLMPredictionEngine(ctx.config)
+        if not engine.enabled:
+            return high_confidence_approved
+
+        max_n = int(engine.cfg.get("max_predictions_per_cycle") or 12)
+        kept: List[Signal] = []
+        reviewed = 0
+        rejected = 0
+
+        print(f"[LLM PREDICT] Running compact-context predictions (cap {max_n}/cycle)...")
+        if engine.brave.llm_context_available:
+            print("[LLM PREDICT] Brave LLM Context key configured")
+        elif engine.brave.search_key:
+            print("[LLM PREDICT] LLM Context not on plan — using Brave Web Search grounding")
+        else:
+            print("[LLM PREDICT] No Brave keys — skills-only mode")
+
+        for signal in high_confidence_approved:
+            if reviewed >= max_n:
+                kept.append(signal)
+                continue
+            reviewed += 1
+            sym = getattr(signal, "symbol", None) or "pending"
+            try:
+                result = engine.predict(signal)
+                if not result:
+                    kept.append(signal)
+                    continue
+                engine.apply_to_signal(signal, result)
+                score = result.get("prediction_score")
+                verdict = result.get("verdict")
+                gstatus = result.get("grounding_status")
+                print(
+                    f"[LLM PREDICT] {sym}: score={score} verdict={verdict} "
+                    f"grounding={gstatus}"
+                )
+                if result.get("hard_reject"):
+                    rejected += 1
+                    print(f"[LLM PREDICT] REJECT {sym}: score below floor")
+                    continue
+                kept.append(signal)
+            except Exception as exc:
+                print(f"[LLM PREDICT] {sym} skipped: {exc}")
+                kept.append(signal)
+
+        if rejected:
+            print(f"[LLM PREDICT] {len(high_confidence_approved)} -> {len(kept)} after prediction filter")
+        return kept
 
     def _stage_jury_final_review(
         self,
@@ -3563,7 +3652,7 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
                                     'source': 'social_media',
                                     'sentiment': 0.5,
                                     'catalyst_score': 0.3,
-                                    'sector': 'Unknown',
+                                    'sector': get_resolver().sector(item.get('symbol'), item.get('title')) or 'Equities',
                                     'current_price': real_price,  # REAL PRICE
                                     # target_price will be calculated by simulation later
                                     'social_mentions': count
@@ -3733,7 +3822,7 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
                     
                     # Check if it's undervalued
                     if pe_analysis.get('score', 0) >= 7:  # High value score
-                        valuation_level = pe_analysis.get('valuation_level', 'Unknown')
+                        valuation_level = pe_analysis.get('valuation_level') or 'fair'
                         current_pe = pe_analysis.get('current_pe', 0)
                         industry_pe = pe_analysis.get('industry_pe', 0)
                         fair_value = pe_analysis.get('fair_value_range', {})
@@ -3757,7 +3846,7 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
                                     'source': 'fundamental_analysis',
                                     'sentiment': 0.7,
                                     'catalyst_score': 0.4,
-                                    'sector': pe_analysis.get('sector', 'Unknown'),
+                                    'sector': pe_analysis.get('sector') or get_resolver().sector(symbol) or 'Equities',
                                     'current_price': current_price,
                                     'target_price': target_price,
                                     'pe_ratio': current_pe,
@@ -3878,7 +3967,29 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
         if not news_items:
             print("💤 No news items to analyze - skipping signal generation")
         else:
-            for news_item in news_items[:20]:  # Analyze top 20 items
+            from utils.prediction_context import select_news_for_analysis
+
+            boost_syms: List[str] = []
+            try:
+                funnel = getattr(getattr(ctx, "app_ctx", None), "feature_funnel", None) or {}
+                boost_syms = list(funnel.get("deep_ai_finalists") or [])
+                if not boost_syms and getattr(ctx, "cycle_data", None):
+                    fs = getattr(ctx.cycle_data, "freshness_status", None) or {}
+                    boost_syms = list(fs.get("feature_funnel") or [])
+            except Exception:
+                boost_syms = []
+
+            analysis_items = select_news_for_analysis(
+                news_items,
+                config=ctx.config,
+                boost_symbols=boost_syms,
+            )
+            print(
+                f"   📦 Compacted news intake: {len(news_items)} rows → "
+                f"{len(analysis_items)} ranked for unified analysis"
+            )
+
+            for news_item in analysis_items:
                 try:
                     # UNIFIED ANALYSIS: All methods together for each item
                     unified_signals = await s._run_unified_analysis(
@@ -4347,7 +4458,10 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
             if s.options_engine:
                 print(f"\n📊 Scanning for options trading opportunities...")
                 try:
-                    options_signals = await s.options_engine.generate_signals(comprehensive_watchlist)
+                    scan_symbols = comprehensive_watchlist if comprehensive_watchlist else None
+                    if not scan_symbols:
+                        print("   ℹ️ No affordable momentum symbols — scanning default liquid options watchlist")
+                    options_signals = await s.options_engine.generate_signals(scan_symbols)
                     
                     if options_signals:
                         print(f"   🎯 Generated {len(options_signals)} SUPER ADVANCED options trading signals")
@@ -4665,38 +4779,70 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
         if not cycle_data:
             return
         matched = [
-            item for item in cycle_data.ingested_news
+            item for item in (cycle_data.ingested_news or [])
             if item.get("prediction_market")
             and float(item.get("news_match_score") or 0) > 0
         ]
         matched.sort(key=lambda row: float(row.get("news_match_score") or 0), reverse=True)
         matched = matched[:5]
+
+        # Also surface top snapshot markets when news match is empty (still research-only)
+        snapshot_rows = []
         if not matched:
+            markets = list(getattr(cycle_data, "prediction_markets", None) or [])
+            for m in markets[:8]:
+                if not isinstance(m, dict):
+                    continue
+                ticker = m.get("ticker") or m.get("symbol") or m.get("event_ticker") or "—"
+                title = (m.get("title") or m.get("subtitle") or "")[:72]
+                yes = m.get("yes_bid") or m.get("yes_price") or m.get("last_price")
+                snapshot_rows.append((ticker, title, yes))
+
+        if not matched and not snapshot_rows:
+            print("   Kalshi intel digest skipped — no matched news and empty snapshot")
             return
+
         digest_key = f"KALSHI_INTEL_DIGEST:{datetime.now().strftime('%Y-%m-%d')}"
-        if digest_key in self.posted_signals:
+        # Allow a second mid-day refresh if first was empty of matches
+        refresh_key = f"KALSHI_INTEL_SNAPSHOT:{datetime.now().strftime('%Y-%m-%d-%H')}"
+        key = digest_key if matched else refresh_key
+        if key in self.posted_signals:
             return
+
         lines = [
-            "Kalshi intel digest (research only — not trade signals)",
+            "Kalshi intel (research only — NOT a trade signal)",
+            "Mode: kalshi_intel_only — no live Kalshi orders",
             "",
         ]
         try:
             from engines.kalshi_virtual_book import get_kalshi_virtual_book
-            lines.append(f"Virtual Kalshi win-rate: {get_kalshi_virtual_book().win_rate_label()}")
+            book = get_kalshi_virtual_book()
+            lines.append(f"Virtual Kalshi win-rate: {book.win_rate_label()}")
+            open_n = len((book.state or {}).get("open") or {})
+            lines.append(f"Virtual book open positions: {open_n}")
             lines.append("")
         except Exception:
             pass
-        for item in matched:
-            sym = item.get("symbol") or "—"
-            score = item.get("news_match_score", 0)
-            title = (item.get("title") or "")[:72]
-            venue = item.get("prediction_market", "kalshi")
-            lines.append(f"• [{venue}] {sym} (match {score}): {title}")
+
+        if matched:
+            lines.append("News-linked themes:")
+            for item in matched:
+                sym = item.get("symbol") or "—"
+                score = item.get("news_match_score", 0)
+                title = (item.get("title") or "")[:72]
+                venue = item.get("prediction_market", "kalshi")
+                lines.append(f"• [{venue}] {sym} (match {score}): {title}")
+        if snapshot_rows:
+            lines.append("Top markets from snapshot (no news match yet):")
+            for ticker, title, yes in snapshot_rows:
+                yes_bit = f" yes≈{yes}" if yes is not None else ""
+                lines.append(f"• {ticker}{yes_bit}: {title or '(untitled)'}")
+
         try:
             if telegram_bot.send_message("\n".join(lines)):
-                self.posted_signals.add(digest_key)
+                self.posted_signals.add(key)
                 self._save_posted_signals()
-                print(f"   Posted Kalshi intel digest ({len(matched)} themes)")
+                print(f"   Posted Kalshi intel digest (matched={len(matched)} snapshot={len(snapshot_rows)})")
         except Exception as err:
             print(f"   Kalshi intel digest post failed: {err}")
 
@@ -5184,6 +5330,9 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
 
                                 # 2) Telegram report-only (never submits orders)
                                 try:
+                                    from utils.signal_identity import ensure_signal_identity, ensure_trade_levels
+                                    ensure_signal_identity(report_dict)
+                                    ensure_trade_levels(report_dict)
                                     if report_dict.get('source') == 'stock_signal':
                                         formatted_message = telegram_bot.format_stock_signal_message(report_dict)
                                     else:
@@ -5250,14 +5399,23 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
                     insider_hits = self.insider_monitor.fetch_and_analyze_opportunities()
                     if insider_hits:
                         for hit in insider_hits[:5]:  # limit chatter
-                            ticker = hit.get('ticker', 'N/A')
+                            ticker = hit.get('ticker') or 'pending ticker'
                             score = hit.get('opportunity_score', 0)
                             rec = hit.get('recommendation') or 'WATCH'
                             reasoning = hit.get('reasoning', 'No reasoning')
                             current_price = hit.get('current_price', 0)
                             insider_price = hit.get('purchase_price', 0)
                             transaction_value = hit.get('transaction_value', 0)
-                            sector = hit.get('sector', 'Unknown')
+                            sector = hit.get('sector') or 'Equities'
+                            try:
+                                from utils.signal_identity import ensure_signal_identity
+                                id_sig = {"symbol": ticker, "company_name": hit.get("company_name"), "sector": sector}
+                                ok, cname = ensure_signal_identity(id_sig)
+                                if ok:
+                                    sector = id_sig.get("sector") or sector
+                                    hit["company_name"] = cname
+                            except Exception:
+                                pass
                             
                             # Create unique key for deduplication
                             insider_key = f"INSIDER:{ticker}:{rec}:{int(transaction_value)}"
@@ -5265,21 +5423,23 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
                                 continue
                             
                             # Calculate gain since purchase
-                            gain_text = "N/A"
+                            gain_text = "gain pending"
                             if insider_price > 0 and current_price > 0:
                                 gain_pct = ((current_price - insider_price) / insider_price) * 100
                                 gain_text = f"{gain_pct:+.1f}%"
                             
+                            company = hit.get("company_name") or ticker
+                            detail_link = hit.get('link') or 'link pending'
                             msg = (
                                 f"🕵️ **Insider Opportunity Alert**\n"
-                                f"📈 **{ticker} - {rec}**\n"
+                                f"📈 **{ticker} ({company}) - {rec}**\n"
                                 f"💰 Score: {score:.0f}/100\n"
                                 f"🏢 Sector: {sector}\n"
                                 f"💸 Insider Purchase: ${transaction_value/1e3:.0f}K at ${insider_price:.2f}\n"
                                 f"📊 Current Price: ${current_price:.2f} ({gain_text})\n"
                                 f"🎯 Analysis: {reasoning}\n"
                                 f"📅 Days Since Purchase: {hit.get('days_since_purchase', 0)}\n"
-                                f"🔗 Details: {hit.get('link', 'N/A')}"
+                                f"🔗 Details: {detail_link}"
                             )
                             result = telegram_bot.send_message(msg)
                             if result:
@@ -5303,8 +5463,8 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
                             posted = 0
                             for trade in top_trades:
                                 politician_key = (
-                                    f"POLITICIAN:{trade.get('ticker', 'N/A')}:"
-                                    f"{trade.get('politician', 'N/A')}:{trade.get('date', 'N/A')}"
+                                    f"POLITICIAN:{trade.get('ticker') or 'pending'}:"
+                                    f"{trade.get('politician') or 'pending'}:{trade.get('date') or 'pending'}"
                                 )
                                 if politician_key in self.posted_signals:
                                     continue
@@ -5653,6 +5813,7 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
 
         high_confidence_approved = self._stage_streamlined_signal_filtering(ctx, approved_signals)
         high_confidence_approved = self._stage_bankroll_intel_and_pro_options(ctx, high_confidence_approved)
+        high_confidence_approved = self._stage_llm_prediction_review(ctx, high_confidence_approved)
         high_confidence_approved = self._stage_jury_final_review(
             ctx,
             high_confidence_approved,
@@ -6354,6 +6515,11 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
                         if quality != SignalDataQuality.COMPLETE:
                             print(f"  ❌ DATA QUALITY: {symbol} - incomplete market data (volume/price/name), skipping")
                             continue
+                        try:
+                            from utils.prediction_context import attach_prediction_context
+                            attach_prediction_context(signal, config=cfg)
+                        except Exception:
+                            pass
                         signals.append(signal)
 
             except Exception as e:
@@ -6646,6 +6812,10 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
         """Ensure signal has validated company + real price before showing or trading."""
         sig = display_safe.as_dict(signal)
         if not sig:
+            return None
+
+        from core.source_status import signal_uses_fake_price
+        if signal_uses_fake_price(sig):
             return None
 
         sym = str(sig.get("symbol") or "").upper().strip()
@@ -7179,12 +7349,12 @@ Our AI analysis identifies this as a good {action.lower()} opportunity based on 
     def _generate_value_investing_reasoning(self, symbol: str, pe_analysis: Dict, current_price: float, target_price: float) -> str:
         """Generate AI reasoning for why THIS stock is a good value investment and why the industry needs it"""
         
-        sector = pe_analysis.get('sector', 'Unknown')
+        sector = pe_analysis.get('sector') or get_resolver().sector(symbol) or 'Equities'
         pe_ratio = pe_analysis.get('current_pe', 0)
         industry_pe = pe_analysis.get('industry_pe', 0)
         eps_growth = pe_analysis.get('eps_growth', 0)
         revenue_growth = pe_analysis.get('revenue_growth', 0)
-        valuation_level = pe_analysis.get('valuation_level', 'Unknown')
+        valuation_level = pe_analysis.get('valuation_level') or 'fair'
         
         # Industry-specific reasoning
         industry_reasons = {

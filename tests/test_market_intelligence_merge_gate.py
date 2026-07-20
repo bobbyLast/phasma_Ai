@@ -261,3 +261,141 @@ def test_decision_pipeline_context_mode_gate():
     }
     d = pipe.evaluate(sig, has_catalyst=True)
     assert "context_mode" in (d.gates_failed or [])
+
+
+def test_trade_jury_uses_compact_prediction_context():
+    from engines.trade_jury_system import TradeJurySystem
+
+    class _Sig:
+        symbol = "AAPL"
+        action = "BUY"
+        confidence = 0.7
+        rationale = "UNIFIED Analysis: breakout patterns + 35% divergence + Monte Carlo validation"
+        source = "UNIFIED_ANALYSIS"
+        current_price = 180.0
+        position_size = 1
+        intelligence_strength = 62
+        prediction_context = {
+            "skills_tags": ["pattern", "divergence", "monte_carlo", "market_intel"],
+            "catalyst": {"title": "Apple beats estimates"},
+        }
+
+    jury = TradeJurySystem()
+    out = jury.evaluate(_Sig())
+    assert out.verdict in ("APPROVE", "CONDITIONAL", "REJECT")
+    assert any("prediction skills" in r for r in out.reasons)
+
+
+def test_prediction_context_compacts_signal():
+    from utils.prediction_context import attach_prediction_context, compact_signal_context
+
+    signal = {
+        "symbol": "GOOG",
+        "company_name": "Alphabet Inc.",
+        "action": "BUY",
+        "confidence": 0.72,
+        "title": "Alphabet announces cloud deal " + ("x" * 200),
+        "rationale": "UNIFIED " + ("y" * 300),
+        "patterns": ["breakout", "volume_surge", "macd_cross", "rsi_reset", "extra"],
+        "divergence_analysis": {"divergence_score": 0.35},
+        "simulation_results": {"win_rate": 0.58, "target_price": 210, "stop_loss": 175},
+        "latent_news_context": {"latent_risk_score": 0.2, "summary": "Recent whale outflows noted"},
+        "intelligence_strength": 65,
+    }
+    compact = compact_signal_context(signal)
+    assert compact["symbol"] == "GOOG"
+    assert len(compact["catalyst"]["title"]) <= 120
+    assert len(compact["technical"]["patterns"]) <= 4
+    assert "monte_carlo" in compact["skills_tags"]
+    attach_prediction_context(signal)
+    assert signal["prediction_context"]["company"] == "Alphabet Inc."
+
+
+def test_rank_news_for_analysis_boosts_funnel_finalists():
+    from utils.prediction_context import rank_news_for_analysis, select_news_for_analysis
+
+    items = [
+        {"symbol": "AAA", "title": "AAA steady", "sentiment": 0.1},
+        {"symbol": "BBB", "title": "BBB steady", "sentiment": 0.1},
+        {"symbol": "CCC", "title": "CCC breaking news", "catalyst_score": 0.9, "sentiment": 0.8},
+    ]
+    ranked = rank_news_for_analysis(items, boost_symbols=["BBB"])
+    assert ranked[0]["symbol"] in ("CCC", "BBB")
+    selected = select_news_for_analysis(items, config={"prediction_context": {"max_unified_analysis_items": 2}})
+    assert len(selected) == 2
+
+
+def test_llm_prediction_fuses_skills_and_grounding():
+    from engines.llm_prediction_engine import infer_prediction
+
+    pc = {
+        "symbol": "AAPL",
+        "company": "Apple Inc.",
+        "action": "BUY",
+        "confidence": 0.7,
+        "skills_tags": ["pattern", "monte_carlo", "divergence"],
+        "simulation": {"win_rate": 0.58},
+        "intel": {"strength": 65},
+        "technical": {"divergence_score": 0.3},
+        "catalyst": {"title": "Apple beats earnings"},
+    }
+    grounding = {
+        "status": "ok",
+        "snippets": ["Apple shares surge after strong earnings beat expectations"],
+        "sources": [{"title": "Reuters", "url": "https://example.com"}],
+    }
+    result = infer_prediction(pc, grounding, config={"llm_prediction": {"min_prediction_score": 42}})
+    assert result["prediction_score"] >= 42
+    assert result["verdict"] in ("BULLISH", "NEUTRAL", "BEARISH")
+    assert result["grounding_snippets"]
+
+
+def test_brave_web_fallback_parses_results():
+    from utils.brave_llm_context import BraveLLMContextClient
+
+    client = BraveLLMContextClient({"enabled": True})
+    data = {
+        "web": {
+            "results": [
+                {
+                    "title": "Apple beats estimates",
+                    "url": "https://example.com/aapl",
+                    "description": "Apple shares surge after strong earnings beat",
+                }
+            ]
+        }
+    }
+    payload = client._parse_web_response(data)
+    assert payload["status"] == "ok_web"
+    assert payload["snippets"]
+    assert payload["provider"] == "brave_web"
+
+
+def test_build_llm_query_from_compact_context():
+    from utils.prediction_context import build_llm_query
+
+    q = build_llm_query(
+        {
+            "symbol": "GOOG",
+            "company": "Alphabet Inc.",
+            "sector": "Technology",
+            "catalyst": {"title": "Cloud revenue accelerates"},
+        }
+    )
+    assert "GOOG" in q
+    assert "Alphabet" in q
+    assert "Cloud revenue" in q
+
+    from utils.prediction_context import build_llm_query
+
+    q = build_llm_query(
+        {
+            "symbol": "GOOG",
+            "company": "Alphabet Inc.",
+            "sector": "Technology",
+            "catalyst": {"title": "Cloud revenue accelerates"},
+        }
+    )
+    assert "GOOG" in q
+    assert "Alphabet" in q
+    assert "Cloud revenue" in q

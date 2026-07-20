@@ -31,7 +31,7 @@
       "chat_id": "${TELEGRAM_CHAT_ID}"
     },
     "discord": {
-      "enabled": false,
+      "enabled": true,
       "webhook_url": "${DISCORD_WEBHOOK_URL}"
     }
   }

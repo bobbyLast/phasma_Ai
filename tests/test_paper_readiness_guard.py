@@ -131,13 +131,13 @@ class TestPaperReadinessGuard(unittest.TestCase):
         {"ALPACA_API_KEY": "k", "ALPACA_API_SECRET": "s", "ALPACA_BASE_URL": PAPER_ALPACA_URL},
         clear=True,
     )
-    def test_blocked_allow_live_trading(self):
+    def test_allow_live_trading_does_not_block_paper_readiness(self):
         cfg = _safe_paper_config()
         cfg["execution"]["allow_live_trading"] = True
         normalize_execution_config(cfg)
-        result = self.guard.check_all(cfg, simulate_paper_mode=True)
-        self.assertFalse(result.passed)
-        self.assertIn("allow_live_trading_enabled", result.failed_checks)
+        result = self.guard.check_all(cfg, alpaca_client=_mock_alpaca_client(), simulate_paper_mode=True)
+        self.assertTrue(result.passed, result.failed_checks)
+        self.assertNotIn("allow_live_trading_enabled", result.failed_checks)
 
     @patch.dict(
         os.environ,
@@ -157,13 +157,13 @@ class TestPaperReadinessGuard(unittest.TestCase):
         {"ALPACA_API_KEY": "k", "ALPACA_API_SECRET": "s", "ALPACA_BASE_URL": PAPER_ALPACA_URL},
         clear=True,
     )
-    def test_blocked_kalshi_execution_enabled(self):
+    def test_kalshi_execution_enabled_does_not_block_paper_readiness(self):
         cfg = _safe_paper_config()
         cfg["execution"]["kalshi_execution_enabled"] = True
         normalize_execution_config(cfg)
-        result = self.guard.check_all(cfg, simulate_paper_mode=True)
-        self.assertFalse(result.passed)
-        self.assertIn("kalshi_execution_enabled", result.failed_checks)
+        result = self.guard.check_all(cfg, alpaca_client=_mock_alpaca_client(), simulate_paper_mode=True)
+        self.assertTrue(result.passed, result.failed_checks)
+        self.assertNotIn("kalshi_execution_enabled", result.failed_checks)
 
     @patch.dict(
         os.environ,

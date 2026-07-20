@@ -200,6 +200,30 @@ class TradeJurySystem:
         if intel_raw is not None:
             score += 10.0 * _clamp(_f(intel_raw, 0.0) / 100.0, 0.0, 1.0)
 
+        pc = getattr(signal, "prediction_context", None)
+        if isinstance(pc, dict):
+            skills = pc.get("skills_tags") or []
+            if len(skills) >= 3:
+                score += 8.0
+                reasons.append(f"Evidence: {len(skills)} prediction skills corroborate ({', '.join(skills[:4])})")
+            elif len(skills) >= 2:
+                score += 4.0
+            catalyst = pc.get("catalyst") if isinstance(pc.get("catalyst"), dict) else {}
+            if catalyst.get("title"):
+                score += 3.0
+
+        lp = getattr(signal, "llm_prediction", None)
+        if isinstance(lp, dict):
+            ps = _f(lp.get("prediction_score"), 0.0)
+            if ps >= 55:
+                score += 10.0
+                reasons.append(f"Evidence: LLM prediction score {ps:.0f}/100 ({lp.get('verdict')})")
+            elif ps >= 42:
+                score += 4.0
+            gs = lp.get("grounding_status")
+            if gs in ("ok", "ok_web") and lp.get("grounding_snippets"):
+                score += 3.0
+
         return _clamp(score, 0.0, 100.0)
 
     def _score_risk(self, signal: Any, ctx: Dict[str, Any], reasons: List[str]) -> float:
@@ -247,6 +271,16 @@ class TradeJurySystem:
             score += 0.35 * _clamp(pop, 0.0, 100.0)
         else:
             score += 100.0 * _clamp(pop, 0.0, 1.0) * 0.35
+
+        lp = getattr(signal, "llm_prediction", None)
+        if isinstance(lp, dict):
+            ps = _f(lp.get("prediction_score"), 0.0)
+            score += 0.2 * _clamp(ps, 0.0, 100.0)
+            if lp.get("verdict") == "BEARISH" and ps < 40:
+                score -= 8.0
+                reasons.append(f"Outcome: bearish LLM prediction {ps:.0f}/100")
+            elif lp.get("verdict") == "BULLISH" and ps >= 55:
+                reasons.append(f"Outcome: bullish LLM prediction {ps:.0f}/100")
 
         sim = getattr(signal, "simulation_results", None) or {}
         if isinstance(sim, dict):

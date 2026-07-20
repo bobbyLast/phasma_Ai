@@ -1,0 +1,63 @@
+{
+  "trades": [
+    {
+      "trade_id": 3,
+      "symbol": "AAPL",
+      "action": "BUY",
+      "quantity": 0,
+      "price": 192.5,
+      "timestamp": "2026-05-19T18:17:46.364780",
+      "verification": {
+        "symbol": "AAPL",
+        "timestamp": "2026-05-19T18:17:46.364780",
+        "reported_price": 192.5,
+        "verification_sources": [],
+        "is_valid": true,
+        "price_variance": 0.0
+      },
+      "hash": "2b210ef47aefce0e",
+      "verified": true
+    },
+    {
+      "trade_id": 4,
+      "symbol": "AAPL",
+      "action": "BUY",
+      "quantity": 0,
+      "price": 192.5,
+      "timestamp": "2026-05-20T12:00:20.560953",
+      "verification": {
+        "symbol": "AAPL",
+        "timestamp": "2026-05-20T12:00:20.560953",
+        "reported_price": 192.5,
+        "verification_sources": [],
+        "is_valid": true,
+        "price_variance": 0.0
+      },
+      "hash": "57f5b18a65e5b82d",
+      "verified": true
+    },
+    {
+      "trade_id": 5,
+      "symbol": "AAPL",
+      "action": "BUY",
+      "quantity": 0,
+      "price": 192.5,
+      "timestamp": "2026-05-20T14:53:21.676536",
+      "verification": {
+        "symbol": "AAPL",
+        "timestamp": "2026-05-20T14:53:21.676536",
+        "reported_price": 192.5,
+        "verification_sources": [],
+        "is_valid": true,
+        "price_variance": 0.0
+      },
+      "hash": "a43ced2521807e32",
+      "verified": true
+    }
+  ],
+  "checksums": {
+    "3": "2b210ef47aefce0e",
+    "4": "57f5b18a65e5b82d",
+    "5": "a43ced2521807e32"
+  }
+}

@@ -151,10 +151,10 @@ class PoliticianTracker:
             
             # Look for politician names (usually before the ticker)
             politician_match = re.search(r'([A-Z][a-z]+ [A-Z][a-z]+)', text)
-            politician = politician_match.group(1) if politician_match else 'Unknown'
+            politician = politician_match.group(1) if politician_match else 'name pending'
             
             # Look for buy/sell indicators
-            action = 'Unknown'
+            action = 'action pending'
             if re.search(r'\bbuy\b|purchase\b|acquired\b', text, re.I):
                 action = 'BUY'
             elif re.search(r'\bsell\b|sold\b|disposed\b', text, re.I):
@@ -238,32 +238,35 @@ class PoliticianTracker:
         for trade in raw_trades:
             try:
                 if source == 'capitol_trades_scrape' or source == 'sample_data':
+                    ticker = str(trade.get('ticker') or '').upper().strip() or 'pending ticker'
                     normalized_trade = {
-                        'politician': trade.get('politician', 'Unknown'),
-                        'chamber': 'Unknown',  # Not available from scrape/sample
-                        'party': 'Unknown',    # Not available from scrape/sample
-                        'state': 'Unknown',    # Not available from scrape/sample
-                        'ticker': trade.get('ticker', 'Unknown'),
-                        'company': trade.get('ticker', 'Unknown'),  # Use ticker as company name
-                        'action': trade.get('action', 'Unknown'),
+                        'politician': trade.get('politician') or 'name pending',
+                        'chamber': 'chamber pending',
+                        'party': 'party pending',
+                        'state': 'state pending',
+                        'ticker': ticker,
+                        'company': trade.get('company') or ticker,
+                        'action': trade.get('action') or 'action pending',
                         'amount': trade.get('amount', 0),
-                        'date': trade.get('date', 'Unknown'),
+                        'date': trade.get('date') or 'date pending',
                         'source': 'Capitol Trades (Sample Data)' if source == 'sample_data' else 'Capitol Trades',
                         'description': trade.get('raw_text', ''),
                         'raw_data': trade,
                         'is_demo': source == 'sample_data',
                     }
                 elif source == 'finnhub':
+                    person = trade.get('person') or {}
+                    ticker = str(trade.get('symbol') or '').upper().strip() or 'pending ticker'
                     normalized_trade = {
-                        'politician': trade.get('person', {}).get('name', 'Unknown'),
-                        'chamber': trade.get('person', {}).get('chamber', 'Unknown'),
-                        'party': trade.get('person', {}).get('politicalParty', 'Unknown'),
-                        'state': trade.get('person', {}).get('state', 'Unknown'),
-                        'ticker': trade.get('symbol', 'Unknown'),
-                        'company': trade.get('assetName', 'Unknown'),
-                        'action': trade.get('transaction', 'Unknown'),
-                        'amount': self._parse_amount(trade.get('amount', 'Unknown')),
-                        'date': trade.get('transactionDate', 'Unknown'),
+                        'politician': person.get('name') or 'name pending',
+                        'chamber': person.get('chamber') or 'chamber pending',
+                        'party': person.get('politicalParty') or 'party pending',
+                        'state': person.get('state') or 'state pending',
+                        'ticker': ticker,
+                        'company': trade.get('assetName') or ticker,
+                        'action': trade.get('transaction') or 'action pending',
+                        'amount': self._parse_amount(trade.get('amount')),
+                        'date': trade.get('transactionDate') or 'date pending',
                         'source': 'Finnhub',
                         'description': trade.get('comment', ''),
                         'raw_data': trade,
@@ -271,6 +274,19 @@ class PoliticianTracker:
                     }
                 else:
                     continue
+
+                # Resolve real company name when ticker is valid
+                try:
+                    from utils.signal_identity import ensure_signal_identity
+                    id_sig = {
+                        "symbol": normalized_trade["ticker"],
+                        "company_name": normalized_trade.get("company"),
+                    }
+                    ok, name = ensure_signal_identity(id_sig)
+                    if ok and name:
+                        normalized_trade["company"] = name
+                except Exception:
+                    pass
                 
                 # Apply filters
                 if self._should_include_trade(normalized_trade):
@@ -286,7 +302,7 @@ class PoliticianTracker:
         """
         Parse amount string to integer value
         """
-        if not amount_str or amount_str == 'Unknown':
+        if not amount_str or str(amount_str).strip().lower() in ("unknown", "n/a", "none", ""):
             return 0
             
         try:
@@ -316,8 +332,10 @@ class PoliticianTracker:
         if self.focus_tickers and trade['ticker'] not in self.focus_tickers:
             return False
         
-        # Exclude unknown/invalid data
-        if trade['ticker'] == 'Unknown' or trade['politician'] == 'Unknown':
+        # Exclude incomplete / invalid data
+        pol = str(trade.get('politician') or '').strip().lower()
+        tick = str(trade.get('ticker') or '').strip().lower()
+        if pol in ('', 'unknown', 'n/a', 'name pending') or tick in ('', 'unknown', 'n/a', 'pending ticker'):
             return False
         
         return True

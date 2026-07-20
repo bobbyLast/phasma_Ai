@@ -193,7 +193,7 @@ class KalshiVirtualBook:
 
     def win_rate_label(self) -> str:
         wr = get_trade_performance_ledger().win_rate(asset_class=ASSET_KALSHI)
-        return wr.get("label") or "n/a"
+        return wr.get("label") or "building sample"
 
 
 _BOOK: Optional[KalshiVirtualBook] = None

@@ -74,7 +74,9 @@ class PERatioAnalyzer:
             # Get additional metrics
             eps_growth = info.get("earningsGrowth", None)
             revenue_growth = info.get("revenueGrowth", None)
-            sector = info.get("sector", "Unknown")
+            sector = info.get("sector") or "Equities"
+            if str(sector).lower() in ("unknown", "n/a", ""):
+                sector = "Equities"
             market_cap = info.get("marketCap", 0)
             
             # Historical P/E data
@@ -238,7 +240,7 @@ class PERatioAnalyzer:
         
         if not historical_pe:
             return {
-                "trend": "Unknown",
+                "trend": "insufficient history",
                 "strength": 0,
                 "direction": "neutral"
             }

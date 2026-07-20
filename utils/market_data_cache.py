@@ -325,12 +325,8 @@ class MarketDataCache:
                         prices[symbol] = price
                         self._price_cache[symbol] = price
                         self._price_timestamps[symbol] = now
-                    elif symbol in self._price_cache:
-                        prices[symbol] = self._price_cache[symbol]
                 except Exception as e:
                     self.logger.error(f"Error fetching price for {symbol}: {e}")
-                    if symbol in self._price_cache:
-                        prices[symbol] = self._price_cache[symbol]
         
         if prices:
             register_cycle_prices(prices)

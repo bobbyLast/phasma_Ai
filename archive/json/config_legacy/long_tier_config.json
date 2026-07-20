@@ -1,0 +1,75 @@
+{
+    "tier_config": {
+        "micro": {
+            "min_bankroll": 50,
+            "max_bankroll": 250,
+            "position_size_pct": 2.0,
+            "max_risk_pct": 0.5
+        },
+        "standard": {
+            "min_bankroll": 250,
+            "max_bankroll": 2500,
+            "position_size_pct": 1.5,
+            "max_risk_pct": 1.0
+        },
+        "heavy": {
+            "min_bankroll": 2500,
+            "max_bankroll": 1000000,
+            "position_size_pct": 1.0,
+            "max_risk_pct": 1.5
+        }
+    },
+    "partnership_scoring": {
+        "tier1_multiplier": 2.0,
+        "tier2_multiplier": 1.5,
+        "tier3_multiplier": 1.2,
+        "source_credibility": {
+            "sec_filing": 1.0,
+            "pr_newswire": 0.9,
+            "news_article": 0.8,
+            "social_media": 0.5
+        },
+        "min_confidence_threshold": 7.0
+    },
+    "alerting": {
+        "telegram": {
+            "enabled": true,
+            "token_env_var": "TELEGRAM_BOT_TOKEN",
+            "chat_id_env_var": "TELEGRAM_CHAT_ID"
+        },
+        "discord": {
+            "enabled": false,
+            "webhook_url_env_var": "DISCORD_WEBHOOK_URL"
+        },
+        "min_confidence_for_alert": 7.0
+    },
+    "monitoring": {
+        "check_interval_minutes": 15,
+        "max_runtime_hours": 24,
+        "log_level": "INFO"
+    },
+    "data_sources": {
+        "market_data": {
+            "provider": "polygon",
+            "api_key_env_var": "POLYGON_API_KEY"
+        },
+        "news": {
+            "provider": "newsapi",
+            "api_key_env_var": "NEWS_API_KEY"
+        },
+        "sec_edgar": {
+            "enabled": true,
+            "rate_limit_per_second": 10
+        }
+    },
+    "exit_strategy": {
+        "trailing_stop_pct": 15.0,
+        "max_hold_days": 90,
+        "profit_targets": [
+            {"percent": 25.0, "sell_pct": 25},
+            {"percent": 50.0, "sell_pct": 25},
+            {"percent": 100.0, "sell_pct": 25},
+            {"percent": 200.0, "sell_pct": 25}
+        ]
+    }
+}

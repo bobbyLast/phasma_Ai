@@ -10,11 +10,6 @@ import logging
 
 from utils.price_fetcher import get_price_fetcher
 
-try:
-    from utils.free_market_data_sources import SimulatedDataProvider
-except ImportError:
-    SimulatedDataProvider = None
-
 @dataclass
 class ConfluenceResult:
     """Result from confluence analysis"""
@@ -96,24 +91,21 @@ class ConfluenceService:
             except Exception as e:
                 self.logger.debug(f"Price fetcher failed: {e}")
             
-            # Fallback to provider bridge
             if current_price is None:
                 try:
                     stock = market_data.Ticker(ticker)
-                    info = stock.info
-                    current_price = info.get('currentPrice', 0)
+                    hist = stock.history(period="5d", interval="1d")
+                    if hist is not None and not hist.empty:
+                        current_price = float(hist["Close"].iloc[-1])
                 except Exception as e:
-                    self.logger.debug(f"Provider bridge failed: {e}")
-            
-            # Last resort - simulated data
-            if current_price is None and SimulatedDataProvider:
-                simulated = SimulatedDataProvider()
-                data = simulated.get_price(ticker)
-                if data:
-                    current_price = data['price']
+                    self.logger.debug(f"History fallback failed: {e}")
+
+            if not current_price or float(current_price) <= 0:
+                self.logger.info("%s budget filter: no verified live price — skipping", ticker)
+                return False
             
             # Skip if we can't afford even one share
-            if current_price and current_price > max_price:
+            if float(current_price) > max_price:
                 return False
             
             return True
@@ -237,15 +229,17 @@ class ConfluenceService:
             min_adv_shares = self.active_strategy.get('min_ADV_shares', 0)
             min_adv_dollars = self.active_strategy.get('min_ADV_dollars', 0)
             
-            # Get price and market cap
+            current_price = get_price_fetcher().get_real_price(ticker)
+            if not current_price or float(current_price) <= 0:
+                return False
+
             stock = market_data.Ticker(ticker)
-            info = stock.info
-            current_price = info.get('currentPrice', 0)
-            market_cap = info.get('marketCap', 0)
-            avg_volume = info.get('averageVolume', 0)
+            info = stock.info or {}
+            market_cap = info.get('marketCap', 0) or 0
+            avg_volume = info.get('averageVolume', 0) or 0
             
             # Check price
-            if current_price > max_price or current_price <= 0:
+            if float(current_price) > max_price:
                 return False
             
             # Check market cap range

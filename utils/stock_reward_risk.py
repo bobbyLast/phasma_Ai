@@ -93,7 +93,8 @@ def apply_stock_rr_targets(
         signal["stop_price"] = round(stop_f, 4)
 
     rr = compute_reward_risk(entry, stop_f, target_f) if target_f else None
-    if rr is not None and rr + 1e-9 >= min_rr:
+    # Compare at 2-decimal display precision so 4.996 → 5.00 passes (overnight false fails)
+    if rr is not None and round(float(rr), 2) + 1e-9 >= float(min_rr):
         signal["reward_risk_ratio"] = round(rr, 2)
         signal["risk_reward_ratio"] = round(rr, 2)
         signal["rr_gate_failed"] = False
@@ -105,10 +106,11 @@ def apply_stock_rr_targets(
 
     # Catalyst / expected move check — do not invent if signal already has a weaker target
     if target_f is not None and not invent_target:
-        signal["reward_risk_ratio"] = round(rr or 0.0, 2)
-        signal["risk_reward_ratio"] = round(rr or 0.0, 2)
+        shown = round(float(rr or 0.0), 2)
+        signal["reward_risk_ratio"] = shown
+        signal["risk_reward_ratio"] = shown
         signal["rr_gate_failed"] = True
-        signal["rr_fail_reason"] = f"reward:risk {rr:.2f} < {min_rr:.1f} required"
+        signal["rr_fail_reason"] = f"reward:risk {shown:.2f} < {min_rr:.1f} required"
         return signal
 
     # Size target to exactly min_rr when no honest target was provided
@@ -147,6 +149,7 @@ def passes_stock_rr_gate(signal: Any, config: Any = None) -> Tuple[bool, str]:
     )
     if rr is None:
         return False, "missing entry/stop/target"
-    if rr + 1e-9 < min_rr:
-        return False, f"reward:risk {rr:.2f} < {min_rr:.1f}"
-    return True, f"{rr:.2f}:1"
+    shown = round(float(rr), 2)
+    if shown + 1e-9 < float(min_rr):
+        return False, f"reward:risk {shown:.2f} < {min_rr:.1f}"
+    return True, f"{shown:.2f}:1"

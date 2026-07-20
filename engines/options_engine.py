@@ -273,12 +273,12 @@ class OptionsChain:
         for option in self.calls + self.puts:
             option.update_greeks(spot_price, risk_free_rate)
 
-    def get_best_signals(self, min_pop: float = 0.7, max_options: int = 3) -> List[OptionContract]:
+    def get_best_signals(self, min_pop: float = 0.7, max_options: int = 3, min_score: float = 0.45) -> List[OptionContract]:
         """Get best trading opportunities with position sizing based on confidence"""
         all_options = self.calls + self.puts
 
         # Filter by POP and score
-        candidates = [opt for opt in all_options if opt.pop >= min_pop and opt.score >= 0.6]
+        candidates = [opt for opt in all_options if opt.pop >= min_pop and opt.score >= min_score]
 
         if not candidates:
             return []
@@ -393,8 +393,31 @@ class PhasmaOptionsEngine:
         self.max_option_price = config.get('trading.max_option_price', 10.0)
         self.preferred_dte = config.get('trading.preferred_dte', [5, 7, 10, 14, 21, 30, 45])
         self.strike_selection = config.get('trading.strike_selection', 'atm')
+        self.min_pop = float(config.get('options_engine.min_pop', 0.4))
+        self.min_option_score = float(config.get('options_engine.min_option_score', 0.45))
 
         self.logger = logging.getLogger("PhasmaOptionsEngine")
+
+    def _resolve_spot_price(self, symbol: str) -> Optional[float]:
+        """Spot price via robust fetcher — avoids repo yfinance shim empty history."""
+        try:
+            from utils.robust_price_fetcher import get_robust_price_fetcher
+            px = get_robust_price_fetcher().get_real_price(symbol)
+            if px and float(px) > 0:
+                return float(px)
+        except Exception:
+            pass
+        try:
+            from utils.pypi_yfinance import get_pypi_ticker
+            stock = get_pypi_ticker(symbol)
+            if stock is None:
+                return None
+            hist = stock.history(period="5d")
+            if hist is not None and not hist.empty:
+                return float(hist["Close"].iloc[-1])
+        except Exception:
+            pass
+        return None
 
     def _safe_int(self, value, default=0):
         """Safely convert value to int, handling NaN and None"""
@@ -421,28 +444,47 @@ class PhasmaOptionsEngine:
         return min(available_strikes, key=lambda x: abs(x - target_strike))
 
     async def _get_provider_chain(self, symbol: str) -> Optional[OptionsChain]:
-        """Get options chain using the market data provider bridge."""
+        """Get options chain using PyPI yfinance (not repo-root shim) + robust spot price."""
+        symbol = str(symbol or "").upper().strip()
+        if not symbol:
+            return None
         try:
-            import yfinance as yf
-            import numpy as np
+            from utils.pypi_yfinance import get_pypi_ticker
 
-            # Get stock info
-            stock = yf.Ticker(symbol)
-            spot_price = stock.history(period='1d')['Close'].iloc[-1]
+            stock = get_pypi_ticker(symbol)
+            if stock is None:
+                self.logger.warning(
+                    "%s: PyPI yfinance not available — install/upgrade yfinance for options chains",
+                    symbol,
+                )
+                return None
 
-            # Get options chain
+            spot_price = self._resolve_spot_price(symbol)
+            if not spot_price or spot_price <= 0:
+                self.logger.warning("%s: could not resolve spot price for options chain", symbol)
+                return None
+
             options_chain = OptionsChain(symbol, spot_price)
 
             try:
-                # Get available expirations
-                expirations = stock.options
+                try:
+                    expirations = list(stock.options or [])
+                except Exception as exc:
+                    self.logger.warning(
+                        "%s: options expirations fetch failed (%s) — Yahoo options API may be blocked or down",
+                        symbol,
+                        exc,
+                    )
+                    return None
                 if not expirations:
-                    self.logger.warning(f"No expirations available for {symbol}")
+                    self.logger.warning(
+                        "%s: no option expirations (repo yfinance shim returns empty — using PyPI yfinance)",
+                        symbol,
+                    )
                     return None
 
-                # Prefer expirations that match preferred DTE; if none, fall back to earliest two expirations
                 selected_expirations = []
-                for expiry in expirations[:3]:  # Look at first 3 expirations
+                for expiry in expirations[:6]:
                     expiry_date = datetime.strptime(expiry, '%Y-%m-%d')
                     dte = (expiry_date - datetime.now()).days
                     if dte in self.preferred_dte:
@@ -450,18 +492,19 @@ class PhasmaOptionsEngine:
 
                 if not selected_expirations:
                     selected_expirations = expirations[:2] if len(expirations) >= 2 else expirations[:1]
-                    self.logger.info(f"{symbol}: No preferred DTE found; using nearest expirations {selected_expirations}")
+                    self.logger.info(
+                        "%s: No preferred DTE found; using nearest expirations %s",
+                        symbol,
+                        selected_expirations,
+                    )
 
                 all_strikes = set()
-
-                # First pass: collect all available strikes from selected expirations
                 for expiry in selected_expirations:
                     opt = stock.option_chain(expiry)
                     all_strikes.update(opt.calls['strike'].tolist())
                     all_strikes.update(opt.puts['strike'].tolist())
 
                 if not all_strikes:
-                    # Fallback: try first 2 expirations without filters
                     fallback_expirations = expirations[:2] if len(expirations) >= 2 else expirations[:1]
                     for expiry in fallback_expirations:
                         opt = stock.option_chain(expiry)
@@ -469,85 +512,121 @@ class PhasmaOptionsEngine:
                         all_strikes.update(opt.puts['strike'].tolist())
 
                 if not all_strikes:
-                    self.logger.warning(f"No strikes found for {symbol}")
+                    self.logger.warning("%s: no strikes in selected expirations", symbol)
                     return None
 
                 all_strikes = sorted(all_strikes)
-                self.logger.info(f"Available strikes for {symbol}: {all_strikes[:5]}...{all_strikes[-5:] if len(all_strikes) > 10 else ''}")
+                self.logger.info(
+                    "Available strikes for %s: %s...%s",
+                    symbol,
+                    all_strikes[:5],
+                    all_strikes[-5:] if len(all_strikes) > 10 else '',
+                )
 
-                # Second pass: process options with valid strikes
                 for expiry in selected_expirations:
                     opt = stock.option_chain(expiry)
-
-                    # Process calls
                     for _, row in opt.calls.iterrows():
-                        if row['bid'] > 0 and row['ask'] > 0:
-                            strike = self._find_nearest_strike(row['strike'], all_strikes)
-                            option = OptionContract(
-                                symbol=symbol,
-                                strike=strike,
-                                expiry=expiry,
-                                option_type='call',
-                                bid=row['bid'],
-                                ask=row['ask'],
-                                volume=self._safe_int(row.get('volume', 0)),
-                                open_interest=self._safe_int(row.get('openInterest', 0)),
-                                implied_vol=row.get('impliedVolatility', 0.3)
-                            )
-                            options_chain.add_option(option)
+                        bid = float(row.get('bid') or 0)
+                        ask = float(row.get('ask') or 0)
+                        if bid <= 0 and ask <= 0:
+                            continue
+                        if bid <= 0:
+                            bid = ask * 0.95
+                        if ask <= 0:
+                            ask = bid * 1.05
+                        mid = (bid + ask) / 2.0
+                        if mid < self.min_option_price or mid > self.max_option_price:
+                            continue
+                        strike = self._find_nearest_strike(float(row['strike']), all_strikes)
+                        option = OptionContract(
+                            symbol=symbol,
+                            strike=strike,
+                            expiry=expiry,
+                            option_type='call',
+                            bid=bid,
+                            ask=ask,
+                            volume=self._safe_int(row.get('volume', 0)),
+                            open_interest=self._safe_int(row.get('openInterest', 0)),
+                            implied_vol=float(row.get('impliedVolatility') or 0.3),
+                        )
+                        options_chain.add_option(option)
 
-                    # Process puts
                     for _, row in opt.puts.iterrows():
-                        if row['bid'] > 0 and row['ask'] > 0:
-                            strike = self._find_nearest_strike(row['strike'], all_strikes)
-                            option = OptionContract(
-                                symbol=symbol,
-                                strike=strike,
-                                expiry=expiry,
-                                option_type='put',
-                                bid=row['bid'],
-                                ask=row['ask'],
-                                volume=self._safe_int(row.get('volume', 0)),
-                                open_interest=self._safe_int(row.get('openInterest', 0)),
-                                implied_vol=row.get('impliedVolatility', 0.3)
-                            )
-                            options_chain.add_option(option)
+                        bid = float(row.get('bid') or 0)
+                        ask = float(row.get('ask') or 0)
+                        if bid <= 0 and ask <= 0:
+                            continue
+                        if bid <= 0:
+                            bid = ask * 0.95
+                        if ask <= 0:
+                            ask = bid * 1.05
+                        mid = (bid + ask) / 2.0
+                        if mid < self.min_option_price or mid > self.max_option_price:
+                            continue
+                        strike = self._find_nearest_strike(float(row['strike']), all_strikes)
+                        option = OptionContract(
+                            symbol=symbol,
+                            strike=strike,
+                            expiry=expiry,
+                            option_type='put',
+                            bid=bid,
+                            ask=ask,
+                            volume=self._safe_int(row.get('volume', 0)),
+                            open_interest=self._safe_int(row.get('openInterest', 0)),
+                            implied_vol=float(row.get('impliedVolatility') or 0.3),
+                        )
+                        options_chain.add_option(option)
 
-                # Update Greeks
+                if not options_chain.calls and not options_chain.puts:
+                    self.logger.warning("%s: chain loaded but no contracts passed price/quote filters", symbol)
+                    return None
+
                 options_chain.update_greeks(spot_price, self.risk_free_rate)
-
                 self.options_chains[symbol] = options_chain
-                self.logger.info(f"Loaded options chain for {symbol}: {len(options_chain.calls)} calls, {len(options_chain.puts)} puts")
-
+                self.logger.info(
+                    "Loaded options chain for %s: %s calls, %s puts @ spot $%.2f",
+                    symbol,
+                    len(options_chain.calls),
+                    len(options_chain.puts),
+                    spot_price,
+                )
                 return options_chain
 
             except Exception as e:
-                self.logger.error(f"Error parsing options chain for {symbol}: {e}")
+                self.logger.error("Error parsing options chain for %s: %s", symbol, e)
                 return None
 
         except Exception as e:
-            self.logger.error(f"Provider chain error for {symbol}: {e}")
+            self.logger.error("Provider chain error for %s: %s", symbol, e)
             return None
 
     
     async def generate_signals(self, symbols: Optional[List[str]] = None) -> List[Dict]:
-        """Generate SUPER ADVANCED options trading signals with aggressive opportunity detection"""
+        """Generate options trading signals from real chains."""
         if symbols is None:
-            # Expand watchlist to include ALL major stocks for maximum opportunities
-            symbols = [
-                'AAPL', 'MSFT', 'GOOGL', 'AMZN', 'META', 'TSLA', 'NVDA', 'AMD', 'NFLX', 'CRM',
-                'VIX', 'SPY', 'QQQ', 'IWM', 'VTI', 'DIA',  # Indices
-                'KO', 'JNJ', 'WMT', 'PG', 'UNH', 'HD', 'DIS', 'BAC', 'VZ', 'INTC',  # More stocks
-                'F', 'GM', 'XOM', 'CVX', 'T', 'IBM', 'ORCL', 'CSCO', 'PEP', 'COST'  # Even more
-            ]
+            symbols = list(self.watchlist)
+        else:
+            normalized: List[str] = []
+            for item in symbols:
+                if isinstance(item, str):
+                    sym = item.upper().strip()
+                elif isinstance(item, dict):
+                    sym = str(item.get("symbol") or item.get("ticker") or "").upper().strip()
+                else:
+                    sym = str(item).upper().strip()
+                if sym and sym not in normalized:
+                    normalized.append(sym)
+            symbols = normalized or list(self.watchlist)
 
         signals = []
 
         for symbol in symbols:
             chain = await self.get_options_chain(symbol)
             if chain:
-                # SUPER AGGRESSIVE: Lower thresholds to find EVERY opportunity
-                best_options = chain.get_best_signals(min_pop=0.4)  # Was 0.7, now 0.4
+                best_options = chain.get_best_signals(
+                    min_pop=self.min_pop,
+                    min_score=self.min_option_score,
+                )
 
                 # Group options by direction and expiration
                 signals_by_group = {}
@@ -613,8 +692,9 @@ class PhasmaOptionsEngine:
 
                     # Fall back to single-leg strategy (enhanced)
                     # Calculate expected stock move and holding period
-                    chain = await self._get_provider_chain(symbol)
-                    current_price = chain.spot_price if chain else ticker_data['price']
+                    current_price = chain.spot_price if chain else self._resolve_spot_price(symbol)
+                    if not current_price:
+                        continue
                     expected_stock_move_pct = (primary_option.strike / current_price - 1) * 100 if option_type == 'call' else (1 - primary_option.strike / current_price) * 100
                     optimal_hold_days = min(30, int((datetime.strptime(expiry, '%Y-%m-%d') - datetime.now()).days * 0.7))  # Exit at 70% of time to expiry
                     
